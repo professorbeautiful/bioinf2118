@@ -1,0 +1,178 @@
+---
+title: "Untitled"
+author: "roger"
+date: "November 9, 2016"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+#### Not working currently.
+
+#### Dr. Lump and Dr. Split duke it out
+
+```{r, echo=FALSE}
+### Dr. Lump and Dr. Split duke it out
+##  Bayesian computation of posterior
+
+logit = function(p) log(p/(1-p))
+antilogit = function(x) 1 - 1/(1+exp(x))
+DLdata = matrix(c(3,5,2,90),nrow=2)
+dimnames(DLdata) = list(c("dark","light"),c("R","N"))
+logit.hat = logit(apply(DLdata, 1, function(r)r[1]/sum(r)))
+mu0 = logit(0.50)  ### prior mean.
+ColorForPrior="green";     ColorForPosterior="red";      ColorForLikelihood="black"
+
+source("/Users/Roger/Box Sync/teaching/bioinf2132,bios2063/bios2063_R_code/Plight-Pdark-posterior-new.R", local=TRUE)
+
+
+rValues = reactiveValues(tau = 1,  phi = 0.001, mu=0.5)
+rValues$blockNumeric = FALSE
+rValues$blockSelector = FALSE
+
+
+plotPlightPdarkPosteriorReactive = reactive( {
+  cat("plotPlightPdarkPosteriorReactive: input is ", input$LumpOrSplitOrIdontknow)
+  reactToNumericInputs()
+  reactToSelector()
+  tau <<- input$tauInput
+  phi <<- input$phiInput
+  mu0 <<- input$mu0Input
+  cat("tau=", tau, " phi=", phi, " mu0=", mu0, "\n")
+  plotPlightPdarkPosterior(tau=tau, phi=phi, mu0=mu0, 
+                           showPrior = input$checkPrior, 
+                           showPosterior = input$checkPosterior)
+  isolate({
+    rValues$blockNumeric = FALSE
+    rValues$blockSelector = FALSE
+  })
+  
+}
+)
+# reactToTau = reactive({
+#   tau = input$tau
+#   isolate({rValues$tau <<- tau })
+# })
+# reactToPhi = reactive({
+#   phi <<- input$phi
+#   isolate({rValues$phi <<- phi })
+#   
+# })
+reactToSelector = reactive({
+  #if( ! rValues$blockSelector) {
+    cat(" reactToSelector\n")
+    #if(input$LumpOrSplitOrIdontknow == "")
+    #  updateSelectInput(session, inputId = "LumpOrSplitOrIdontknow", selected = "Lump")
+    LumpOrSplitOrIdontknow = input$LumpOrSplitOrIdontknow
+    isolate({
+      #rValues$blockNumeric = TRUE
+      # ### Split:
+      if(LumpOrSplitOrIdontknow == "Split") {
+        rValues$tau <<- 0; rValues$phi <<- 1   ### Split:  D unconnected to L.
+        rValues$title_1 = "Split"
+        rValues$title_2 = " P dark and P light are unrelated"
+      }
+      # 
+      # ### Lump:
+      if(LumpOrSplitOrIdontknow == "Lump") {
+        cat("input$LumpOrSplitOrIdontknow == Lump\n")
+        rValues$tau <<- 1; rValues$phi <<- 0.001   
+        ### Lump:  no individual variation:   D is same as L.
+        rValues$title_1 = "Lump"
+        rValues$title_2 = "Prior belief:  P dark = P light "
+      }
+      if(LumpOrSplitOrIdontknow == "Compromise: lump some, split some"
+         #        |
+         #        LumpOrSplitOrIdontknow == ""
+      ) {
+        cat("input$LumpOrSplitOrIdontknow == Compromise: lump some, split some\n")
+        rValues$tau <<- 1/2; rValues$phi <<- 1/2 
+        rValues$title_1 = "Compromise: lump some, split some"
+        rValues$title_2 = "Prior belief:  P dark is somewhat related to P light. "
+      }
+      updateNumericInput(session=session, inputId="tauInput", value = rValues$tau)
+      updateNumericInput(session=session, inputId="phiInput", value = rValues$phi)
+      rValues$title_3 = paste0(
+        "  tau=", input$tau,  
+        ",  phi=", input$phi,  
+        ",  mu0=", input$mu0Input 
+      )
+    })
+  
+})
+
+### tau = var of deviation shared by D and L.
+### phi = var of individual deviations for D and L.
+### m0 = shared mean of prior
+reactToNumericInputs = reactive({
+  #if( ! rValues$blockNumeric) {
+    cat(" reactToNumericInputs\n")
+    #input$tauInput; input$phiInput; input$mu0Input
+    isolate({
+      rValues$blockSelector = TRUE
+      rValues$tau <<- input$tauInput
+      rValues$phi <<- input$phiInput
+      rValues$mu0 <<- logit(input$mu0Input)
+      #updateSelectInput(session, inputId = "LumpOrSplitOrIdontknow", selected = "")
+    })
+  #}
+    rValues$title_1 <<- "reacting To Numeric Inputs"
+    rValues$title_2 <<- ""
+    rValues$title_3 <<- paste0(
+      "  tau=", input$tauInput,  
+      ",  phi=", input$phiInput,  
+      ",  mu0=", input$mu0Input 
+    )
+})
+
+output$title_1 = renderText({rValues$title_1})
+output$title_3 = renderText({rValues$title_3})
+
+sidebarLayout(
+  sidebarPanel(
+    selectInput(inputId = "LumpOrSplitOrIdontknow", 
+                label = "Whose prior?", 
+                choices = c("Lump", "Split", "Compromise: lump some, split some"), 
+                selected = 1),
+    #h3("Joint prior distribution"),
+    numericInput("tauInput", "shared variance (tau)", 
+                 value=1, min = 0.00, step=0.1),
+    numericInput("phiInput", "between-groups variance  (phi)", 
+                 value=0, min = 0.00, step=0.1),
+    numericInput("mu0Input", "shared prior mean", 
+                 value=0.5, min = 0.001, step=0.1, max=0.999),
+    "X = observation",
+    div(style="color:green", 
+        checkboxInput("checkPrior", 
+                      "Green = prior distribution",
+                      TRUE)),
+    div(style="color:red",
+        checkboxInput("checkPosterior", 
+                      "Red = posterior distribution",
+                      TRUE))
+  )
+  ,
+  mainPanel(
+    br(),
+    tagAppendAttributes(
+      div(
+        textOutput(outputId="title_1"),
+        textOutput(outputId="title_2"),
+        textOutput(outputId="title_3")
+      ),
+      style='text-align:center; font-size:large; font-weight:bold'),
+    renderPlot(width=700, height=700,
+               {
+                 par(mai=c(1.4,1.4,1.1,0.6))
+                 par(mar=c(5,5,4,2) + 0.2)
+                 plotPlightPdarkPosteriorReactive()
+               })
+  )
+)
+```
+
+
