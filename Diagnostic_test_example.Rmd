@@ -3,44 +3,94 @@ title: "Diagnostic test example"
 output: html_notebook
 ---
 
+#Table 1: diagnosticModelFamily
 
 ```{r}
-Table1_data = matrix(
-  dimnames = list(
-    theta=c('healthy', 'sick'),
-    X=c('negative',	'positive',	'indeterminate')
-    ),
-  c(
-    0.95,	0.03,	0.02,
-    0.03,	0.95,	0.02),
-  nrow=2, byrow=TRUE
-)
-print(Table1_data)
+Table1_data = diagnosticModelFamily = 
+  rbind(c(0.95, 0.03, 0.02), 
+        c(0.03, 0.95, 0.02)) 
+parameterSpace = c("healthy","sick")
+sampleSpace = c("negative","positive","indeterminate")
+dimnames(diagnosticModelFamily) = list(parameterSpace, sampleSpace)
+print(diagnosticModelFamily)
 ```
 
-QUESTION 1:  Which variable, X or theta, are the table entries conditional on?
+### QUESTION 1a:  Which variable, X or theta, are the table entries conditional on?
 (Replace NULL with your answer, in this chunk.)
 
 ```{r}
-Answer1 = NULL
+Answer1a = NULL
 ```
-
+Here are the row sums (could be informative!):
 
 ```{r}
-cat('\nHere are the row sums:\n')
 print(rowSums(Table1_data))
 print(colSums(Table1_data))
 
 ```
 
-QUESTION 2:  Write a function "joint_probability" that takes as its arguments an outcome X  and a state-of-nature, and returns the probability of that outcome.
+
+### QUESTION 1b: What are the sensitivity and specificity of the test, if "indeterminate" is combined with "positive"? 
+Don't just calculate them.  Write a function to do it.
+
+```{r}
+Answer1b = NULL
+```
+
+
+### QUESTION 1c: What are the sensitivity and specificity of the test, if "indeterminate" is combined with "negative"? 
+Don't just calculate them.  Write a function to do it.
+
+```{r}
+Answer1c = NULL
+```
+
+### QUESTION 1d: What are the likelihood ratios for the three possible obervations (values of X)?
+
+```{r}
+Answer1d = NULL
+```
+
+
+#Table 2:  Joint probability table
+
+To get the joint probability TABLE, we multiply the Table 1 top row by the prevalence, and the bottom row by 1 - prevalence.
+
+```{r}
+prior = c(0.9, 0.1)
+Table_2_data = diagnosticJointTable = 
+  matrix(prior, nrow=2, ncol=3) *
+    diagnosticModelFamily
+print(diagnosticJointTable)
+```
+
+QUESTION 2a:  Write code that verifies that all the probabilities in diagnosticJointTable add to 1.
+
+```{r}
+Answer2a = NULL
+```
+
+
+QUESTION 2b:  Write a function "joint_probability" that takes as its arguments an outcome X  and a state-of-nature, and returns the probability of that outcome.
 
 Example of use: joint_probability("negative", "healthy")
 
-First, we will construct Table 2, the JOINT distribution.
+HINT:  It should be just ONE LINE, very simple. Use indexing. 
+Type help('[') at the console to learn about indexing.
+
+
 
 ```{r}
-
+Answer2b = NULL
 ```
 
+
+
+# Report of Answers:
+
+```{r}
+AnswerVariables = ls(pattern='Answer[0-9]*') 
+Answers = sapply(AnswerVariables, get)
+print(AnswerVariables)
+```
 
