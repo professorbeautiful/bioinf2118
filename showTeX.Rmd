@@ -1,0 +1,16 @@
+---
+title: "showTeX"
+author: "roger"
+date: "1/17/2017"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```   
+
+\[\frac{{ - b \pm \sqrt {{b^2} - 4ac} }}{{2a}}\]
+

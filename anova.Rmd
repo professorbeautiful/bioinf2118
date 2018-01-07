@@ -1,0 +1,35 @@
+Demonstration of ANOVA
+===
+
+ANOVA = Analysis of Variance
+
+Let's look at the famous iris  data, in a "one-way" lay-out. There is one categorical variable, "Species".  
+
+Question: does the Sepal.Width vary among the species?
+First, let's do some exploring:
+```{r, fig.show='hide'}
+attach(iris)
+head(iris)
+table(Species)
+sapply(split(Sepal.Width, Species), summary)
+boxplot(formula= Sepal.Width ~ Species)
+points(Species, Sepal.Width)
+is.factor(Species)
+points(jitter(as.numeric(Species)), Sepal.Width, col="green")
+```
+
+Now let's see if we can test whether Sepal.Width varies by Species:
+```{r ,fig.show='hide'}
+theModelfit = lm(Sepal.Width ~ Species)
+theModelfit
+theAnova = anova(object=theModelfit)
+theAnova
+```
+
+You can dig a bit deeper:
+```{r ,fig.show='hide'}
+names(theModelfit)
+plot(theModelfit)
+str(theAnova)
+```
+

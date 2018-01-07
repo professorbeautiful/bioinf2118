@@ -1,0 +1,112 @@
+---
+title: "Thuesen data - regression analysis"
+author: "roger"
+date: "April 18, 2016"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Dalgaard's Chapter 6 introduces regression with an example which uses data from [this article of Thuesen et al](https://www.ncbi.nlm.nih.gov/pubmed/?term=thuesen+%5Bau%5D+blood+glucose+short+velocity). 
+
+```{r}
+while( ! require(ISwR) )
+  install.packages("ISwR")
+
+data("thuesen")
+help("thuesen")
+
+dim(thuesen)
+thuesen
+```
+
+The chapter has no discussion of the scientific questions or even the meaning of the variables. Thuesen et al wanted to investigate the pathophysiological background for the increased cardiac performance described in short-term insulin-dependent diabetes. The intervention was Low-dose intravenous glucagon. The outcome measure (among others) was "mean circumferential shortening velocity". 
+
+### Abstract
+
+> In order to investigate the pathophysiological background for the increased cardiac performance described in short-term insulin-dependent diabetes, we infused glucagon intravenously in 8 healthy men at a dose of 5 ng/kg/min for 1 h and at a dose of 10 ng/kg/min for a further hour. Heart rate and blood pressure were measured and myocardial contractility assessed by echocardiography as the fractional shortening of the left ventricle and as the mean circumferential shortening velocity before the glucagon infusion (first base-line level), after the first glucagon infusion period, after the second glucagon infusion period and at 1 h after stopping the glucagon infusion (second base-line level). Plasma levels of glucagon were 79 +/- 15 ng/l, 123 +/- 76 ng/l, 381 +/- 179 ng/l and 77 +/- 22 ng/l, respectively. Heart rate decreased significantly during the first (8%, p less than 0.05) and second (6%, p less than 0.01) glucagon infusion period compared to the mean of the first and the second base-line value. Mean arterial blood pressure, fractional shortening of the left ventricle and mean circumferential shortening velocity were unchanged. We conclude that increments in plasma concentrations of glucagon to levels seen in poorly controlled diabetes does not change myocardial contractility in normal man.
+
+
+Here is the greatly simplified  regression analysis from Dalgaard.
+
+Notice that there is one missing value.
+
+
+
+We can attach the thuesen data set, in lieu of including "data=" arguments.
+
+We fit the regression with lm(). We plot the regression line and the predicted values.
+
+
+```{r}
+attach(thuesen)
+search()
+ls(pos=2)
+
+plot(blood.glucose, short.velocity, xlim=c(0,20), ylim=c(1,2))
+
+theFormula = short.velocity ~ blood.glucose
+summary(lm(formula = theFormula))
+
+lm.out <- lm(theFormula)
+abline(lm.out)
+abline(lm.out$coefficients, col='red', lty=3, lwd=3)
+
+##  The following line fails due to the missing value. 
+try(points(blood.glucose, predict(lm.out), col="blue", pch=2))
+##  But this works.
+missingShortVelocity = is.na(thuesen$short.velocity)
+points(blood.glucose[-which(missingShortVelocity)], predict(lm.out), col="blue", pch=2)
+```
+
+The first attempt to plot the predicted points fails due to the missing value. The "try()" call catches the error and protects us from having a fatal error.
+
+
+Note the special method for abline() when the arg is an "lm" object.
+
+
+It seems that this is the right formula for the scientific question.  See the abstract above.
+
+### The reverse regression
+
+What if you did the opposite regression?
+Now we repeat the plot, but add a line for the *reverse* regression:
+
+```{r}
+plot(blood.glucose, short.velocity, xlim=c(0,20), ylim=c(1,2))
+abline(lm.out$coefficients, col='red', lty=3, lwd=3)
+points(blood.glucose[-which(missingShortVelocity)], predict(lm.out), col="blue", pch=2)
+
+## Now add the reverse regression:
+theFormulaReversed = blood.glucose ~ short.velocity
+lm.Reversed.out <- lm(theFormulaReversed)
+slope.original = lm.Reversed.out$coefficients['short.velocity']
+slope.mirrored = 1 / slope.original
+intercept.original = lm.Reversed.out$coefficients['(Intercept)']
+intercept.mirrored = -intercept.original / slope.original
+abline(a = intercept.mirrored, b = slope.mirrored, col='green', lty=3, lwd=3)
+
+```
+
+We have to reflect the regression line, to show it in the same plot.
+Notice the tilt! The stronger the correlation, the closer the two lines will be (small angle). Here the correlation is weak.
+
+
+### Missing data
+
+
+What is the effect of the missing value for short.velocity?  (Row 16)
+Here is the original, and three ways of eliminating row 16.
+
+```{r}
+lm(formula = theFormula, data=thuesen)$coef
+lm(formula = theFormula, data=thuesen, na.action = na.omit)$coef  ## default
+lm(formula = theFormula, data=thuesen, na.action = na.exclude)$coef  ## same
+lm(formula = theFormula, data=thuesen[-which(missingShortVelocity), ])$coef
+```
+
+NOTE: if you leave out the call to which()  (which I did at first),  it leaves out the first row! That's because the values of missingShortVelocity are F's and T's, zero's and ones.
+

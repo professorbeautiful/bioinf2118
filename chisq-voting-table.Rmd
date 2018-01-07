@@ -1,0 +1,123 @@
+---
+title: " chisq-voting-table.Rmd"
+author: "roger"
+date: "3/20/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+####   Example 9.3.1  from DeGroot-Schervish.
+
+To set up the data, one can select the contents of the "Observations" table in "N15-categorical data.docx", and paste it into a string, here called `voterDataString`. Then write string to a temporary file, and read it into a data frame.
+```{r}
+voterDataString <- 
+  "	Prefers.Mr.Jones	Prefers.Ms.Smith	undecided	TOTAL
+Eng and science	24	23	12	59
+Humanities, soc sciences	24	14	10	48
+Fine arts	17	8	13	38
+Industr, public admin	27	19	9	55
+TOTAL	92	64	44	200"
+temp <- tempfile()
+cat(voterDataString, file=temp)
+voterData <- read.delim(temp, sep = '\t')
+str(voterData)
+```
+
+Now we have to use the first column as the rownames, remove the first column, and remove the row and column labeled TOTAL.
+
+```{r}
+rownames(voterData) <- voterData[ , 1]
+voterData <- voterData[ , -1]  ## Remove first column (used for row names)
+# It still has the TOTAL rows and columns. We must remove them.
+voterData <- voterData[ , -match("TOTAL", colnames(voterData))]  ## Remove first column (used for row names)
+voterData <- voterData[ -match("TOTAL", rownames(voterData)), ]  ## Remove first column (used for row names)
+voterData
+```
+
+
+Now we want to fit models using the function `loglin()`.
+But voterData is a data frame.  
+To use loglin() for log-linear modeling, it must be a matrix.
+```{r}
+voterData <- as.matrix(voterData)
+voterData   #### OK
+longDimNames <- dimnames(voterData)
+dimnames(voterData) <- list(c("E","H","F","I") , 
+                            c("Jones", "Smith","un"))
+str(voterData)
+```
+
+Later we'll change one number dramatically, and re-knit this document, to see what happens. We use the `eval` arg in the chunk clause to control this. 
+
+```{r eval=FALSE}
+voterData[1,2] <- 230  
+```
+
+Meanwhile, let's try some log-linear modeling. The `margin` argument says what "faces" are participating in the model. Here, `list(1,2)` means that the model will have row effects (1) and column effects (2), but not the interaction.
+```{r}
+voterData.fitted <- loglin(table = voterData, margin = list(1,2), fit=TRUE)
+voterData - voterData.fitted$fit   ##  O - E
+(voterData.fitted$fit - voterData)^2/voterData.fitted$fit
+(voterData.fitted$fit - voterData)/sqrt(voterData.fitted$fit)
+
+Q <- sum((voterData.fitted$fit - voterData)^2/voterData.fitted$fit)
+c(Q=Q, pearson=voterData.fitted$pearson, lrt=voterData.fitted$lrt)
+
+df.for.Q <- (nrow(voterData)-1) * (ncol(voterData)-1)
+c(voterData.fitted$df, df.for.Q)
+cat("P = ", 1 - pchisq(Q, df.for.Q), "\n")
+```
+Interaction terms can be specified like this (to get the saturated model):
+```{r}
+loglin(table = voterData, margin = list(1, 2, c(1,2)), fit=TRUE)
+```
+
+Very handy for modeling higher order data.
+
+### Using loglm() ###
+
+Here is another approach, using the function `loglm()`, which uses the "formula" syntax to specify the model.  The first call gives us the saturated model.
+```{r}
+require("MASS")   ### "MASS" is a library in support of the book "Modern Applied Statistics with S-Plus", Venables and Ripley.
+voterData.loglm.out <- loglm( ~ 1 + 2 + 1:2, voterData)
+print(voterData.loglm.out)
+voterData.loglm.out <- loglm( ~ 1 + 2, voterData)
+print(voterData.loglm.out)
+```
+
+Ordinarily, in a formula object (created by the "~" character), the right side indicates predictors, and the left side is the predicted variable or "label".
+
+For loglinear models, however, there is no left side, because the counts themselves are the things to predict.
+
+###  Reconstructing the likelihood ratio statistic: ###
+Depending on your computer, the likelihood might overflow!
+So better to do the loglikelihood directly.
+
+```{r}
+maxLik1 <- prod(voterData^voterData)   # SATURATED
+log(maxLik1)  #### It COULD overflow!
+logmaxLik1 <- sum(voterData*log(voterData))  ### Better
+logmaxLik0 <- sum(voterData*log(voterData.fitted$fit))
+c(2*(logmaxLik1 - logmaxLik0),
+  voterData.fitted$lrt )
+```
+ They agree, of course.
+
+  What if you want to test whether the departments are different?  
+
+  If not, then the null hypothesis is that all the row probabily vectors are IDENTICAL, not just proportional.
+
+  So the d.f. is 8 = (RC-1) - (R-1) which equals R(C-1).
+
+```{r}
+voterData.loglin.out = loglin( voterData, margin = 1)
+print(voterData.loglin.out)
+1 - pchisq(voterData.loglin.out$pearson, 8)
+```
+
+Notice that functions like loglin, loglm, and regression functions in R do not automatically produce P values. I think they want to encourage you to know what you're doing!
+
+

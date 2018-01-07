@@ -1,0 +1,80 @@
+---
+title: "random-negbinomial"
+author: "Roger Day"
+date: "February 8, 2016"
+output: html_document
+---
+
+First, we create 10000 random draws from the negative binomial (in this case, the geometric, since size = 1).
+```{r}
+SampleSize = 10000 
+x = rnbinom(n = SampleSize, size = 1, prob = .5)
+summary(x)
+range(x)
+hist(x)
+```
+Now let's take a look at a table of results.
+```{r}
+xtable = table(x)
+xtable
+```
+The top row holds all the values that were observed in the sample, in sorted order. We extract them, and plot their true probabilities along the x-axis, versus their observed frequencies along the y-axis. 
+```{r}
+observedValues = as.numeric(names(xtable))
+plot(dnbinom(observedValues, 1, .5),
+	xtable/SampleSize, pch="", log="xy")
+text(dnbinom(observedValues, 1, .5),
+     xtable/SampleSize,
+     names(xtable))
+abline(a=0, b=1)
+```
+The agreement seems good.
+
+Things to learn about the coding:
+* Using the function $names()$ to get the values (as character strings).
+* Using the function $as.numeric()$ to convert the values from strings to numbers.
+* Using the function $text()$ to write text on the plot.
+* Using the function $abline()$ to draw a diagonal line.
+
+
+Now let's take a look at the cumulative distribution function (CDF) at the observed values:
+```{r}
+plot(observedValues, 
+     pnbinom(observedValues, 1, .5),
+     ylim=0:1)
+``` 
+(Note use of the $ylim$ argument to set the y-axis limits.)
+
+Now we compare the CDF to the cumulative number frequencies of observations.
+```{r}
+plot(pnbinom(observedValues, 1, .5),
+	cumsum(xtable/SampleSize), pch="")
+text(pnbinom(observedValues, 1, .5),
+     cumsum(xtable/SampleSize),
+     observedValues)
+abline(a=0,b=1)
+```
+The function $cumsum()$ calculates the cumulative sum of a vector. Note the use of pch="" to suppress the usual symbol, so we can read the text labels.
+
+This is kind of bunched up near (1,1), so let's take the complement, then use log-log axes:
+```{r}
+plot(1-pnbinom(observedValues, 1, .5),
+	1-cumsum(xtable/SampleSize), log="xy", pch="")
+text(1-pnbinom(observedValues, 1, .5),
+     1-cumsum(xtable/SampleSize),
+     observedValues)
+abline(a=0,b=1)
+```
+Looks good.  There is some random deviation for the values of very small counts, at the lower left.
+
+
+The following plot illustrates the relationship between pnbinom and qnbinom.
+```{r}
+plot(pnbinom(Q<- 0:6, size=1, prob=0.5), Q,
+       pch="Q", cex=2, col="green")
+
+points(temp<-seq(0,1,length.out=101),
+       qnbinom(temp, 1, 0.5))
+
+title("pnbinom and qnbinom are inverse functions--\non the sample space (Q, the quantiles)")
+```

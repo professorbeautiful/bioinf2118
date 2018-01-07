@@ -1,0 +1,203 @@
+Explorations in the one-sample normal test and t test.
+===
+
+We consider an experiment with i.i.d. normal data. 
+```{r}
+
+sigmaSq = 100
+sigma = sqrt(sigmaSq)
+n=10
+alpha = 0.05
+sdOfMean = sigma / sqrt(n)	
+
+```
+The critical value for normal test is 
+```{r}
+
+criticalValue = qnorm(1-alpha) * sdOfMean
+cat("criticalValue = ", criticalValue, "\n")
+ #  z(1-alpha) * sigma / sqrt(n)
+```
+
+
+(A)  Confirm that the critical value gives the right Type 1 error 
+----
+```{r}
+nreps = 10000   
+```
+We validate on `r nreps` simulated data sets, each with `r n` observations.
+Each row is a dataset
+```{r}
+simulatedDataSets = rnorm(n * nreps, mean = 0, sd= sqrt(sigmaSq))
+simulatedDataSets = matrix(simulatedDataSets, nrow=nreps)
+
+testStatistics = apply(simulatedDataSets, 1, mean)
+```
+In the "apply"  call, the "1" means keep the first dimension, the rows,
+so we produce one result, one mean, per simulated data set.
+
+
+What proportion of the testStatistics exceed the criticalValue?
+```{r}
+
+proportionRejected = mean(testStatistics > criticalValue)
+print(proportionRejected)   ### It should be close to alpha, 0.05.
+
+```
+
+
+ proportionRejected * 10000  should be binomial(10000, alpha). Using the normal approximation,
+ how many standard deviations away?
+```{r}
+(proportionRejected - 0.05) * nreps/ sqrt(alpha*(1-alpha)*nreps)
+```
+ How far from 0.05 in s.d's?
+
+Usually looks close,  less than 2 s.d.'s ( results will vary).
+
+  (B)   Statistical power.   
+----
+  
+```{r}
+muAlternative = 0:13
+power.at.muA = 1-pnorm(qnorm(1-alpha) - 
+							muAlternative/(sigma/sqrt(n)))
+plot(muAlternative, power.at.muA, ylim=0:1)
+title(paste("sample size = ", n))
+text(6, 0.05, labels=expression(alpha))
+abline(h=c(0.05, 0.80))
+abline(h=0, lwd=2)
+
+
+```
+
+Notice that the "power" at the null hypothesis (muAlternative=0) is $\alpha$ = 0.05.
+
+
+(C)   Sample size requirement.
+---
+Suppose we want power = 0.95 (beta = 0.05) at an alternative muA = 6.
+```{r}
+
+
+beta = 0.05    
+muA = 6
+sumOfZs = qnorm(1-alpha) + qnorm(1-beta)
+nRequired = (sumOfZs * sigma / muA)^2
+print(nRequired)
+nRequired = ceiling(nRequired)
+```
+Note the use of the function **ceiling**, so that
+nRequired > 30.
+
+Let's confirm that this N is enough, by simulation.
+
+```{r}
+simulatedDataSets.muA = matrix(ncol=nRequired,  rnorm(nreps*nRequired, muA, sigma))
+testStatistics.muA = apply(simulatedDataSets.muA, 1, mean)
+sdOfMean = sigma / sqrt(nRequired)	
+criticalValue.31 = 	qnorm(1-alpha) * sdOfMean
+#  z(1-alpha) * sigma / sqrt(n)
+mean(testStatistics.muA > criticalValue.31)
+```
+
+This is bigger than 1 - beta = 0.95, so the sample size nRequired has the required power.
+
+
+(D)   Analyzing a dataset.  
+---
+
+ I want to pick out a dataset that happens to have a mean around 6; see "12-testing, part 2.doc".  Then we can see what the P value will be ("anticipated results").
+
+```{r}
+
+closeToSix = order(abs(6 - apply(simulatedDataSets.muA, 1, mean)))[1]
+theDataset = simulatedDataSets.muA[ closeToSix, ]
+Xbar = mean(theDataset)  ## That's close to 6.
+Xbar
+cat("P value = ",  1 - pnorm(Xbar/(sigma/sqrt(31))), "\n") 
+```
+Highly significant! 
+The P value is the probability of the upper tail --  things more likely than our Xbar.\
+Compare with our simulated datasets:
+ _Number observed significant | H0 =  `r sum(apply(simulatedDataSets, 1, mean) >= Xbar)`_
+ compared to expected,  `r (1 - pnorm(Xbar/sdOfMean))*10000` 
+      
+```{r}
+
+cat("# Observed significant | H0 = ", sum(apply(simulatedDataSets, 1, mean) >= Xbar), 
+    "  compared to expected, ", (1 - pnorm(Xbar/sdOfMean))*10000, "\n")
+
+``` 
+
+(E)  One-sample one-sided t-test.   
+---
+If sigma is NOT known, we use the t statistic as a `pivotal quantity`.
+\[\frac{{{\text{standard normal}}}}{{\sqrt {\chi _\nu ^2/\nu } }}
+=\frac{{{\sigma ^{ - 1}}\bar X}}{{\sqrt {{\sigma ^{ - 1}}S/(n - 1)} }}\]
+
+The unknown sigma cancels out top and bottom.
+
+```{r}
+#####  X is a vector of observations, i.i.d. normal. ######
+tTestStatistic = function(X) { 
+ 	sPrime = sd(X)   ### sumOfSquares divided by (n-1)
+		n = length(X)
+		return( 
+			( mean(X) * sqrt(n) ) /  ( sPrime)
+		)
+}
+criticalValue = qt(1-alpha, n-1)
+```
+
+Compare this with before:    z(1-alpha) * sigma / sqrt(n)
+
+And compare this to the case where we know sigma:
+
+The critical values are :
+
+```{r echo=FALSE}
+c(infinity=qnorm(1-alpha), "31-1"=qt(1-alpha, 31-1), "10-1"=qt(1-alpha, 10-1))
+```
+
+
+Now validate against simulations.
+```{r}
+
+tTestStatistics = apply(simulatedDataSets, 1, tTestStatistic)
+proportionRejected = mean(tTestStatistics > criticalValue)
+print(proportionRejected)
+```
+
+On our dataset  with Xbar=6 roughly,  P-value is 
+```{r}
+cat("Test statistic is ", 
+	tTestStatistic(theDataset), "\n")
+cat("P value = ", 
+	1 - pt(tTestStatistic(theDataset), length(theDataset) - 1), "\n")
+
+```
+We compare our result to the built-in function **t.test**.
+```{r}
+
+t.test(theDataset)
+```
+This is *"statistically significant"*.  But, hmm, why is this P-value twice as big?
+```{r}
+t.test(theDataset, alternative="greater")
+```
+Aha, so the default is *alternative="two.sided"*.
+
+With a sample size of only n=10, the power is insufficient:
+```{r}
+simulatedDataSets.muA.n10 = matrix(ncol=10,  rnorm(nreps*nRequired, muA, sigma))
+testStatistics.muA.n10 = apply(simulatedDataSets.muA.n10, 1, mean)
+testStatistics.muA.n10 = apply(simulatedDataSets.muA.n10, 1, tTestStatistic)
+proportionRejected.muA.n10 = mean(testStatistics.muA.n10 > criticalValue)
+print(proportionRejected.muA.n10)
+```
+
+
+
+
+

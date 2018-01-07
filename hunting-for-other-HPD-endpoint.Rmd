@@ -1,0 +1,20 @@
+
+Hunting for the other (lower) point with the same F density:
+  ```{r}
+temp = function(lower) {df(lower,5,20) - df(3,5,20)}
+temp(3)  ##  Verifying the upper root.
+uniroot(f=temp, lower=0, upper=2)  ###  0.0301423
+temp(.Last.value$root) ### Yes, close to zero.
+```
+```{r}
+
+```
+
+
+Why do you need to give uniroot a range?
+```{r}
+
+plot(xvalues, sin(1/xvalues*10), type="l")
+abline(h=0)
+
+```

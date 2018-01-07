@@ -1,0 +1,109 @@
+---
+title: "prisonersPicnic-modeling.Rmd"
+author: "roger"
+date: "3/20/2017"
+output: html_document
+---
+
+See "prisonersPicnic- data preparation.R" for the data. Note that an Rmarkdown session does not see your .GlobalEnv (R_GlobalEnv), so you have to re-load the data here.
+
+```{r}
+load(file = "prisonersPicnic.dataframe.rdata")
+load(file = "prisonersPicnic.array.rdata")
+load(file = "prisonersPicnic.array.Observed.rdata")
+```
+
+```{r}
+require(MASS)  #### This contains loglm()
+```
+
+Let's start with an independence model
+```{r}
+( output.loglm <- with(prisonersPicnic.dataframe,
+                      loglm( Observed ~ A.ate + D.drank + S.sick , fit=TRUE)) )
+anova(output.loglm)    ### no equivalent for loglin
+summary(output.loglm)  ### more detail.
+
+###  In these formulas, the "+" and the ":" do not mean the usual thing.  Run the command 
+#              help("formula")
+model1  = loglm(formula=  ~ 1 + 2 + 3,
+                data=prisonersPicnic.array.Observed,
+                fit=TRUE)
+resid(model1)
+modelEDSindependent  = loglm(formula=  ~ A.ate + D.drank + S.sick,
+                data=prisonersPicnic.array.Observed,
+                fit=TRUE)  ####  the same model, expressed differently.
+resid(modelEDSindependent)
+
+### Maybe E "interacts" with S
+modelEwithS  = loglm(formula=  ~ A.ate*S.sick + D.drank,
+                             data=prisonersPicnic.array.Observed,
+                             fit=TRUE)  
+### Maybe D "interacts" with S
+modelDwithS  = loglm(formula=  ~ A.ate + S.sick*D.drank,
+                     data=prisonersPicnic.array.Observed,
+                     fit=TRUE)  
+### Maybe E "interacts" with D
+modelEwithD  = loglm(formula=  ~ A.ate*D.drank + S.sick,
+                     data=prisonersPicnic.array.Observed,
+                     fit=TRUE)  
+anova(modelEDSindependent, modelEwithS, modelDwithS, modelEwithD)
+resid(modelEwithS)  ## Wow, E really explains a lot! Small residuals.
+resid(modelDwithS)  ##  D does not explain S;   deviance does not get much better
+
+## E and D both interact with S
+modelEandDwithS  = loglm(formula=  ~ S.sick*A.ate + S.sick*D.drank,
+                     data=prisonersPicnic.array.Observed,
+                     fit=TRUE)  
+anova(modelEDSindependent, modelEwithS, modelEandDwithS)
+ ### No,  A.ate explains it all.
+
+## All pairwise interactions
+## Fully interactive model E and D both interact with S
+modelPairwise  = loglm(formula=  ~ S.sick*A.ate + S.sick*D.drank + A.ate*D.drank,
+                         data=prisonersPicnic.array.Observed,
+                         fit=TRUE)
+```
+
+```{r}
+anova(modelEDSindependent, modelEwithD, modelEwithS, modelDwithS, modelEandDwithS)
+for (model in list(modelEDSindependent, modelEwithD, modelEwithS, modelDwithS, modelEandDwithS)) {
+  cat("======= ", as.character(model$formula)[2], " =======\n")
+#  print(summary(model))
+  print(coefficients(model))
+}
+options(digits=3)
+for (model in list(modelEDSindependent, modelEwithD, modelEwithS, modelDwithS, modelEandDwithS)) {
+  cat("======= ", as.character(model$formula)[2], " =======\n")
+  #  print(summary(model))
+  print((c(residuals(model))))
+}
+
+##########################
+## Other ways to do it. These are more flexible
+( output.glm = with(prisonersPicnic.dataframe,
+     glm( Observed ~ D.drank + S.sick + A.ate, family=poisson)) )
+
+( output.glm.2 = with(prisonersPicnic.dataframe,
+     glm(S.sick ~  A.ate + D.drank , family=binomial, 
+        weights=Observed) ))
+
+( output.loglin = loglin(prisonersPicnic.array.Observed, 
+                         margin=list(1,2,3), fit=TRUE) )
+
+### Compare fitted values
+exp(predict(output.glm))
+output.loglin$fit
+
+### Compare fit statistics
+c(output.glm$deviance, output.glm.2$deviance, model1$lrt, output.loglin$lrt)
+
+anova(output.glm)    ### no equivalent for loglin
+output.loglin.2 = loglin(prisonersPicnic.array.Observed, margin=list(1:2,3:2), fit=TRUE)
+names(output.loglin.2 )
+output.loglin$lrt
+output.loglin.2$lrt
+output.loglin.2$lrt - output.loglin$lrt  
+  ### this compares 2 models; in the second, the deviance (loglikelihood*2) is reduced by 4.63, 
+ ####     at the expense of an extra parameter.  Is it worth it?
+```

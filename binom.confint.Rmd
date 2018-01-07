@@ -1,0 +1,56 @@
+Confidence intervals for a binomial.
+===
+
+Normal approximation
+```{r}
+0.8+c(-1,1)*sqrt(.8*.2/9)*qnorm(0.975)
+```
+
+Compare to exact.  Here's a function that uses the duality between tests and confidence intervals. It handles two-sided, upper, and lower intervals.
+```{r}
+binom.confint.new = 
+function(k, n, alpha=0.05, range=0:1, 
+		side=c("two", "upper", "lower")) {
+	sideLetter = toupper(substring(side[1], 1, 1))
+	if(sideLetter=="T") {
+	  alphaUpper = alphaLower = alpha/2
+	} else if(sideLetter=="U") {
+	  alphaUpper = alpha; alphaLower = 0
+	} else if(sideLetter=="L") {
+	  alphaLower = alpha; alphaUpper = 0
+	}
+	else stop("bad value for \"side\" ")  	
+	huntForBoundaryUpper = function(p) 
+	  alphaUpper - (1 - pbinom((k-1),n,p))
+	lb = try(uniroot(huntForBoundaryUpper, range)$root)
+	if(class(lb) == "try-error") lb = 0
+	huntForBoundaryLower = function(p) 
+  			alphaLower - pbinom(k,n,p)
+  	ub = try(uniroot(huntForBoundaryLower, range)$root)
+  	if(class(ub) == "try-error") ub = 1
+	return(c(lb=lb, ub=ub))
+}
+```
+Now let's compare the three confidence intervals.
+```{r}
+plot(c(0, 1), 0:1, pch="", xlab="P", ylab="", 
+     xaxs="i", yaxt="n")
+abline(v=8/10, col="red")
+lines(binom.confint.new (k=8, n=10), c(1/4,1/4),
+      pch="2", type="b")
+text(0.8, 1/4, adj=c(1,1), col="darkgreen", "two-sided ")
+lines(binom.confint.new (k=8, n=10, side="u"), c(2/4,2/4),
+      pch="U", type="b", xpd=NA)
+text(0.8, 2/4, adj=c(1,1), col="darkgreen", "one-sided (upper) ")
+lines(binom.confint.new (k=8, n=10, side="l"), c(3/4,3/4),
+      pch="L", type="b", xpd=NA)
+text(0.8, 3/4, adj=c(1,1), col="darkgreen", "one-sided (lower) ")
+
+```
+
+
+NOTES
+---
+* The (badly named) parameter xpd governs clipping. We don't want the letters to be clipped.
+* The xaxs="i" parameter forces the x axis to match the xlim exactly.
+* The yaxt="n" means no ticks or labels on the y axis.
