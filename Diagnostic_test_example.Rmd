@@ -1,0 +1,46 @@
+---
+title: "Diagnostic test example"
+output: html_notebook
+---
+
+
+```{r}
+Table1_data = matrix(
+  dimnames = list(
+    theta=c('healthy', 'sick'),
+    X=c('negative',	'positive',	'indeterminate')
+    ),
+  c(
+    0.95,	0.03,	0.02,
+    0.03,	0.95,	0.02),
+  nrow=2, byrow=TRUE
+)
+print(Table1_data)
+```
+
+QUESTION 1:  Which variable, X or theta, are the table entries conditional on?
+(Replace NULL with your answer, in this chunk.)
+
+```{r}
+Answer1 = NULL
+```
+
+
+```{r}
+cat('\nHere are the row sums:\n')
+print(rowSums(Table1_data))
+print(colSums(Table1_data))
+
+```
+
+QUESTION 2:  Write a function "joint_probability" that takes as its arguments an outcome X  and a state-of-nature, and returns the probability of that outcome.
+
+Example of use: joint_probability("negative", "healthy")
+
+First, we will construct Table 2, the JOINT distribution.
+
+```{r}
+
+```
+
+
