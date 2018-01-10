@@ -1,9 +1,18 @@
 ---
-title: "Diagnostic test example"
+title: "Homework for class N01: Diagnostic test example"
 output: html_notebook
 ---
 
+# Homework for class N01.
+
+```{r include=FALSE}
+# Removing any previous answers:
+previousAnswerVariables = grep(pattern=('Answer[[:digit:]]+'), ls(), v=T) 
+if(length(previousAnswerVariables) > 0) rm(list=previousAnswerVariables)
+```
+
 #Table 1: diagnosticModelFamily
+
 
 ```{r}
 Table1_data = diagnosticModelFamily = 
@@ -39,7 +48,7 @@ Answer1b = NULL
 
 
 ### QUESTION 1c: What are the sensitivity and specificity of the test, if "indeterminate" is combined with "negative"? 
-Don't just calculate them.  Write a function to do it.
+Don't just calculate them.  Write a simple function to do it.
 
 ```{r}
 Answer1c = NULL
@@ -89,8 +98,9 @@ Answer2b = NULL
 # Report of Answers:
 
 ```{r}
-AnswerVariables = ls(pattern='Answer[0-9]*') 
-Answers = sapply(AnswerVariables, get)
+AnswerVariables = grep(pattern=('Answer[[:digit:]]+'), ls(), v=T) 
 print(AnswerVariables)
+Answers = sapply(AnswerVariables, get)
+print(Answers)
 ```
 
