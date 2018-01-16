@@ -7,6 +7,12 @@ output: html_document
 
 See "prisonersPicnic- data preparation.R" for the data. Note that an Rmarkdown session does not see your .GlobalEnv (R_GlobalEnv), so you have to re-load the data here.
 
+We can study the following hypotheses:
+
+* H1: Ate, Drank, and Sick are independent.
+* H2: Ate and Drank are independent conditional on Sick.
+* H3: Ate, Drank, and Sick may be pairwise associated, but there is no “3-way interaction”.
+
 ```{r}
 load(file = "prisonersPicnic.dataframe.rdata")
 load(file = "prisonersPicnic.array.rdata")
