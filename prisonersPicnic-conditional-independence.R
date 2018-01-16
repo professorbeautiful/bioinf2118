@@ -1,9 +1,9 @@
 
 ####### Conditional independence
 
-prisonersPicnic.dataframe.by.C = split(prisonersPicnic.dataframe, prisonersPicnic.dataframe$C) 
-prisonersPicnic.dataframe.by.C[["sick"]]
-prisonersPicnic.dataframe.by.C[["ok"]]
+prisonersPicnic.dataframe.by.S = split(prisonersPicnic.dataframe, prisonersPicnic.dataframe$S) 
+prisonersPicnic.dataframe.by.S[["sick"]]
+prisonersPicnic.dataframe.by.S[["ok"]]
 prisonersPicnic.array[ , , "sick"]
 prisonersPicnic.array[ , , "ok"]
 
