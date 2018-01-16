@@ -1,3 +1,5 @@
+### prisonersPicnic- data preparation.R
+
 ### Data:  from "02-More Probability.docx"
 ### Exercise: from "15-categorical data.docx"
 
@@ -7,10 +9,12 @@
 
 #  First, select the 8 data cells from the document, and "copy".
 
-prisonersPicnic = scan(file="")
+prisonersPicnic = strsplit('
 0.48  0.15  0.06 	0.17 
 0.04 	0.01 	0.02 	0.07 
-
+', split='[\n \t]+') [[1]] [-1]
+prisonersPicnic =  as.numeric(prisonersPicnic)
+prisonersPicnic = matrix(prisonersPicnic, nrow=2, byrow=TRUE)
 
 ## Put into a data frame. 
 ### Looking across the rows,
@@ -39,16 +43,17 @@ prisonersPicnic.dataframe$proportion[
 
 ## Now let's re-arrange in alphabetical order.
 prisonersPicnic.dataframe = prisonersPicnic.dataframe[c(
-  "A.ate", "D.drank", "S.sick", "proportion", "Observed")]
-  ### Spot-check again.
+  "A.ate", "D.drank", "S.sick", "proportion", "Observed"
+  )]
+### Spot-check again.
 with(prisonersPicnic.dataframe, 
      proportion[A.ate=="ate" & D.drank=="drank" & S.sick=="ok"])
+
 ### Now re-order, so that the cycling is most rapid for E, next for D, slowest for S
 prisonersPicnic.dataframe = prisonersPicnic.dataframe[
   with(prisonersPicnic.dataframe, order(S.sick,D.drank,A.ate)), ]
 print(prisonersPicnic.dataframe)
 save(prisonersPicnic.dataframe, file = "prisonersPicnic.dataframe.rdata")
-
 
 ####  Reshaping the data in the form of an array:
 prisonersPicnic.array = 
@@ -65,6 +70,7 @@ prisonersPicnic.array = aperm(prisonersPicnic.array, c("A.ate", "D.drank", "S.si
 ### Spot-check again:
 prisonersPicnic.array ["ate", "drank", "ok"]
 save(prisonersPicnic.array, file = "prisonersPicnic.array.rdata")
+prisonersPicnic.array
 
 ### Let's create an array of observations too,
 ### and compare the array to the data.frame.
@@ -78,4 +84,3 @@ prisonersPicnic.array.Observed["ate not", "drank not", "sick"]  ##ok!!
 prisonersPicnic.array.Observed["ate", "drank", "ok"]  ##ok!!
 save(prisonersPicnic.array.Observed, file = "prisonersPicnic.array.Observed.rdata")
 
-# compare observed to expected:
