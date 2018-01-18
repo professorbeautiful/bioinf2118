@@ -191,7 +191,7 @@ array(
 )
 
 , array(
-   'Contingency tables, confounding, and Simpson’s paradox<br>
+   'Contingency tables, confounding, and Simpsons paradox<br>
      <a href="https://pitt.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=1bd6c829-b15b-49a2-9355-b81e8d3820ed ">Panopto Recording (2017)</a><br>',
 
 '<a href="N-files-for-handouts/N16-ContingencyTables_Confounding.docx">N 16</a>&nbsp;
@@ -199,12 +199,97 @@ array(
    'Take-home Portion of Midterm Due.<br>
     Homework 7 Assigned (exercises at end of N16).'
 	, '&nbsp;'
-), array(
-   'Exact Tests<br>
-   <a href="https://pitt.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=7e4ca7c2-7ddb-4a3a-b7b3-b22d64f4fadc">Panopto Recording (2017)</a><br>',
-   ',
+),
+
+
+array(
+   'Exact Tests<br>',
+	'
+   <a href="https://pitt.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=7e4ca7c2-7ddb-4a3a-b7b3-b22d64f4fadc">Panopto Recording (2017)</a><br>
+   ' , 
    '&nbsp;<br>&nbsp;'
 )
+
+, array(
+   'Review of Midterm Exam<br>
+    Likelihood ratio and score tests<br>
+    <a href="https://pitt.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9fc5f8ca-3614-433b-ae74-bacb65a77b26">Panopto Recording (2017)</a>',
+   '<a href="N-files-for-handouts/N18-testing, likelihood ratio test and score test.docx">N 18</a>&nbsp;
+   <a href="R-code-miscellaneous/prisonersPicnic-modeling.Rmd">R Code: Prisoners Picnic Modeling</a><br>
+   <a href="R-code-miscellaneous/LRT-binomial.Rmd">R Code: Demonstration of LRT</a><br>
+   <a href="R-code-miscellaneous/chisq-voting-table.Rmd">R Code: Chi-Square Voting Table</a>',
+   'Homework 7 Due.'
+)
+
+, array(
+   'Least squares and linear regression<br>
+    <a href="N-files-for-handouts/Whiteboard_03-23-17.JPG">Whiteboard</a>',
+   '<a href="N-files-for-handouts/N19-Least squares and simple linear regression.docx">N 19</a>&nbsp
+  ',
+   '&nbsp;'
+), array(
+   'Extensions of least squares -- data mining',
+   '<a href="N-files-for-handouts/N19-B extensions of least squares--data mining.docx">N 19B</a>&nbsp
+   <a href="N-files-for-handouts/regression-to-the-mean,variance-bias,truth-wears-off,empirical-bayes.doc">Resources on Misc Topics</a>&nbsp;
+  ',
+   '&nbsp;'
+)
+
+
+
+
+
+, array(
+   'Reproducibility<br>
+    <a href="https://youtu.be/jeMjtFQesmM">Video Lecture -- Reproducibility</a>',
+   '<a href="N-files-for-handouts/Reproducibility- Obstacles and Opportunities.docx">Reproducibility Notes</a>
+   ',
+   'Submit Q&As for Video Lecture'
+), array(
+   'Review of Questions and Aha-s for Reproducibility <br>
+   <a href="https://pitt.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=be10cbb9-e6f2-4252-bc34-1b84b18d000d ">Panopto Recording (2017)</a>',
+   '<a href="N-files-for-handouts/N19-B extensions of least squares--data mining.docx">N19-B</a>&nbsp;
+',
+   '(no assignment)'
+), array(
+   'Bayesian solutions to the lump/split dilemma<br>
+    <a href="https://pitt.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=d3e266bc-d613-4447-a67e-da938a2ebadc">Panopto Recording (2017)</a>',
+   '<a href="N-files-for-handouts/Bayes-lump-split-and-related/N21 - bayes decision analysis.docx">N21</a>
+   <a href="N-files-for-handouts/Bayes-lump-split-and-related/N24- 2015-04-02 beta,dirichlet.docx">N24</a>
+   <a href="N-files-for-handouts/Bayes-lump-split-and-related/lump,split and dirichlet.docx">Lump, split and dirichlet</a>
+   <a href="N-files-for-handouts/Bayes-lump-split-and-related/Model Choice, Model Averaging.docx">Model Choice, Model Averaging (last page only)</a>&nbsp;
+  ',
+   'Write a quiz question'
+), array(
+   'Topics in regression analysis<br>
+   <a href=https://pitt.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=55b5c27b-5930-4194-8496-df2d27c5cf05>Panopto Recording (2017)</a>',
+   '<a href="N-files-for-handouts/N20 - ANOVA, logistic regression, discriminant analysis, survival analysis.docx">N20</a>
+   ',
+   '&nbsp;'
+), array(
+   'Multiple comparisons',
+   '<a href="N-files-for-handouts/N22-Multiple comparisons,permutation,randomization,bootstrap.docx">N22</a>
+   ',
+   '&nbsp;'
+), array(
+   'Permutation and randomization tests; bootstrap',
+   '<a href="N-files-for-handouts/N22-Multiple comparisons,permutation,randomization,bootstrap.docx">N22</a>
+   ',
+   '&nbsp;'
+), array(
+   'Case studies of data analysis projects',
+   '&nbsp;',
+   '&nbsp;'
+), array(
+   'Final review session<br>&nbsp;',
+   '&nbsp;',
+   '&nbsp;'
+), array(
+   'FINAL EXAM<br>&nbsp;',
+   '&nbsp;',
+   '&nbsp;'
+)
+
 );
 for($i=0; $i<$nClasses; $i++) {
  $bgcolor = $bgcolorArray[$i & 1];  
