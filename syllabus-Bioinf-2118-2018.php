@@ -167,6 +167,28 @@ array(
    ',
    '&nbsp;'
 )
+
+, array(
+   'Midterm Review',
+   '&nbsp;',
+   'Homework 6 Due.'
+), array(
+   'MIDTERM EXAM <br>&nbsp;',
+   '&nbsp;<br>&nbsp;',
+   '&nbsp;'
+), array(
+   'Categorical Data and the Chi-Square Test<br>
+    <a href="https://pitt.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=d8c38be6-382e-4d29-be03-46cf310600e4">Panopto Recording (2017)</a><br>',
+   '<a href="N-files-for-handouts/N15-categorical data.docx">N 15</a>&nbsp;
+   ',
+   '&nbsp;'
+), array(
+   'Spring Break<br>&nbsp;'
+), array(
+   'Spring Break<br>&nbsp;',
+   '&nbsp;<br>&nbsp;',
+   '&nbsp;'
+)
 );
 for($i=0; $i<$nClasses; $i++) {
  $bgcolor = $bgcolorArray[$i & 1];  
