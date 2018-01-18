@@ -189,6 +189,21 @@ array(
    '&nbsp;<br>&nbsp;',
    '&nbsp;'
 )
+
+, array(
+   'Contingency tables, confounding, and Simpson’s paradox<br>
+     <a href="https://pitt.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=1bd6c829-b15b-49a2-9355-b81e8d3820ed ">Panopto Recording (2017)</a><br>',
+
+'<a href="N-files-for-handouts/N16-ContingencyTables_Confounding.docx">N 16</a>&nbsp;
+    ',
+   'Take-home Portion of Midterm Due.<br>
+    Homework 7 Assigned (exercises at end of N16).'
+), array(
+   'Exact Tests<br>
+   <a href="https://pitt.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=7e4ca7c2-7ddb-4a3a-b7b3-b22d64f4fadc">Panopto Recording (2017)</a><br>',
+   ',
+   '&nbsp;<br>&nbsp;'
+)
 );
 for($i=0; $i<$nClasses; $i++) {
  $bgcolor = $bgcolorArray[$i & 1];  
