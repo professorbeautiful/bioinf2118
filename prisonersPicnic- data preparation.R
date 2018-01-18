@@ -44,7 +44,7 @@ prisonersPicnic.dataframe$proportion[
 
 ## Now let's re-arrange in alphabetical order.
 prisonersPicnic.dataframe = prisonersPicnic.dataframe[c(
-  "A.ate", "D.drank", "S.sick", "proportion", "Observed"
+  "A.ate", "D.drank", "S.sick", "proportion", "Observed", "Expected"
   )]
 ### Spot-check again.
 with(prisonersPicnic.dataframe, 
