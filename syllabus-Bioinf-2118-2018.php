@@ -198,6 +198,7 @@ array(
     ',
    'Take-home Portion of Midterm Due.<br>
     Homework 7 Assigned (exercises at end of N16).'
+	, '&nbsp;'
 ), array(
    'Exact Tests<br>
    <a href="https://pitt.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=7e4ca7c2-7ddb-4a3a-b7b3-b22d64f4fadc">Panopto Recording (2017)</a><br>',
