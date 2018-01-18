@@ -22,7 +22,7 @@ prisonersPicnic = matrix(prisonersPicnic, nrow=2, byrow=TRUE)
 prisonersPicnic.dataframe = 
 	expand.grid( 
 		S.sick=c("sick","ok"), A.ate=c("ate","ate not"), 
-    D.drank=c("drank","drank not"))
+    D.drank=c("drank","drank not") )
 
 prisonersPicnic.dataframe$proportion = prisonersPicnic
 
@@ -30,7 +30,8 @@ sampleSize = 100
 prisonersPicnic.dataframe$Expected = 
   sampleSize * prisonersPicnic.dataframe$proportion
 prisonersPicnic.dataframe$Observed = 
-  rmultinom( n = 1, size = sampleSize, prob = prisonersPicnic.dataframe$proportion)
+  rmultinom( n = 1, size = sampleSize, 
+             prob = prisonersPicnic.dataframe$proportion)
 
 ### Spot-check (compare against original):
 with(prisonersPicnic.dataframe, 
