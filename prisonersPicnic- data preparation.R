@@ -24,7 +24,7 @@ prisonersPicnic.dataframe =
 		S.sick=c("sick","ok"), A.ate=c("ate","ate not"), 
     D.drank=c("drank","drank not") )
 
-prisonersPicnic.dataframe$proportion = prisonersPicnic
+prisonersPicnic.dataframe$proportion = c(prisonersPicnic)
 
 sampleSize = 100
 prisonersPicnic.dataframe$Expected = 
