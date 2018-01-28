@@ -16,4 +16,11 @@ theModes = sapply(someLambdaValues,
 plot(someLambdaValues, theModes,
      xlab="mean", ylab="mode")
 abline(a=0, b=1)
-title("Poisson distribution")
+title("Poisson distribution\nmeans versus modes")
+
+##  median:
+theMedians = qpois(1/2, someLambdaValues)
+plot(someLambdaValues, theMedians)
+plot(theModes, theMedians)
+abline(a=0, b=1)
+title("Poisson distribution\nmodes versus medians")
