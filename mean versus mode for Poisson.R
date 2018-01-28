@@ -28,5 +28,5 @@ theModesD =  sapply(someLambdaValues, function(lam) {
 plot(someLambdaValues, theModes,
      xlab="mean", ylab="mode")
 abline(a=0, b=1)
-
+title("Poisson distribution")
 plot(theModes, theModesD)
