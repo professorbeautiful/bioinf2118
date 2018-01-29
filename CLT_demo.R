@@ -9,7 +9,7 @@ distribExpressions = list(
   cauchy = 'rcauchy(n*M)'
 )
 
-for (distribName in names(distribExpressions)) {
+simulateCLT = function(distribName) {
   theDensities = lapply(1:length(Nlist), function(i) {
     n = Nlist[i]
     # We use "eval" to turn the strings into results.
@@ -37,3 +37,10 @@ for (distribName in names(distribExpressions)) {
     else points(theDensities[[i]], type="b", col=i+1, pch=as.character(i))  
   }
 }
+
+simulateCLT('binomial')
+simulateCLT('poisson')
+simulateCLT('exponential')
+simulateCLT('rbinom')
+simulateCLT('normal')
+simulateCLT('cauchy')
