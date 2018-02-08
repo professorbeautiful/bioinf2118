@@ -1,4 +1,4 @@
-M = 1000   #### number of replicate data sets to construct
+M = 1000            #### number of replicate data sets to construct
 Nlist = c(1,10,100)   #### three sample sizes
 
 distribExpressions = list(
@@ -8,21 +8,24 @@ distribExpressions = list(
   normal = 'rnorm(n*M)',
   cauchy = 'rcauchy(n*M)'
 )
-
-simulateCLT = function(distribName) {
-  theDensities = lapply(1:length(Nlist), function(i) {
-    n = Nlist[i]
+evaluateADistribution = 
+  function(X) {
+    n = Nlist[X]
     # We use "eval" to turn the strings into results.
     simulations = eval(parse(text=distribExpressions[[distribName]]))
     simdatasets = matrix(simulations, nrow=n)
-    simMeans = apply(simdatasets, 2, mean)
+    simMeans = apply(X = simdatasets, MARGIN = 2, FUN = mean)
     density(simMeans, kernel="triangular", bw=0.02) 
+    ### The bw argument changes the bandwidth to make it more narrow.
     #str(simdatasets)
     #str(simMeans)
     # summary(simMeans)
     # summary(colMeans(simdatasets))  ### same thing.
-    ### bw argument changes the bandwidth to make it more narrow.
   }
+simulateCLT = function(distribName) {
+  theDensities = lapply(
+    X = 1:length(Nlist), 
+    FUN = evaluateADistribution
   )
   theXranges = sapply(theDensities, function(theDensity) range(theDensity$x))
   theYranges = sapply(theDensities, function(theDensity) range(theDensity$y))
@@ -41,6 +44,5 @@ simulateCLT = function(distribName) {
 simulateCLT('binomial')
 simulateCLT('poisson')
 simulateCLT('exponential')
-simulateCLT('rbinom')
 simulateCLT('normal')
 simulateCLT('cauchy')
