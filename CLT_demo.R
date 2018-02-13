@@ -9,30 +9,31 @@ distribExpressions = list(
   cauchy = 'rcauchy(n*M)'
 )
 evaluateADistribution = 
-  function(whichSampleSize, distribution, standardize=FALSE,
+  function(sampleSize, distribution, standardize=FALSE,
            adjust=1) {
-    sampleSize = Nlist[whichSampleSize]
+    #sampleSize = Nlist[whichSampleSize]
     # We use "eval" to turn the strings into results.
     simulations = eval(parse(text=distribExpressions[[distribution]]))
     simdatasets = matrix(simulations, nrow=sampleSize)
     simMeans = apply(X = simdatasets, MARGIN = 2, FUN = mean)
     if(standardize)
       simMeans = (simMeans-mean(simMeans)) / sd(simMeans)
-    density(simMeans, kernel="triangular", adjust=adjust) 
-    ### The bw argument changes the bandwidth to make it more narrow.
     #str(simdatasets)
     #str(simMeans)
-    # summary(simMeans)
-    # summary(colMeans(simdatasets))  ### same thing.
+    invisible(simMeans)
   }
 simulateCLT = function(distribName, standardize=FALSE, 
                        theXranges, theYranges, adjust=1, ...) {
-  theDensities = lapply(
-    X = 1:length(Nlist), 
+  theSimMeans = lapply(
+    X = Nlist, 
     FUN = evaluateADistribution,
     standardize = standardize,
     distribution = distribName
   )
+  theDensities = lapply(theSimMeans,
+    density, kernel="triangular", adjust=adjust) 
+  ### The bw argument changes the bandwidth to make it more narrow.
+  
   if (missing(theXranges))
     theXranges = sapply(theDensities, function(theDensity) range(theDensity$x))
   if (missing(theYranges))
@@ -59,6 +60,7 @@ simulateCLT('binomial')
 simulateCLT('poisson')
 simulateCLT('exponential')
 simulateCLT('exponential', theXranges=c(0,3))
+
 simulateCLT('exponential', standardize = TRUE)
 simulateCLT('normal')
 simulateCLT('cauchy')
