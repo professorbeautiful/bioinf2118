@@ -1,4 +1,4 @@
-### mean versus mode for Poisson
+### mean versus mode and median for Poisson
 someLambdaValues = seq(0.1,10,by = 0.1)
 
 argmax = function(f, set, ...) {
