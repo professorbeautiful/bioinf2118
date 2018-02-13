@@ -1,0 +1,120 @@
+---
+title: "Assignment 4 demo"
+author: "Roger Day"
+date: "February 24, 2016"
+output: pdf_document
+---
+
+Demonstration of Central Limit Theorem successes and failures
+===
+
+IMPORTANT NOTE:  see also CLTdemo.Rmd to update this exercise.
+
+# Purpose
+For each of several distributional families, we will generate many samples at various sample sizes, in order to characterize how the distribution of the sample mean changes with sample size.
+
+# Families and parameters
+```{r}
+familyList = list(
+    list(family="rbinom", extraArgs=list(size=1, prob=0.2)),
+    list(family="rpois", extraArgs=list(lambda = 1)),
+    list(family="rnorm", extraArgs=list(mean = 0, sd = 1)),
+    list(family="rexp", extraArgs=list()),
+    list(family="rcauchy", extraArgs=list())
+)
+```
+
+# Sample sizes to test, and number of replicatios
+```{r}
+sampleSizeVector = c(1, 10, 100)
+nReps = 1e4
+```
+
+The following function tests a single sample size, returning a vector of sample means.
+```{r}
+CLTtestOneSize = function(distribution, sampleSize, nReps) {
+    numbers = do.call(
+      what = distribution$family, 
+      args = c(n = sampleSize*nReps, distribution$extraArgs)
+    )
+    # Each column is a sample
+    simulations = matrix(numbers, nrow=sampleSize)
+    # return(apply(simulations, 2, mean))  # one way
+    return(colMeans(simulations))  # simpler
+}
+```
+
+This function assembles the samples of means across the sample sizes, and plots all on a single plot. The "..." represents any unmatched args. They are passed into the call to plot().
+```{r}
+CLTdensityPlot = function(distribution, theXrange, ...) {
+  densitiesOfMeans = lapply(
+    sampleSizeVector, 
+    function(sampleSize) {
+      simMeans = CLTtestOneSize(
+        distribution, sampleSize, nReps)
+      return(density(simMeans, kernel="triangular", bw=0.02))
+    }
+  )
+  names(densitiesOfMeans) = sampleSizeVector
+if(missing(theXrange))
+  theXrange = range(c(sapply(
+    densitiesOfMeans, function(density) range(density$x)) ))
+  theYrange = range(c(sapply(densitiesOfMeans, 
+                      function(density) range(density$y)) ))
+  colors = 1 + 1:length(sampleSizeVector)
+  chars = 1 + 1:length(sampleSizeVector)
+  for(i in 1:length(sampleSizeVector)) {
+    if(i==1)
+      plot(densitiesOfMeans[[i]],  type="b"
+           , col=colors[1], pch=chars[1]
+           , xlim=theXrange
+           , ylim=theYrange
+           , xlab="X=x"
+           , ylab="Density"
+           , main="" 
+           , ...
+      )
+    else points(densitiesOfMeans[[i]], type="b",
+                col=colors[i], pch=chars[i])
+  }
+  title(main=paste(distribution$family, "\n",
+      paste(names(distribution$extraArgs), 
+                          distribution$extraArgs,
+            sep = "=", collapse = ", ")))
+
+legend(x="topright",legend=sampleSizeVector,
+       col=colors, pch=chars)
+}
+```
+We'll jump to a new page now.
+For a pdf document, it's done with a **TeX** command,
+> \\newpage 
+
+and with an html document, it's done with an **HTML** command, 
+> <br>
+
+\newpage
+
+#The `r familyList[[1]]$family` family
+```{r}
+CLTdensityPlot(familyList[[1]])
+```
+
+
+
+For the `r familyList[[1]]$family` family,
+we see that the distribution of the mean converges to a normal distribution.
+
+Rerunning this chunk gives similar-looking results each time.
+\newpage
+
+#  For the `r familyList[[5]]$family` family:
+```{r}
+CLTdensityPlot(familyList[[5]], theXrange=c(-500, 500))
+```
+
+For the `r familyList[[5]]$family` family,
+we see that the distribution of the mean does NOT converge to a normal distribution, because the Cauchy distribution does not have a defined mean (and variance).
+
+Repeating this chunk will give very different results each time, because most of the action is far out on the tails.
+
