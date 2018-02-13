@@ -9,40 +9,56 @@ distribExpressions = list(
   cauchy = 'rcauchy(n*M)'
 )
 evaluateADistribution = 
-  function(X) {
-    n = Nlist[X]
+  function(whichSampleSize, distribution, standardize=FALSE,
+           adjust=1) {
+    sampleSize = Nlist[whichSampleSize]
     # We use "eval" to turn the strings into results.
-    simulations = eval(parse(text=distribExpressions[[distribName]]))
-    simdatasets = matrix(simulations, nrow=n)
+    simulations = eval(parse(text=distribExpressions[[distribution]]))
+    simdatasets = matrix(simulations, nrow=sampleSize)
     simMeans = apply(X = simdatasets, MARGIN = 2, FUN = mean)
-    density(simMeans, kernel="triangular", bw=0.02) 
+    if(standardize)
+      simMeans = (simMeans-mean(simMeans)) / sd(simMeans)
+    density(simMeans, kernel="triangular", adjust=adjust) 
     ### The bw argument changes the bandwidth to make it more narrow.
     #str(simdatasets)
     #str(simMeans)
     # summary(simMeans)
     # summary(colMeans(simdatasets))  ### same thing.
   }
-simulateCLT = function(distribName) {
+simulateCLT = function(distribName, standardize=FALSE, 
+                       theXranges, theYranges, adjust=1, ...) {
   theDensities = lapply(
     X = 1:length(Nlist), 
-    FUN = evaluateADistribution
+    FUN = evaluateADistribution,
+    standardize = standardize,
+    distribution = distribName
   )
-  theXranges = sapply(theDensities, function(theDensity) range(theDensity$x))
-  theYranges = sapply(theDensities, function(theDensity) range(theDensity$y))
+  if (missing(theXranges))
+    theXranges = sapply(theDensities, function(theDensity) range(theDensity$x))
+  if (missing(theYranges))
+    theYranges = sapply(theDensities, function(theDensity) range(theDensity$y))
   
-  for(i in 1:length(Nlist)) {
-    if(i==1)
-      plot(theDensities[[i]],  type="b", col=2, pch=as.character(i)
+  for(whichSampleSize in 1:length(Nlist)) {
+    if(whichSampleSize==1)
+      plot(theDensities[[whichSampleSize]],  type="b", 
+           col=2, pch=as.character(whichSampleSize)
            , xlim=c(min(theXranges),max(theXranges))
            , ylim=c(min(theYranges),max(theYranges)),
-           main = distribName
+           main = paste(distribName, '\n',
+            distribExpressions[[distribName]]),
+           ...=...
       )
-    else points(theDensities[[i]], type="b", col=i+1, pch=as.character(i))  
+    else points(theDensities[[whichSampleSize]], type="b", 
+                col=whichSampleSize+1, pch=as.character(whichSampleSize))  
   }
+  legend('topright', col=1:(length(Nlist)+1) , legend = c("n", Nlist),
+         pch=c("", as.character(1:length(Nlist))))
 }
 
 simulateCLT('binomial')
 simulateCLT('poisson')
 simulateCLT('exponential')
+simulateCLT('exponential', theXranges=c(0,3))
+simulateCLT('exponential', standardize = TRUE)
 simulateCLT('normal')
 simulateCLT('cauchy')
