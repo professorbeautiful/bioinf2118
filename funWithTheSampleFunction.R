@@ -50,4 +50,4 @@ birthdayProb(seq(10, 60, by=10)) ### Checks.
 birthdayProb(22:23)
 #Therefore 23 people is the minimum sized party for which the chance of duplicate birthday exceeds 1/2.
 
-plot(seq(10, 60, by=1), birthdayProb(seq(10, 60, by=1)) )
+plot(seq(2, 60), birthdayProb(seq(2, 60)), xlim=c(0,60), ylim=c(0,1))
