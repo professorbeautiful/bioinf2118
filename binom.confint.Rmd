@@ -1,3 +1,7 @@
+---
+output: html_document
+runtime: shiny
+---
 title: "Confidence intervals for a binomial"
 author: "Roger Day"
 date: "2/15/2018"
@@ -15,7 +19,7 @@ Compare to exact.  Here's a function that uses the duality between tests and con
 ```{r}
 binom.confint.new = 
 function(k, n, alpha=0.05, range=0:1, 
-		side=c("two", "upper", "lower"), traces=TRUE) {
+		side=c("two", "upper", "lower")) {
 	sideLetter = toupper(substring(side[1], 1, 1))
 	if(sideLetter=="T") {
 	  alphaUpper = alphaLower = alpha/2
@@ -80,30 +84,47 @@ NOTES
 ### A diagram showing the tail probabilities.
 
 ## First for the lower bound (upper tail):
-```{r}
-for(p_u in saved_p_u) {
-    plot(0:10, dbinom(0:10, 10, p_u)
-        ,type='h' 
-       , col=c('black','red')[1 + (0:10 >= 8)]
-       )
-  abline(v=p_u*10, col='green', lwd=4)
-  title(paste('P = ', p_u, '\n',
-              'upperTail=', 1-pbinom(8-1,10,p_u)))
-}
+```{r, echo=F}
+library(shiny)
+inputPanel(
+  numericInput(inputId = 'id_saved_p_u', label = "saved_p_u",value = 1, min = 1, max = length(saved_p_u)))
 
+renderPlot({
+  p_u = saved_p_u[input$id_saved_p_u]
+  # for(p_u in saved_p_u) {
+  plot(0:10, dbinom(0:10, 10, p_u)
+       ,type='h' 
+       , col=c('black','red')[1 + (0:10 >= 8)]
+  )
+  abline(v=p_u*10, col='green', lwd=4)
+  text(x = p_u*10, y = 0, labels = 'N * tested P', srt=90, 
+       pos=4, col='darkgreen', cex=2)
+  title(paste('tested P = ', p_u, '\n',
+              'upperTail=', 1-pbinom(8-1,10,p_u)))
+  points(8,0, pch=9, cex=2, xpd=NA, col='red')
+})
 ```
 
 ## Then for the upper bound (lower tail):
-```{r}
-for(p_l in saved_p_l) {
-    plot(0:10, dbinom(0:10, 10, p_l)
-        ,type='h' 
+```{r, echo=F}
+library(shiny)
+inputPanel(
+  numericInput(inputId = 'id_saved_p_l', label = "saved_p_l",value = 1, min = 1, max = length(saved_p_l)))
+
+renderPlot({
+  p_l = saved_p_l[input$id_saved_p_l]
+  # for(p_l in saved_p_l) {
+  plot(0:10, dbinom(0:10, 10, p_l)
+       ,type='h' 
        , col=c('black','red')[1 + (0:10 <= 8)]
-       )
+  )
   abline(v=p_l*10, col='green', lwd=4)
-  title(paste('P = ', p_l, '\n',
+  text(x = p_l*10, y = 0, labels = 'N * tested P', srt=90, 
+       pos=4, col='darkgreen', cex=2)
+  title(paste('tested P = ', p_l, '\n',
               'lowerTail=', pbinom(8,10,p_l)))
-}
+    points(8,0, pch=9, cex=2, xpd=NA, col='red')
+})
 
 ```
 
