@@ -1,0 +1,97 @@
+---
+title: "spellingSTATISTICS"
+author: "Roger Day"
+date: "1/22/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Suppose we pick ten letters from an infinite pile of scrabble tiles, and arrange them face down.  What's the probability that they spell STATISTICS?
+
+  
+  \[{p_S}{p_T}{p_A}{p_T}{p_I}{p_S}{p_T}{p_I}{p_C}{p_S} = p_S^3p_T^3p_A^{}p_I^2p_C^{} = \prod\limits_{j = 1}^{26} {p_j^{{m_j}}} \]
+  
+is the probability of getting the right letters in the right order, where $j$ is the position in the word, and $m_j$ is the count for each of the 26 letters.
+
+Suppose that each letter has chance 1/26--- sampling WITH REPLACEMENT. All $p_j$ = 1/26.
+
+
+```{r}
+ourword = "STATISTICS"
+wordLength = nchar(ourword)
+jointProbability = print( (1/26)^wordLength )
+```
+
+This is the *joint distribution* of two events.
+
+First, you need to select the right *number* of each letter. This is the multinomial probability:
+
+\[\Pr (\underset{\raise0.3em\hbox{$\smash{\scriptscriptstyle\thicksim}$}}{M}  = \underset{\raise0.3em\hbox{$\smash{\scriptscriptstyle\thicksim}$}}{m} ) = \left( {\begin{array}{*{20}{c}}
+  n \\ 
+  {\begin{array}{*{20}{c}}
+  {{m_1}}&{...}&{{m_{26}}} 
+\end{array}} 
+\end{array}} \right)p_1^{{m_1}}...p_{26}^{{m_{26}}} = \frac{{n!}}{{\prod\limits_{j = 1}^{26} {{m_j}!} }}\;\;\prod\limits_{j = 1}^{26} {p_j^{{m_j}}} \]
+
+is the probability of getting the right number of each letter. In this case, the required number of each letter is given by 
+
+```{r}
+byLetter = strsplit(ourword, split="")[[1]]
+letterTable = print(table(byLetter))
+letterFreq = rep(0, 26)
+names(letterFreq) = LETTERS
+letterFreq[names(letterTable)] = letterTable
+print(letterFreq)
+marginalProbability = dmultinom(
+  x = letterFreq, #size = 10, not necessary.
+  prob = rep(1/26, 26 ) )
+print(marginalProbability)
+
+```
+
+
+Next, given the right number of each letter, what is the conditional probability of putting the letters in the right order?
+Each permutation is equally likely, so this is the proportion of permutations which are correct:
+
+\[\frac{{\Pr ({\text{correct letter order}})}}{{\Pr (\underset{\raise0.3em\hbox{$\smash{\scriptscriptstyle\thicksim}$}}{M}  = \underset{\raise0.3em\hbox{$\smash{\scriptscriptstyle\thicksim}$}}{m} )}} = \frac{{\prod\limits_{j = 1}^{26} {p_j^{{m_j}}} }}{{\frac{{n!}}{{\prod\limits_{j = 1}^{26} {{m_j}!} }}\;\;\prod\limits_{j = 1}^{26} {p_j^{{m_j}}} }} = \frac{{\prod\limits_{j = 1}^{26} {{m_j}!} }}{{n!}}\]
+
+which is: 
+
+```{r}
+nDistinctLetters = length(letterTable)
+conditionalProbability = print(
+  prod(factorial(letterTable)) / 
+    factorial(wordLength)
+)
+```
+
+This makes sense, because
+  $n!$ is the total number of permutations of the $n$ slots, and the numerator $\prod\limits_{j = 1}^{26} {{m_j}!}$ is the number of permutations that match the correct slots for the word STATISTICS.
+   
+   
+Confirming on the boundary cases:
+
+* If the word had unique letters only, this would be only 1 permutation. 
+
+* If the word had just one letter repeated, it would be all n! permutations.
+
+
+
+
+Let's check our work:
+
+JOINT = MARGINAL * CONDITIONAL
+
+```{r}
+marginalProbability * conditionalProbability
+```
+
+Verify:
+```{r}
+jointProbability
+```
+
+

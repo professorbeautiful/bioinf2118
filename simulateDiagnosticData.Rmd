@@ -1,0 +1,84 @@
+Demonstration of the three diagnostic tables.
+====
+
+### Table 1: Probabilities of test result 
+This is the *model family*
+```{r}
+diagnosticModelFamily = rbind(c(0.95, 0.03, 0.02), 
+                   c(0.03, 0.95, 0.02)) 
+parameterSpace = c("healthy","sick")
+sampleSpace = c("negative","positive","indeterminate")
+dimnames(diagnosticModelFamily) = list(parameterSpace, sampleSpace)
+print(diagnosticModelFamily)
+```
+The sensitivity is `r diagnosticModelFamily["sick", "positive"]`.
+The specificity is `r diagnosticModelFamily["healthy", "negative"]`.
+
+Here are the likelihood ratios:
+```{r}
+LRexpressions = paste0(diagnosticModelFamily[1,], '/',
+                      diagnosticModelFamily[2,])
+options(digits=2)
+sapply (LRexpressions, function(ex) 
+        eval(parse(text=ex)) )
+```
+# Table 2: Joint probabilities
+Now we get Table 2 by multiplying each row by its probability.
+```{r}
+prior = c(0.9, 0.1)
+diagnosticJoint = matrix(prior, nrow=2, ncol=3) *
+                  diagnosticModelFamily
+print(diagnosticJoint)
+```
+
+### Table 3: conditional on the observations.
+```{r}
+normalize = function(x) x/sum(x)
+predictiveProbabilities = apply(diagnosticJoint, 2,
+                                normalize)
+###   "2" means columns  and "1" means rows.
+```
+
+
+### Simulating datasets from this joint distribution.
+```{r}
+sampleSize = 100
+```
+Each sample has `sampleSize` patients.
+
+```{r}
+simulateDiagnosticDatasets = function(ignoreMe=NULL){
+  simdata = rmultinom(1, sampleSize, diagnosticJoint)
+  simdata = matrix(simdata, nrow=2)
+  dimnames(simdata) = dimnames(diagnosticJoint) 
+  simdata
+}
+
+nReps = 1000
+library(plyr)
+samples = laply(1:nReps, simulateDiagnosticDatasets)
+str(samples)
+```
+(Note the use of $laply()$ in the package $plyr$. Worth learning about.)
+
+So *samples* is an **array** object, with 3 dimensions.
+We'll fancy it up a little now.
+```{r}
+dimnames(samples)[[1]] = 1:nReps
+names(dimnames(samples)) = c("rep number", "patient truth", "test")
+str(samples)
+```
+What is our term for "patient truth"? For "test"?
+
+Now let's look at the variability due just to chance.
+```{r}
+for (truth in parameterSpace) {
+  for (result in sampleSpace) {
+    print(paste("Truth=", truth, "  Result=", result))
+    print(summary(samples[ , truth, result]))
+    #     hist(samples[ , truth, result],
+    #          main = paste("Truth=", truth, "  Result=", result))
+  }
+}
+```
+

@@ -1,0 +1,113 @@
+---
+output: html_document
+---
+Supplement on the Wilcoxon two-sample test: exact vs approximate, & the effect of ties
+---
+
+When the data contain ties, the exact distribution of the statistic is much more difficult and the approximations are not good. This doesn’t matter much for P values > 0.001, but can be a huge effect for very very small P values. This matters a lot, because when there are many many comparisons (high-throughput biological data), small P values are frequent, including small P values generated just by chance.
+
+In this numerical experiment, we create a data set of many many features, and one binary label.
+The effects range widely from zero to 5 standard deviations.
+We round to 4 places, to see what the effect of ties might be.
+
+```{r}
+sampleSize = 120
+outcomeClass = rbinom(sampleSize, 1, 1/2)
+nFeatures = 300
+effectSizes = rnorm(nFeatures) * 2
+```
+```{r warning=FALSE}
+do.wilcoxes = function(Xrounded) {
+  X0 <- Xrounded[outcomeClass==0]
+  X1 <- Xrounded[outcomeClass==1]
+  data.frame(p.approx = wilcox.test(X0, X1)$p.value,
+             p.correct = wilcox.test(X0, X1, correct=T)$p.value,
+             p.exact = wilcox.test(X0, X1, exact=T)$p.value,
+             anyTied = length(unique(Xrounded)) < sampleSize 
+                  # not all unique.
+   )
+}
+#options.saved = options(warn=-1)
+p.values.list = lapply(effectSizes, function(effSize){
+  X = rnorm(sampleSize) + effSize*outcomeClass
+  Xrounded <<- round(X, digits=3)
+  do.wilcoxes(Xrounded)
+ }
+)
+#options(options.saved)
+```
+We suppressed the warning messages, using the chunk option **{r warning=FALSE}**.
+
+Now we combine the results.
+```{r}
+library(plyr)
+p.values.df = ldply(p.values.list)
+table(p.values.df$anyTied)
+
+```
+Note: plyr is a good library to know! In "ldply", the "l" means the input is a list, and the "d" means the output is a data frame.
+
+```{r,fig.height=4.5,fig.width=4.5}
+colors = c("red","darkgreen")[p.values.df$anyTied+1]  
+cex = (1:2)[p.values.df$anyTied+1]  
+pch = c("O", "T")[p.values.df$anyTied+1]  
+with(p.values.df, {
+    plot(p.correct, p.approx, log="xy", col=colors, pch=pch, cex=cex)
+    abline(a=0,b=1)
+    plot(p.exact, p.approx,log="xy", col=colors, pch=pch, cex=cex)
+    abline(a=0,b=1)
+  }
+)
+```
+
+The first plot shows that the "correct" and "approx" values are virtually identical for a sample size of 100. Note that "correct" does not mean what it says. It means only that a "continuity correction" for the normal approximation was applied, to adjust (roughtly) for the discreteness of the Wilcoxon test statistic.
+
+The second and third plots (green points) show that the exact P value is much smaller than the approximations, as the P value becomes quite small. This difference doesn’t matter much for P values > 0.001, but can be a huge effect for very very small P values.This matters *a lot*, because when there are many many comparisons (high-throughput biological data), small P values are frequent, including small P values generated just by chance.  
+
+
+
+When the data contain ties, the exact distribution of the statistic is much more difficult and wilcox.text will not do it. Instead it just puts out the approximation. (There is a warning message, but as noted above we have suppressed it.) 
+
+
+```{r}
+plot(effectSizes, p.values.df$p.approx, pch = pch, cex=1/2, col = colors, log='y')
+legend(x = 'topright', legend=c('ties', 'no ties'), c('T', 'O'), col=c('darkgreen', 'red'))
+plot(effectSizes, p.values.df$p.exact, pch = pch, cex=1/2, col = colors, log='y')
+legend(x = 'topright', legend=c('ties', 'no ties'), pch=c('T', 'O'), col=c('darkgreen', 'red'))
+
+```
+
+
+### Studying one data set.
+
+To illustrate, we create a data set with a pretty good effect size. We do a no-tie version and a version with a tie, almost identical.
+```{r}
+effSize = 2
+X = rnorm(sampleSize) + effSize*outcomeClass
+X[2] = X[1] + 0.0001
+do.wilcoxes(X)
+t(
+  sapply(6:0, function(digits) {
+    c(digits=digits, do.wilcoxes(round(X, digits=digits)))
+    }
+    )
+)
+```
+Now we will break the ties for the digits=3 dataset. That should give a more appropriately small P value.
+```{r}
+Xrounded3 = round(X, digits=3)
+do.wilcoxes(Xrounded3)
+which(duplicated(Xrounded3))
+ties = which(duplicated(Xrounded3))
+Xbrokentie = Xrounded3
+Xbrokentie[ties] = Xbrokentie[ties] + 1e-7
+do.wilcoxes(Xbrokentie)
+```
+So we have regained the power lost when the ability to do the exact permutation was lost.
+
+The 
+computing time increases dramatically due to *exact=TRUE*, when there are no ties. If there are ties, the option is ignored.
+```{r}
+unix.time(for(i in 1:20)do.wilcoxes(Xrounded3))
+unix.time(for(i in 1:20)do.wilcoxes(Xbrokentie))
+```

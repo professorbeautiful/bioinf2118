@@ -1,0 +1,103 @@
+---
+title: "Simple Bayes decision plots"
+author: "Roger Day"
+date: "January 12, 2015"
+output: html_document
+runtime: shiny
+---
+
+ 
+This "shiny app" shows Bayes expected loss for decisions 
+
+* "T": Treat
+* "W": Wait
+
+The default values for all parameters are:
+
+Parameter  | Default value
+---------  | -------------
+prevalence | 0.001
+sensitivity| 0.99
+specificity| 0.99
+Loss(Sick, Wait) |  1
+Loss(Healthy, Treat |  1
+
+The vertical blue lines occur at the default values.
+
+* Where the W line is below the T line, the better decision is `W`.
+* Where the T line is below the W line, the better decision is `T`.
+* Where (if) the W and T lines cross, the two decisions are equivalent, because they have the same Bayes expected loss:
+
+Bayes expected loss = $\rho$ = $\rho (a|X) = {E_{\theta |X}}(L(\theta ,a))$.
+
+
+**To make this document work, the file "simplebayesdecision.R" must be in the same folder. **
+This will make the function plot.simple.bayes() available,
+ through the line  `source("simplebayesdecision.R)"` in this document. You can explore the coding in this file on your own.)
+
+INTERACTIVE CONTROLS:
+
+* "Parameter to vary":  the parameter along the horizontal axis.
+* "Observation":  Either P for positive test, or N for negative test. Results are conditional on the observation.
+
+
+## Shiny Inputs and Outputs
+
+```{r, echo=FALSE}
+source("simplebayesdecision.R")
+```
+
+```{r, echo=FALSE}
+longparamnames = c("prevalence","sensitivity","specificity",
+               "Loss_given_S_and_W","Loss_given_H_and_T")
+paramArgDefaults = unlist(formals(plot.simple.bayes)[1:5])
+paramArgNames = names(paramArgDefaults)
+inputPanel(
+  selectInput("parameterInputID", label = "Parameter to vary:",
+              choices = longparamnames, selected = longparamnames[1]),
+  selectInput("dataInputID", label="Observation",
+              choices = c("P","N"), selected="P")
+  )
+
+renderPlot({
+  ## First, reset all parameters to their defaults.
+  sapply(paramArgNames, function(param) 
+    assign(param, paramArgDefaults[param], envir=.GlobalEnv))
+  ### Here pos=1 is the same as env=.GlobalEnv -- try search().
+  ### Now, swap in the vector for the selected parameter.
+  which.varies = which(input$parameterInputID == longparamnames)
+  cat(which.varies, longparamnames[which.varies], "  ",
+      paramArgNames[which.varies], "\n")
+  horiz.label = input$parameterInputID 
+  horiz.values = switch(paramArgNames[which.varies],
+                        L.SW=seq(0.5,20,1),
+                        L.HT=seq(0,1,0.05),
+                        prev=1/10^seq(0.5,4,0.1),
+                        sens=seq(0.1,1,.01),
+                        spec=seq(0.99,1,.0002))
+  #Save the default value, and reassign the vector of values
+  default.value = paramArgDefaults[which.varies]
+  # You need to use "assign"; we doncan't hard-code the variable name.
+  assign(paramArgNames[which.varies],
+         horiz.values)
+  cat(horiz.label, default.value, horiz.values, "\n")
+#  assign(input$parameterInputID, horiz.values)
+  E.loss = simple.bayes.vectorized(
+    prev, sens, spec, L.SW, L.HT, input$dataInputID)
+  print(E.loss)
+  E.loss.W = E.loss[ , 1]
+  E.loss.T = E.loss[ , 2]
+  plot(
+    c(horiz.values, horiz.values), c(E.loss.W, E.loss.T), pch=" ",
+    ylab="Bayes expected loss",
+    xlab=input$parameterInputID,
+    main=paste("Varying ", input$parameterInputID))
+  lines (horiz.values, E.loss.W, pch= "W", col="red", lwd=3)
+  lines (horiz.values, E.loss.T, pch= "T", col="green", lwd=3)
+  points(horiz.values, E.loss.W, pch= "W", col="red", lwd=3)
+  points(horiz.values, E.loss.T, pch= "T", col="green", lwd=3)
+  abline(v=default.value, lty=3, lwd=5, col="blue")
+  })
+```
+
+

@@ -1,0 +1,203 @@
+---
+title: "mcnemar exercise"
+author: "roger"
+date: "April 4, 2016"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Pasted from the table in document N16:
+```{r}
+printDetails <- FALSE
+pastedData <- "TRUTH:   disease present
+                       Test B is positive
+                       Test B is negative
+                       Test A is positive
+                       100
+                       17
+                       Test A is negative
+                       8
+                       15
+                       TRUTH:   disease absent
+                       Test B is positive
+                       Test B is negative
+                       Test A is positive
+                       14
+                       16
+                       Test A is negative
+                       22
+                       200"
+mcdata.orig <- strsplit(split = "\n", pastedData) [[1]]
+```
+Note that strsplit() always returns a LIST.  Thus the [[1]].
+
+Now we make it into a data array. (We need the package abind, because R base forgot to include the abind() function. along=3, or better rev.along=0, makes sure each component is treated as a slice.)
+
+```{r}
+mcdata.character.matrix <- matrix(mcdata.orig, ncol=3, byrow=T)
+library(abind)
+mcdata.character.array <- abind(mcdata.character.matrix[1:3, ], 
+                               mcdata.character.matrix[4:6, ],
+                               along=3)
+if(printDetails) print(mcdata.character.array)
+mcdata.array <- mcdata.character.array[ -1, -1,  ]
+mcdata.array <-  apply(mcdata.array, MARGIN = 1:3, as.numeric) # as.numeric does not work here! 8-(
+dimnames(mcdata.array) <- list(
+  A=c("Apos","Aneg"),  # ROW
+  B=c("Bpos","Bneg"),  # COLUMN
+  TRUTH=c("present","absent") # SLICE
+)	
+```
+### Possible data modifications go in this chunk!
+```{r}
+#mcdata.array[mcdata.array==16] = 36
+mcdata.array["Apos", "Bneg", "absent"] = 36  # originally 16
+mcdata.array["Apos", "Bneg", "present"] = 37 # originally 17
+```
+
+Now we will reshape it a "long skinny" data frame. That will be handy for some analyses.
+
+```{r}
+mcdata.df <- expand.grid(dimnames(mcdata.array))
+mcdata.df$count <- c(mcdata.array)
+if(printDetails) print(mcdata.df)
+```
+
+Now we can use mcdata.array and mcdata.df to test hypotheses.
+
+Hypothesis:  A is more likely to say "positive" than B.
+One approach: Just collapse over TRUTH:
+```{r}
+AposBneg <- mcdata.array["Apos", "Bneg", "present"] +
+  mcdata.array["Apos", "Bneg", "absent"]
+if(printDetails) print(AposBneg <- ### Alternative
+  sum(mcdata.df [mcdata.df$A=="Apos" & 
+               mcdata.df$B=="Bneg", "count"]))
+AposBneg <- sum(mcdata.array["Apos", "Bneg", ])
+```
+
+Here is the other marginalized diagonal:
+```{r}
+  AnegBpos <- sum(mcdata.array["Aneg", "Bpos", ])
+```
+
+McNemar test, using the binomial method:
+```{r}
+cat("McNemar Ptest_AMorePos = ", 
+         Ptest_AMorePos <- round(digits=3, 
+                            pbinom(AnegBpos, AposBneg+AnegBpos, 1/2)),
+      "\n")
+```
+Compare with mcnemar.test-- but careful, it's TWOSIDED.
+The apply() call is collapsing over the 3rd dimension (TRUTH).
+```{r}
+test_AMoreOrLessPos <- mcnemar.test(apply(mcdata.array, 1:2, sum) )  
+Ptest_AMoreOrLessPos <- test_AMoreOrLessPos$p.value
+```
+This is very limited, though. One test might be much better at agreeing with the truth when it's "present" but not when it's "absent".
+Another approach:  control for TRUTH by combining evidence.
+
+Hypothesis:  A is more likely to be CORRECT.
+There are several approaches.
+```{r}
+mcdata.combined <- mcdata.array[ , , 1] + mcdata.array[ 2:1, 2:1, 2]
+dimnames(mcdata.combined) <- list(c("Aright", "Awrong"), c("Bright", "Bwrong"))
+mcdata.combined
+Pvalue.combined = print(mcnemar.test(mcdata.combined))$p.value
+```
+
+We can also use our data frame structure:
+```{r}
+mcdata.df$Acorrect <- 
+  (mcdata.df$A=="Apos" & mcdata.df$TRUTH=="present") |
+  (mcdata.df$A=="Aneg" & mcdata.df$TRUTH=="absent") 
+mcdata.df$Bcorrect <- 
+  (mcdata.df$B=="Bpos" & mcdata.df$TRUTH=="present") |
+  (mcdata.df$B=="Bneg" & mcdata.df$TRUTH=="absent") 
+###  Collapsing over TRUTH:
+AcorrectBincorrect <- mcdata.df$Acorrect & 
+  ! mcdata.df$Bcorrect
+nAcorrectBincorrect <- sum(mcdata.df$count[AcorrectBincorrect])
+ABdisagree <- mcdata.df$Acorrect != mcdata.df$Bcorrect
+nABdisagree <- sum(mcdata.df$count[ABdisagree])
+cat("(collapsing) P = ",
+    1 - pbinom(nAcorrectBincorrect - 1, nABdisagree, 1/2), "\n")
+```
+This P is ONE-sided.
+Alternatively, using the array structure:
+```{r}
+mcdata.correctness <- mcdata.array[ , , 1] + t(mcdata.array[ , , 2])
+dimnames(mcdata.correctness) <-  list(A=c("correct", "incorrect"),
+                                     B=c("correct", "incorrect"))
+mcdata.correctness
+mcnemar.test(mcdata.correctness)  
+```
+Note the use of the transpose function t() to reflect the "absent" part of the array.
+
+If there is an imbalance in marginal for TRUTH. (and there is), 
+we should try controlling for TRUTH.
+The worry: if most cases are "absent", then B might be
+right more often just because B says "negative" more often.
+
+             pos vs neg  ------  A vs B
+
+                    \\            /
+
+                   present vs absent
+
+
+To define and predict "correctness", 
+ adjusting for propensity to say "positive",
+ we need to make a data set double the size.
+ Then we will use Poisson regression, via the function glm().
+```{r}
+mcdata2 <- rbind(mcdata.df, mcdata.df)
+mcdata2$test <- rep(c('A','B'), each=8)
+(mcdata2$correct <-  ifelse(mcdata2$test=="A", 
+                           mcdata2$Acorrect, mcdata2$Bcorrect))
+mcdata2 <- mcdata2[c('TRUTH','count','test','correct')]
+
+require("MASS")
+(glm.out.1 <- glm(data=mcdata2,  
+    correct ~ TRUTH + test, 
+    weights=count, 
+    family=poisson)	)
+summary(glm.out.1)
+```
+Now we include the interaction term.
+```{r}
+(glm.out.2 <- glm(data=mcdata2,  correct ~ TRUTH*test, weights=count, family=poisson) )	
+summary(glm.out.2)
+```
+
+## SUMMARY
+
+The data:
+```{r}
+mcdata.array
+```
+
+P value for HA:"A says positive more", via binomial test:
+```{r} 
+Ptest_AMorePos
+``` 
+
+P value for HA:"A or B says positive more", via chi-square test:
+```{r} 
+Ptest_AMoreOrLessPos
+```  
+
+P value for HA:"A and B differ in correctness":
+```{r}
+Pvalue.combined
+```
+Model fit controlling for Prob(positive | test):
+```{r} 
+summary(glm.out.1)$coef
+```
+Model fit controlling for Prob(positive | test) + interaction:
+```{r}
+summary(glm.out.2)$coef
+```
