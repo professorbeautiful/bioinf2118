@@ -9,7 +9,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-'%&%' = function(a,b) paste0(as.character(a),as.character(b))
+'%&%' = function(a,b)  paste0(as.character(a),as.character(b))
 ```
 
 See notes on testing variances.
@@ -18,20 +18,66 @@ We suppose six observations,  with sum of the squared deviations from the mean e
 
 and another 21 observations, with sum of squared deviations = 40.  
 
-The ratio of the two variance estimates is (30/(6-1)) / (40/(21-1)) = `r (30/(6-1)) / (40/(21-1))`. 
+Perhaps these are two difference measuring instruments $A$ and $B$, and we want to know if one is more accurate than the other. Their variances are $V_A$ and  $V_B$. Then
 
-The ratio of their square roots is sqrt(3) = `r sqrt(3)`.
+  \[{F_{obs}}\frac{{{V_B}}}{{{V_A}}} = \frac{{S_A^2/({n_A} - 1)}}{{S_B^2/({n_B} - 1)}}\frac{{{V_B}}}{{{V_A}}} = \frac{{(S_A^2/{V_A})/({n_A} - 1)}}{{(S_B^2/{V_B})/({n_B} - 1)}} { }   ~~ {\Large \tilde{}} ~~   F({n_A} - 1,{n_B} - 1)\]
+
+The ratio of the two variance estimates is $F_{obs}$ = (30/(6-1)) / (40/(21-1)) = `r (30/(6-1)) / (40/(21-1))`. If $V_A = V_B$, so that  $V_B/V_A = 1$ then it has a standard F distribution.
+
+ 
+
+### Estimation
+
+The ratio of the sample standard deviations is the ratio of their square roots:  sqrt(3) = `r sqrt(3)`.  The expectation of the F under the *null hypothesis* that the instruments have the same standard deviation is E(F) = 1/( (21-1 - 2)/(21-1) = `r 1/( (21-1 - 2)/(21-1) )`.   Not 1!
 
 
 ### Testing
 
 Could the 2 samples come from distributions with the same variance or not?  We use the F distribution.
 
+
 ```{r}
-curve(df(x,5,20), xlim=c(0,8), yaxs="i")
-curve(df(x,5,20), xlim=c(1/3,3), yaxs="i", add=T, type="h", col="green")
-curve(df(x,5,20), xlim=c(0,1/3), yaxs="i", add=T, type="h", col="red")
+curve(df(x,5,20), xlim=c(0,6), n=400, yaxs="i", ylab="density", main='df(x,5,20)')
+curve(df(x,5,20), xlim=c(0,6), yaxs="i", add=T, type="h", col="lightgrey")
+lines(c(3,3), c(0,df(3,5,20)), col="red", lwd=3)
+text(3, 0.1, expression(F[obs]), 
+     col="red")
+```
+
+We see the probability density at the observation $X = 3$.
+
+What should the "tail of surprise be"?
+
+### One-sided test
+
+If we only care if the first instrument is *less* accurate, then the "tail of surprise" is the set $X \ge 3$
+
+```{r}
+curve(df(x,5,20), xlim=c(0,6), yaxs="i", ylab="density", main='df(x,5,20)')
+curve(df(x,5,20), xlim=c(0,6), n=400, yaxs="i", add=T, type="h", col="lightgrey")
+lines(c(3,3), c(0,df(3,5,20)), col="red", lwd=3)
+text(3, 0.1, expression(F[obs]), 
+     col="red")
+curve(df(x,5,20), xlim=c(0,3), yaxs="i", add=T, type="h", col="green")
 curve(df(x,5,20), xlim=c(3,8), yaxs="i", add=T, type="h", col="red")
+text(3, 0.4, "  Tail: P-value =  
+      1 - pf(3,5,20)
+       = " %&% round(digits=3,  1 - pf(3,5,20)), 
+     col="red")
+```
+
+### Equally surprising if the variance ratio is > 3 or < 1/3.
+
+For this hypothesis, we add a lower "tail of surprise".
+
+```{r}
+curve(df(x,5,20), xlim=c(0,6), yaxs="i", ylab="density", main='df(x,5,20)')
+curve(df(x,5,20), xlim=c(1/3,3), n=400, yaxs="i", add=T, type="h", col="green")
+lines(c(3,3), c(0,df(3,5,20)), col="red", lwd=3)
+text(3, 0.1, expression(F[obs]), 
+     col="red")
+curve(df(x,5,20), xlim=c(0,1/3), yaxs="i", add=T, type="h", col="red")
+curve(df(x,5,20), xlim=c(3,6), yaxs="i", add=T, type="h", col="red")
 
 lines(c(1/3,1/3), c(0,df(1/3,5,20)), col="red")
 lines(c(3,3), c(0,df(3,5,20)), col="red")
@@ -41,7 +87,9 @@ text(3, 0.4, "  Tails:
        = " %&% round(digits=3, pf(1/3,5,20) + 1 - pf(3,5,20)), 
      col="red")
 ```
+
 The "tails of surprise" are:
+
 ```{r}
 cat("lower tail: ", pf(1/3,5,20) , "\n")
 cat("upper tail: ", 1 - pf(3,5,20) , "\n")
@@ -49,19 +97,45 @@ cat("both tails: ", pf(1/3,5,20) + 1 - pf(3,5,20) , "\n")
 ```
 So one kind of two-sided  P-value is `r pf(1/3,5,20) + 1 - pf(3,5,20)`.
 
+### Two-sided, but different test statistic
 
 If we use density as our test statistic, the lower tail boundary is
+
 ```{r}
 lowerboundary = uniroot(function(x) df(x,5,20)-df(3,5,20), 0:1)$root 
 cat("lowerboundary = ", lowerboundary, "\n")
 cat("lower tail: ", pf(lowerboundary,5,20) , "\n")
 cat("P = ", 1 - pf(3,5,20) + pf(lowerboundary,5,20), "\n")
 ```
+
+The picture now looks like this:
+
+```{r}
+curve(df(x,5,20), xlim=c(0,6), yaxs="i")
+curve(df(x,5,20), xlim=c(lowerboundary,3), yaxs="i", add=T, type="h", col="green")
+curve(df(x,5,20), xlim=c(0,lowerboundary), yaxs="i", add=T, type="h", col="red")
+curve(df(x,5,20), xlim=c(3,6), yaxs="i", add=T, type="h", col="red")
+
+lines(c(lowerboundary,lowerboundary), c(0,df(lowerboundary,5,20)), col="red")
+lines(c(3,3), c(0,df(3,5,20)), col="red")
+text(3, 0.4, paste("  Tails: 
+     pf(", round(lowerboundary,3), ",5,20) + 1 - pf(3,5,20)
+       = ", round(digits=3, pf(lowerboundary,5,20) + 1 - pf(3,5,20))), 
+     col="red")
+
+```
+
+
 which is far smaller!
 
 ### Confidence intervals
 
-A  confidence interval is obtained by requiring equal probability on each side.
+If the true ratio of the variances $V_B/V_A$ is not 1, then we can easily adjust the calculation to give a confidence interval, because then 
+
+\[
+{F_{obs}}\frac{{{V_B}}}{{{V_A}}} ~~ \tilde{} ~~ F({n_A} - 1,{n_B} - 1)\]
+
+One confidence interval is obtained by requiring equal probability on each side.
 Upper and lower 5% quantiles are:
 ```{r}
 lowerbound = 3/qf(0.95, 5, 20) 
@@ -71,7 +145,21 @@ Thus a confidence interval for the ratio of the variances is
 ```{r}
 (c(lowerbound, upperbound))
 ```
+
+
+See also the R function `var.test()`.
+
+
+### Moment estimators
+
 The moment estimator is 3\ *(20-2)/20 = `r 3*(20-2)/20`.
+
+But another moment estimator is based on the reciprical:
+
+1/( 1/3 *(5-2)/5  )= `r 1/( 1/3 *(5-2)/5  )`.
+
+
+### Density of F and 1/F (which is also an F!)
 
 Here we see the densities of the F for degrees of freedom (5,20) and (20,5). The vertical lines are at one and at the distribution mean.
 
@@ -84,4 +172,18 @@ curve(from=0, to=2,  df(x, dfF[1], dfF[2]), type="l", main=paste("df = ", dfF[1]
                                                                  "\nmean=", dfF[2], "/", (dfF[2]-2)), ylab="F density"); abline(v=c(1,dfF[2]/(dfF[2]-2)));
 }
 par(par.saved) ### reset.
+```
+
+### Comparison with var.test
+
+This code confirms the confidence interval we got. For a one-sided test, the function var.test confirms our P-value.
+For a two-sided test, the function var.test uses the "double the P-value" method.
+
+```{r}
+XA = rnorm(6)
+XA = XA/sd(XA)*sqrt(6)
+XB = rnorm(21)
+XB = XB/sd(XB)*sqrt(2)
+
+var.test(XA, XB, conf.level = .9)
 ```
