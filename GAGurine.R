@@ -3,11 +3,12 @@ data(GAGurine)
 ?GAGurine
 head(GAGurine)
 dim(GAGurine)
+names(GAGurine)
 summary(GAGurine$Age)
 summary(GAGurine$GAG)
 with(GAGurine, table(Age < median(Age), 
-                     GAG < median(GAG)),
-     dnn=c("Age<median", "GAG<median"))
+                     GAG < median(GAG),
+     dnn=c("Age<median", "GAG<median")) )
 
 ### Open a related article in the browser.
 if(regexpr("^win", version$os) == 1) {
