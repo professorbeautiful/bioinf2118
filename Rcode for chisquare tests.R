@@ -20,9 +20,11 @@ chisquareForEqualP.simulation = function(
 }
 
 simResult = chisquareForEqualP.simulation()
+simResult
+class(simResult)
 unclass(simResult)
 # This shows the actual elements of the return value.
-
+getS3method("print","htest")
 
 #################
 ####   From man page for chisq.test:
@@ -37,7 +39,7 @@ chisq.test(x, p = p,simulate.p.value = TRUE)$p.val
 
 ## Case B. Raw data
 x <- trunc(5 * runif(100))	# Tabulate it first!
-chisq.test(table(x))            # NOT 'chisq.test(x)'!
+chisq.test(table(x))        # NOT 'chisq.test(x)'!
 #
 #
 
