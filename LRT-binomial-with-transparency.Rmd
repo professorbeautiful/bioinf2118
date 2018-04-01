@@ -12,10 +12,14 @@ p1 = 0.4; p2 = 0.7
 X1 = 12; X2 = 28
 #X1 = rbinom(1, n1, p1); X2 = rbinom(1, n2, p2)
 source("addOpacity.R")
-symbols(1/2, 1/2, squares=1,  
-        bg=addOpacity("lightgreen",99), add=FALSE, inches=F,
-     xlab=expression(hat(p)[1]), xlim=0:1,
-     ylab=expression(hat(p)[2]), ylim=0:1)
+symbols(1/2, 1/2, #squares=1, has a bug.
+        rectangles = 
+          matrix(c(1,1), nrow=1),
+        bg=addOpacity("lightgreen", 99),
+        add=FALSE, inches=F,
+        xlab=expression(hat(p)[1]),
+        xlim=0:1, ylim=0:1,
+        ylab=expression(hat(p)[2]))
 abline(a=0,b=1, lty=2, col="red", lwd=3)
 points(c(X1/n1, (X1+X2)/(n1+n2)),
      c(X2/n2, (X1+X2)/(n1+n2)), cex=2,
