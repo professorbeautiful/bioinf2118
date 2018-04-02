@@ -64,7 +64,8 @@ power.at.muA = 1-pnorm(qnorm(1-alpha) -
 							muAlternative/(sigma/sqrt(n)))
 plot(muAlternative, power.at.muA, ylim=0:1)
 title(paste("sample size = ", n))
-text(6, 0.05, labels=expression(alpha))
+text(6, 0.05, labels=bquote(alpha == .(alpha)), pos=3, cex=2)
+text(3, 0.80, labels=bquote(1 - beta == 0.80), pos=3, cex=2)
 abline(h=c(0.05, 0.80))
 abline(h=0, lwd=2)
 
@@ -169,7 +170,7 @@ proportionRejected = mean(tTestStatistics > criticalValue)
 print(proportionRejected)
 ```
 
-On our dataset  with Xbar=6 roughly,  P-value is 
+On our dataset  with Xbar=6 roughly,  the test statistic and the P-value are 
 ```{r}
 cat("Test statistic is ", 
 	tTestStatistic(theDataset), "\n")
@@ -190,7 +191,10 @@ Aha, so the default is *alternative="two.sided"*.
 
 With a sample size of only n=10, the power is insufficient:
 ```{r}
-simulatedDataSets.muA.n10 = matrix(ncol=10,  rnorm(nreps*nRequired, muA, sigma))
+smallSampleSize = 10
+simulatedDataSets.muA.n10 = matrix(
+  ncol=smallSampleSize,
+  rnorm(nreps*smallSampleSize, muA, sigma))
 testStatistics.muA.n10 = apply(simulatedDataSets.muA.n10, 1, mean)
 testStatistics.muA.n10 = apply(simulatedDataSets.muA.n10, 1, tTestStatistic)
 proportionRejected.muA.n10 = mean(testStatistics.muA.n10 > criticalValue)
