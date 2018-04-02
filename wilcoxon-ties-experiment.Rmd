@@ -1,5 +1,14 @@
 ---
+title: "Supplement on the Wilcoxon two-sample test: exact vs approximate, & the effect of ties
+"
+author: "Roger Day"
+date: "3/13/2018"
 output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 ---
 Supplement on the Wilcoxon two-sample test: exact vs approximate, & the effect of ties
 ---
@@ -106,8 +115,8 @@ do.wilcoxes(Xbrokentie)
 So we have regained the power lost when the ability to do the exact permutation was lost.
 
 The 
-computing time increases dramatically due to *exact=TRUE*, when there are no ties. If there are ties, the option is ignored.
-```{r}
+computing time increases dramatically due to *exact=TRUE*, when there are no ties. If there are ties, the option is ignored. We suppress the warnings again.
+```{r warning=FALSE}
 unix.time(for(i in 1:20)do.wilcoxes(Xrounded3))
 unix.time(for(i in 1:20)do.wilcoxes(Xbrokentie))
 ```
