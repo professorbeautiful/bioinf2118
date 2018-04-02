@@ -50,7 +50,7 @@ prisonersPicnic.dataframe = prisonersPicnic.dataframe[c(
 with(prisonersPicnic.dataframe, 
      proportion[A.ate=="ate" & D.drank=="drank" & S.sick=="ok"])
 
-### Now re-order, so that the cycling is most rapid for E, next for D, slowest for S
+### Now re-order, so that the cycling is most rapid for A, next for D, slowest for S
 prisonersPicnic.dataframe = prisonersPicnic.dataframe[
   with(prisonersPicnic.dataframe, order(S.sick,D.drank,A.ate)), ]
 print(prisonersPicnic.dataframe)

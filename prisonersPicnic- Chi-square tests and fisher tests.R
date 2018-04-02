@@ -33,13 +33,14 @@ fisher.test(marginACdata)
 
 ###  What if the 3 variables ("features") are all unrelated?
 marginA = apply(prisonersPicnic.array, 1, sum)
-marginB = apply(prisonersPicnic.array, 2, sum)
-marginC = apply(prisonersPicnic.array, 3, sum) 
-prisonersPicnic.dataframe$Expected =
-  SAMPLE_SIZE * with(prisonersPicnic.dataframe,
-                     marginA[E.ate] * marginB[D.drank] * marginC[S.sick]
+marginD = apply(prisonersPicnic.array, 2, sum)
+marginS = apply(prisonersPicnic.array, 3, sum) 
+SAMPLE_SIZE = sum(prisonersPicnic.array.Observed)
+Expecteds = SAMPLE_SIZE * outer(outer(marginA,  marginD), marginS)
+SAMPLE_SIZE * with(prisonersPicnic.dataframe,
+                     marginA * marginD['drank'] * marginS
                      )
-sum(prisonersPicnic.dataframe$Expected)
+prisonersPicnic.dataframe$Expected = c(Expecteds)
 prisonersPicnic.dataframe$ObsMinusExp = prisonersPicnic.dataframe$Observed - prisonersPicnic.dataframe$Expected
 prisonersPicnic.dataframe$Residuals = 
   prisonersPicnic.dataframe$ObsMinusExp/sqrt(prisonersPicnic.dataframe$Expected)
