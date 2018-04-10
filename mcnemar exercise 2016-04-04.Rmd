@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 Pasted from the table in document N16:
 ```{r}
-printDetails <- FALSE
+printDetails <- TRUE
 pastedData <- "TRUTH:   disease present
                        Test B is positive
                        Test B is negative
@@ -143,7 +143,7 @@ right more often just because B says "negative" more often.
 
              pos vs neg  ------  A vs B
 
-                    \\            /
+                    \            /
 
                    present vs absent
 
