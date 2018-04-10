@@ -1,0 +1,109 @@
+---
+title: "eggs and the piercer"
+output: html_notebook
+---
+
+#8.4 in Dalgaard
+
+Reading the data.
+```{r}
+eggsTable = data.frame(
+  size=c('A','B','A','B'), piercer=c('N','N','Y','Y'),
+  total=c(54,200,60,70), 
+  broken=c(4,15,4,1), 
+  cracked=c(8,28,9,7))
+eggsTable$neither = eggsTable$total - eggsTable$broken - eggsTable$cracked
+eggsDF = expand.grid(size=c('A','B'),piercer=c('N','Y'),
+                    result=c('broken','cracked','neither'))
+eggsDF$n = c(eggsTable$broken, eggsTable$cracked, eggsTable$neither)
+eggsDF
+```
+```{r}
+eggsArray = array(eggsDF$n, 
+                  dim=c(2,2,3), 
+                  dimnames=list(
+                    size=c('A','B'),piercer=c('N','Y'),
+                    result=c('broken','cracked','neither')))
+eggsArray
+```
+
+First, let's look at the design; is it balanced with respect to size?
+
+```{r}
+sizeByPiercer = apply(eggsArray, 1:2, sum)
+testDesign = chisq.test(sizeByPiercer)
+cat("P = ", testDesign$p.value,'\n')
+testDesign$expected
+testDesign$observed
+testDesign$stdres
+```
+
+Highly imbalanced design.
+
+Is "size" a "risk factor"?
+```{r}
+resultBySize = apply(eggsArray, c(1,3), sum)
+testresultBySize = chisq.test( resultBySize)
+cat("P = ", testresultBySize$p.value,'\n')
+testresultBySize$expected
+testresultBySize$observed
+testresultBySize$stdres
+```
+
+Does the piercer affect broken-or-cracked?
+This test ignores size. That's probably OK, given the last result. 
+
+```{r}
+resultByPiercer = apply(eggsArray, 2:3, sum)
+testResultByPiercer = chisq.test( resultByPiercer)
+cat("P = ", testResultByPiercer$p.value,'\n')
+testResultByPiercer$expected
+testResultByPiercer$observed
+testResultByPiercer$stdres
+```
+
+Let's look for a "Simpson's Paradox".
+We will do the analysis separately for A and B.
+
+
+```{r}
+for(size in c('A','B')) {
+  resultByPiercerGivenSize = eggsArray[ size, , ]
+  testresultByPiercerGivenSize = chisq.test( resultByPiercerGivenSize)
+  cat("For size = ", size, ":\n")
+  cat("P = ", testresultByPiercerGivenSize$p.value,'\n')
+  cat("Fisher P = ", fisher.test(resultByPiercerGivenSize)$p.value,'\n')
+  print(testresultByPiercerGivenSize$expected)
+  print(testresultByPiercerGivenSize$observed)
+  print(testresultByPiercerGivenSize$stdres)
+}
+```
+
+
+
+```{r}
+glm(data=eggsDF, (result=="neither") ~ piercer,
+    family=poisson, weight=n)
+summary(.Last.value)
+glm(data=eggsDF, (result=="neither") ~ size + piercer,
+    family=poisson, weight=n)
+summary(.Last.value)
+## does the piercer affect broken | broken-or-cracked?
+glm(data=eggsDF, subset = (result!="neither"), 
+    formula=(result=="broken") ~ piercer,
+    family=poisson, weight=n)
+summary(.Last.value)
+eggsDFNotNeither = eggsDF[eggsDF$result!="neither", ]
+glm(data=eggsDFNotNeither, 
+    formula=(result=="broken") ~ size + piercer,
+    family=poisson, weight=n)
+summary(.Last.value)
+
+## By eyeball, it seems that possibly the "1" is low: 
+#  the pierce might decrease broken eggs among B (big) eggs only.
+#  To test this, we need interaction term. 
+glm(data=eggsDFNotNeither, 
+    (result=="broken") ~ size * piercer,
+    family=poisson, weight=n)
+summary(.Last.value)  ### Nope. nothing.
+```
