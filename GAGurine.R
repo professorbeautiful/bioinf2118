@@ -13,7 +13,7 @@ with(GAGurine, table(Age < median(Age),
 ### Open a related article in the browser.
 ### (GAG: glycosaminoglycans)
 GAGurineArticle =  #"http://rheumatology.oxfordjournals.org/content/50/suppl_5/v41.full"
-"https://academic.oup.com/rheumatology/article/50/suppl_5/v41/1778437"
+  "https://academic.oup.com/rheumatology/article/50/suppl_5/v41/1778437"
 if(regexpr("^win", version$os) == 1) {
   system(paste("start", GAGurineArticle))
 } else
