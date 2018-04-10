@@ -24,6 +24,7 @@ lm.out
 
 str(lm.out)
 names(lm.out)
+class(lm.out)
 cbind(lm.out$coef, c(beta0, beta1)); 
 ## two more ways to extract the coefficients:
 coef(lm.out);  coefficients(lm.out)
