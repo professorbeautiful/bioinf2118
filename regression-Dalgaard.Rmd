@@ -40,6 +40,7 @@ We can attach the thuesen data set, in lieu of including "data=" arguments.
 
 We fit the regression with lm(). We plot the regression line and the predicted values.
 
+Notice that the line wrapped in "try()" fails due to the missing value. But the following 3 lines do the job.
 
 ```{r}
 attach(thuesen)
@@ -55,9 +56,8 @@ lm.out <- lm(theFormula)
 abline(lm.out)
 abline(lm.out$coefficients, col='red', lty=3, lwd=3)
 
-##  The following line fails due to the missing value. 
 try(points(blood.glucose, predict(lm.out), col="blue", pch=2))
-##  But this works.
+
 missingShortVelocity = is.na(thuesen$short.velocity)
 points(blood.glucose[-which(missingShortVelocity)], predict(lm.out), col="blue", pch=2)
 ```
@@ -66,7 +66,6 @@ The first attempt to plot the predicted points fails due to the missing value. T
 
 
 Note the special method for abline() when the arg is an "lm" object.
-
 
 It seems that this is the right formula for the scientific question.  See the abstract above.
 
