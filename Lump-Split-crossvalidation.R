@@ -25,14 +25,17 @@ totalPenalty = function(weight, ...)
   leaveOneOut(weight=weight, feature='L', outcome='R', ...) +
   leaveOneOut(weight=weight, feature='L', outcome='N', ...)
 
-penaltyVector = sapply(weights, totalPenalty)
-# penaltyVector = sapply(weights, totalPenalty,
-#                        penalty= function(outcome, prediction)
+# LOSS: LEAST SQUARES
+# penaltyFunction = function(outcome, prediction)
 #                          switch(outcome, R=(1-prediction)^2, N=prediction^2))
-# penaltyVector = sapply(weights, totalPenalty,
-#                        penalty= function(outcome, prediction)
+# LOSS: EXPONENTIAL
+# penaltyFunction =  function(outcome, prediction)
 #                          exp(-switch(outcome, R=1, N=-1)*prediction))
+# LOSS: LOG LIKELIHOOD X (-1)
+penaltyFunction = function(outcome, prediction)
+  -log(dbinom((outcome=='R'), size = 1, prob=prediction))
 
+penaltyVector = sapply(weights, totalPenalty, penalty= penaltyFunction)
 
 savedPar <- par(mai = c(1.2, .8, .2, .8))
 # A numerical vector of the form c(bottom, left, top, right)
@@ -53,7 +56,7 @@ proportionOverall = sum(DLdata[ , 'R'])/sum(DLdata)
 proportionThisGroup =  sum(DLdata[ 'D', 'R'])/sum(DLdata['D', ])
 optimalPrediction = optimalWeight*proportionOverall + (1-optimalWeight)*proportionThisGroup
 cat('optimal prediction for dark = ', optimalPrediction, '\n')
-points(optimalWeight, totalPenalty(optimalWeight), col='red', pch=17, cex=2)
+points(optimalWeight, totalPenalty(optimalWeight, penalty=penaltyFunction), col='red', pch=17, cex=2)
 abline(h=min(penaltyVector),col='red')
 title('cross-validation optimum', 
       'split <----------------------------> lump')
