@@ -5,7 +5,7 @@ DLdata = matrix(c(3,5,2,90),nrow=2)
 dimnames(DLdata) = list(feature=c("D","L"), outcome=c("R","N"))
 DLlong = data.frame(expand.grid(dimnames(DLdata)))
 DLlong$n = c(DLdata)
-
+t(DLdata)
 leaveOneOut = function(weight=1/2, feature, outcome,
                        penalty = function(outcome, prediction)
                          switch(outcome, R=(1-prediction)^2, N=prediction^2)) {
@@ -14,7 +14,7 @@ leaveOneOut = function(weight=1/2, feature, outcome,
     smallerDataSet[feature=feature, outcome=outcome] - 1
   proportionOverall = sum(smallerDataSet[ , 'R'])/sum(smallerDataSet)
   proportionThisGroup =  sum(smallerDataSet[ feature, 'R'])/sum(smallerDataSet[feature, ])
-  prediction = weight*proportionOverall + (1-weight)*proportionThisGroup
+  prediction = weight*proportionThisGroup + (1-weight)*proportionOverall
   #penalty = 
   return(penalty(outcome, prediction) * DLdata[feature, outcome])
 }
@@ -26,22 +26,26 @@ totalPenalty = function(weight, ...)
   leaveOneOut(weight=weight, feature='L', outcome='N', ...)
 
 # LOSS: LEAST SQUARES
+penaltyFunction = function(outcome, prediction)
+                         switch(outcome, R=(1-prediction)^2, N=prediction^2)
 # penaltyFunction = function(outcome, prediction)
 #                          switch(outcome, R=(1-prediction)^2, N=prediction^2))
 # LOSS: EXPONENTIAL
 # penaltyFunction =  function(outcome, prediction)
 #                          exp(-switch(outcome, R=1, N=-1)*prediction))
 # LOSS: LOG LIKELIHOOD X (-1)
-penaltyFunction = function(outcome, prediction)
-  -log(dbinom((outcome=='R'), size = 1, prob=prediction))
+# penaltyFunction = function(outcome, prediction)
+#   -log(dbinom((outcome=='R'), size = 1, prob=prediction))
 
 penaltyVector = sapply(weights, totalPenalty, penalty= penaltyFunction)
 
+#####  plot with two vertical axes #####
 savedPar <- par(mai = c(1.2, .8, .2, .8))
 # A numerical vector of the form c(bottom, left, top, right)
 # which gives the margin size specified in inches.
 # Increasing the 4th entry allows room for a right-side label.
-plot(x=(weights<-seq(0,1,length=100)),
+weights<-seq(0,1,length=100)
+plot(x=weights,
      y=penaltyVector,
      xlab='weights',
      ylab="",
@@ -50,7 +54,7 @@ plot(x=(weights<-seq(0,1,length=100)),
 axis(1)
 axis(2, col='red', col.axis='red')
 mtext(text = 'penalty', side = 2, col='red',line=2)
-optimalWeight = weights[which(penaltyVector==min(penaltyVector))]
+optimalWeight = weights[which(penaltyVector==min(penaltyVector))]  [1]
 cat('optimalWeight = ', optimalWeight, '\n')
 proportionOverall = sum(DLdata[ , 'R'])/sum(DLdata)
 proportionThisGroup =  sum(DLdata[ 'D', 'R'])/sum(DLdata['D', ])
@@ -58,15 +62,18 @@ optimalPrediction = optimalWeight*proportionOverall + (1-optimalWeight)*proporti
 cat('optimal prediction for dark = ', optimalPrediction, '\n')
 points(optimalWeight, totalPenalty(optimalWeight, penalty=penaltyFunction), col='red', pch=17, cex=2)
 abline(h=min(penaltyVector),col='red')
-title('cross-validation optimum', 
-      'split <----------------------------> lump')
+title('cross-validation optimization', 
+      'lump <---------------------------------> split')
 
+#####  adding a right-hand-side vertical axis #####
 par(new=T)
-estimator = weights*0.08+(1-weights)*0.60
+estimator = weights*0.60+(1-weights)*0.08
 plot(weights, estimator, axes=F, type='l', lty=2,
-      col='darkgreen', ylab='')
+      col='darkgreen', ylab='', ylim=c(0.05, 0.60))
 axis(4, col='darkgreen', col.axis='darkgreen')
 mtext('estimate Pr(R|D)', side = 4, col='darkgreen', line = 2) 
 points(optimalWeight, estimator[which(weights==optimalWeight)], 
        col='darkgreen', pch=17, cex=2)
+text(0, 0.08, "0.08", col='darkgreen', adj=0)
+text(1, 0.60, "0.60", col='darkgreen', adj=1)
 par(savedPar)  # restore original plot settings
