@@ -1,12 +1,26 @@
 ---
 title: "Dr. Lump and Dr. Split duke it out"
 author: "Roger Day"
-date: "2018-04/01"
+date: \"`r date()`
 output: 
   html_notebook: 
     number_sections: yes
 runtime: shiny
 ---
+
+NAVIGATE:
+
+Top of the [Notebook](#notebook) .
+
+Let's run some code.
+
+
+
+```{r}
+cat('hello everybody\n')
+```
+
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -14,8 +28,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r, echo=FALSE}
-
-
 logit = function(p) log(p/(1-p))
 antilogit = function(x) 1 - 1/(1+exp(x))
 DLdata = matrix(c(3,5,2,90),nrow=2)
