@@ -3,10 +3,11 @@ title: "Testing shiny within a notebook"
 output: html_notebook
 runtime: shiny
 ---
-  
+
+### NAVBAR 
+
 
 ```{r}
-
 require(shiny)
 require(shinyBS)
 shinyDebuggingPanel::makeDebuggingPanelOutput(session)
@@ -34,7 +35,7 @@ renderText(input$mu0Input)
 ```
 
 And we see that the prior means are: 
-  ```{r}
+```{r}
 renderText(paste('mu0: ', input$mu0Input,  
                  'mu1: ', input$mu1Input))
 
