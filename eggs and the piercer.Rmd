@@ -120,9 +120,46 @@ Nope. nothing.
 
 ### The ANOVA approach, using MASS::loglm
 ```{r}
-eggsLoglin = loglin(table=eggsArray, margin=1:3)
-require(MASS)
-eggsAOV_HA = loglm(formula = result ~ piercer + size, data=eggsDF, weights= eggsDF$n)
+require(MASS)  ### Access to loglm()
+eggsLogLm = loglm(formula = (result) ~  size + piercer,
+                  data=eggsDF,
+                  subset=(result!='neither'))
+deviance(eggsLogLm)
+coef(eggsLogLm)
+fitted(eggsLogLm)
+eggsAOV_H0 = glm(formula = (result) ~  size, 
+                 family = 'binomial',
+                 data=eggsDF[(eggsDF$result!="neither"), ], 
+                 weights= n)
+eggsAOV_HA = glm(formula = result ~  piercer + size, 
+                 family = 'binomial',
+                 data=eggsDF[(eggsDF$result!="neither"), ], 
+                 weights= n)
+anova(eggsAOV_H0, eggsAOV_HA)
+deviance(eggsAOV_HA)
+  
+eggsAOV_HA = loglm(formula = result ~ piercer + size,
+                   data=eggsDF, subset=result!="neither",
+                   weights= n)
 summary(eggsAOV_HA)
 anova(eggsAOV_HA)
+formulas = list(
+  result ~ size,
+  result ~ size + piercer,
+  result ~ size * piercer)
+glmresults = lapply(formulas, function(form)
+  glm(formula=form,
+       weights= nn, family = 'binomial',
+       data=eggsDF, 
+       subset=(eggsDF$result!="neither") 
+       )
+)
+### having trouble just passing the args thru '...'.
+sapply(glmresults, '[[', "deviance")
+glmresultswithnames = glmresults
+names(glmresultswithnames) = sapply(formulas, capture.output)
+sapply(glmresultswithnames, '[[', "deviance")
+# anova(glmresults)  fails; does not take a list,
+# however this works:
+do.call(what = anova, args = glmresults )
 ```
