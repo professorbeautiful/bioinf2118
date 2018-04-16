@@ -12,6 +12,9 @@ NAVIGATE:
 
 Top of the [Notebook](#notebook) .
 
+[Reference on local anchors](https://stackoverflow.com/questions/5319754/cross-reference-named-anchor-in-markdown#7335259)
+
+
 Let's run some code.
 
 
