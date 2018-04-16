@@ -123,7 +123,17 @@ output$responseRates = renderText({
 shinyDebuggingPanel::makeDebuggingPanelOutput(session) 
 ```
 
-```{r}
+## Notebook <a name="notebookBegin">
+Goal: decide whether to treat "D" patients.
+
+We set the Bayesian joint prior, and compute the joint posterior.
+
+(This bivariate normal approximation on the logit scales is pretty good,
+except at or near zero counts.
+For this reason there is a "continuity fudge".
+)
+
+```{r notebookColumn}
 ##### UI components #####
 #### notebookColumn ####  
 notebookColumn =   
