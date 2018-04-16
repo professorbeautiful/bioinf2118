@@ -162,4 +162,7 @@ sapply(glmresultswithnames, '[[', "deviance")
 # anova(glmresults)  fails; does not take a list,
 # however this works:
 do.call(what = anova, args = glmresults )
+
+### Stepwise using AIC decides to drop everything!
+step(glmresults[[3]])
 ```
