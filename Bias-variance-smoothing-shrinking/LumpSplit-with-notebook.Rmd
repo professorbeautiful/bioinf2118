@@ -28,7 +28,7 @@ Go to [viewPlot](#viewPlot).
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 
@@ -142,18 +142,14 @@ output$thePlot = renderPlot(width=500, height=500,
                               par(mar=c(5,5,4,2) + 0.2)
                               plotPlightPdarkPosteriorReactive()
                             })
-
-output$responseRates = renderText({
-  paste(input$mRD, '/', input$mRD+input$mND, "for D, and ",
-        input$mRL, '/', input$mRL+input$mNL, "for L.")
-})
 ```
 
 ```{r makeDebuggingPanelOutput}
 shinyDebuggingPanel::makeDebuggingPanelOutput(session) 
 ```
 
-## Notebook <a name="notebookBegin">
+##  <a name="notebookBegin"> Notebook >/a>
+
 Goal: decide whether to treat "D" patients.
 
 We set the Bayesian joint prior, and compute the joint posterior.
@@ -195,6 +191,69 @@ shinyDebuggingPanel::withDebuggingPanel()
 Go to Top of the [Notebook](#notebookBegin) .
 
 ```{r}
+panelOfInputs = 
+  wellPanel(
+    checkboxInput(inputId= 'togglePanelOfInputs', 
+                  label = 'togglePanelOfInputs',value = TRUE),
+    conditionalPanel(
+      "input.togglePanelOfInputs",
+      wellPanel(
+        numericInput("phiInput", "prior variance | group (phi)", 
+                     value=0, min = 0.00, step=0.1),
+        numericInput("tauInput", "shared additional variance (tau)", 
+                     value=1, min = 0.00, step=0.1),
+        numericInput("mu0Input", "shared prior mean", 
+                     value=0.5, min = 0.001, step=0.1, max=0.999),
+        actionButton("lumpID", label = "Lump"),
+        actionButton("splitID", label = "Split"),
+        actionButton("mixedID", label = "Mixed")
+      ),
+      "X = observed response rate, ",
+      br(),
+      numericInput(inputId = 'fudgeFactor', 
+                   label = 'continuity fudge factor', value=1),
+      div(style="color:green", 
+          checkboxInput("checkPrior", 
+                        "Green = prior distribution",
+                        TRUE)),
+      div(style="color:red",
+          checkboxInput("checkPosterior", 
+                        "Red = posterior distribution",
+                        TRUE)),
+      "Shaded: 50% highest posterior region"
+    )
+  )
+```
+
+```{r}
+output$responseRates = renderText({
+  paste(input$mRD, '/', input$mRD+input$mND, "for D, and ",
+        input$mRL, '/', input$mRL+input$mNL, "for L.")
+})
+
+panelOfData = list(
+  h1("Data: Response by Predictor"),
+  checkboxInput('toggleShowData', 'Show/Hide the Data Panel', TRUE),
+  conditionalPanel(
+    'input.toggleShowData',
+    wellPanel(
+      splitLayout("", "Responders", "non-responders"),
+      splitLayout("Group 'L'",
+                  numericInput('mRL', 'mRL', DLdata[2,1]),
+                  numericInput('mNL', 'mNL', DLdata[2,2])
+      ),
+      splitLayout( "Group 'D'",
+                   numericInput('mRD', 'mRD', DLdata[1,1]),
+                   numericInput('mND', 'mND', DLdata[1,2])
+      ), 
+      textOutput(outputId = 'responseRates'),
+      hr()
+    )
+  )
+)
+```
+
+```{r}
 #### UI fluidPage####
 require(shinyBS)
 fluidPage(
@@ -203,54 +262,11 @@ fluidPage(
   titlePanel("Bias-variance-smoothing-shrinking"),
   #notebookColumn,
   
-  column(width = 8, 
-         h1("Response by Predictor"),
-         h2("Data"),
-         splitLayout("", "Responders", "non-responders"),
-         splitLayout("Group 'L'",
-                     numericInput('mRL', 'mRL', DLdata[2,1]),
-                     numericInput('mNL', 'mNL', DLdata[2,2])
-         ),
-         splitLayout( "Group 'D'",
-                      numericInput('mRD', 'mRD', DLdata[1,1]),
-                      numericInput('mND', 'mND', DLdata[1,2])
-         ), 
-         
-         br()
-  ),
+  column(width = 8, panelOfData),
   sidebarLayout(sidebarPanel = 
                   sidebarPanel(
-                    wellPanel(
-                      
-                      wellPanel(
-                        numericInput("phiInput", "prior variance | group (phi)", 
-                                     value=0, min = 0.00, step=0.1),
-                        numericInput("tauInput", "shared additional variance (tau)", 
-                                     value=1, min = 0.00, step=0.1),
-                        numericInput("mu0Input", "shared prior mean", 
-                                     value=0.5, min = 0.001, step=0.1, max=0.999),
-                        actionButton("lumpID", label = "Lump"),
-                        actionButton("splitID", label = "Split"),
-                        actionButton("mixedID", label = "Mixed")
-                      ),
-                      "X = observed response rate, ",
-                      br(),
-                      textOutput(outputId = 'responseRates'),
-                      numericInput(inputId = 'fudgeFactor', label = 'continuity fudge factor', value=1),
-                      div(style="color:green", 
-                          checkboxInput("checkPrior", 
-                                        "Green = prior distribution",
-                                        TRUE)),
-                      div(style="color:red",
-                          checkboxInput("checkPosterior", 
-                                        "Red = posterior distribution",
-                                        TRUE)),
-                      "Shaded: 50% highest posterior region"
-                    )
-                  )
-                ,
+                    panelOfInputs),
                 mainPanel = mainPanel(
-                  
                   br(),
                   tagAppendAttributes(
                     div(
