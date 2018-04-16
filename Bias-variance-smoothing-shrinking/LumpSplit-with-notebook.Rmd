@@ -8,20 +8,22 @@ output:
 runtime: shiny
 ---
 
+
 NAVIGATE:
 
-Top of the [Notebook](#notebook) .
+Possible solution to including a nav toc:
+
+https://github.com/sethen/markdown-include#markdown-include 
+https://shapeshed.com/setting-up-nodejs-and-npm-on-mac-osx/ 
+Downloaded it, but the SHA 256 doesn't match.
+
+Go to Top of the [Notebook](#notebookBegin) .
+Go to [Debugging](#debugging) .
+Go to [Code for the Plot](#plotCode).
+Go to [viewPlot](#viewPlot).
+
 
 [Reference on local anchors](https://stackoverflow.com/questions/5319754/cross-reference-named-anchor-in-markdown#7335259)
-
-
-Let's run some code.
-
-
-
-```{r}
-cat('hello everybody\n')
-```
 
 
 
@@ -30,7 +32,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-```{r, echo=FALSE}
+```{r initial values, echo=FALSE}
+
 logit = function(p) log(p/(1-p))
 antilogit = function(x) 1 - 1/(1+exp(x))
 DLdata = matrix(c(3,5,2,90),nrow=2)
@@ -38,13 +41,18 @@ dimnames(DLdata) = list(c("D","L"),c("R","N"))
 ColorForPrior="green";     
 ColorForPosterior="red";     
 ColorForLikelihood="black"
+```
 
+
+```{r server code}
 source("Plight-Pdark-posterior-new.R", local=TRUE)
 
 rValues = reactiveValues(tau = 1,  phi = 0.001, mu=0.5,
                          title_1='title 1',
                          DLdata = DLdata)
+```
 
+```{r plotPlightPdarkPosteriorReactive}
 plotPlightPdarkPosteriorReactive = reactive( {
   cat("PLOTTING   ")
   tau <- input$tauInput
@@ -62,6 +70,8 @@ plotPlightPdarkPosteriorReactive = reactive( {
     ",  mu0=", input$mu0Input 
   )
 })
+```
+```{r lumpReact}
 lumpReact = observe({
   if(length(input$lumpID) > 0) {
     cat("lumpID\n")
@@ -71,7 +81,9 @@ lumpReact = observe({
     rValues$title_2 <- "Prior belief:  P dark = P light "
   }
 })  
+```
 
+```{r updateDLdata}
 updateDLdata = observe({
   try({
     rValues$DLdata[1,1] = input$mRD
@@ -81,7 +93,9 @@ updateDLdata = observe({
   })
   cat('input$mRD', input$mRD, '\n')
 })
+```
 
+```{r}
 splitReact = observe({
   if(length(input$splitID) > 0) {
     cat("splitID\n")
@@ -91,6 +105,9 @@ splitReact = observe({
     rValues$title_2 <<- " P dark and P light are unrelated"
   }
 }) 
+```
+
+```{r mixedReact} 
 mixedReact = observe({
   if(length(input$mixedID) > 0) {
     cat("mixedID\n")
@@ -99,14 +116,22 @@ mixedReact = observe({
     rValues$title_2 <<- "Prior belief:  P dark is somewhat related to P light. "
   }
 })
+```
 
+```{r updateViews}
 updateViews = observe({
   updateNumericInput(session=session, inputId="tauInput", 
                      value = rValues$tau)
   updateNumericInput(session=session, inputId="phiInput", 
                      value = rValues$phi)
 })
+```
 
+#### <a name=plotCode> Code for the Plot! </a>
+
+Go to Top of the [Notebook](#notebookBegin) .
+
+```{r thePlot}
 output$title_1_ID = renderText({rValues$title_1})
 output$title_2_ID = renderText({rValues$title_2})
 output$title_3_ID = renderText({rValues$title_3})
@@ -122,7 +147,9 @@ output$responseRates = renderText({
   paste(input$mRD, '/', input$mRD+input$mND, "for D, and ",
         input$mRL, '/', input$mRL+input$mNL, "for L.")
 })
+```
 
+```{r makeDebuggingPanelOutput}
 shinyDebuggingPanel::makeDebuggingPanelOutput(session) 
 ```
 
@@ -135,6 +162,7 @@ We set the Bayesian joint prior, and compute the joint posterior.
 except at or near zero counts.
 For this reason there is a "continuity fudge".
 )
+
 
 ```{r notebookColumn}
 ##### UI components #####
@@ -153,8 +181,18 @@ notebookColumn =
          ))
 ```
 
+## <a name='debugging'>Debugging the shiny code</a>
+
+This tool allows direct computation of any R or JS.
+```{r withDebuggingPanel}
+shinyDebuggingPanel::withDebuggingPanel() 
+```
 
 
+
+## Bivariate prior/posterior plot <a name="prior-posterior">
+
+Go to Top of the [Notebook](#notebookBegin) .
 
 ```{r}
 #### UI fluidPage####
@@ -163,7 +201,6 @@ fluidPage(
   title  = 'Bias-variance-smoothing-shrinking', 
   # Application title
   titlePanel("Bias-variance-smoothing-shrinking"),
-  shinyDebuggingPanel::withDebuggingPanel(), 
   #notebookColumn,
   
   column(width = 8, 
@@ -223,6 +260,7 @@ fluidPage(
                     ),
                     style=
                       'text-align:center; font-size:large; font-weight:bold'),
+                  a(name='viewPlot'),
                   plotOutput(outputId = 'thePlot')
                 )
   )
