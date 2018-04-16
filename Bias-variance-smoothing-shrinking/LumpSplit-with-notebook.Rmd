@@ -119,6 +119,8 @@ output$responseRates = renderText({
   paste(input$mRD, '/', input$mRD+input$mND, "for D, and ",
         input$mRL, '/', input$mRL+input$mNL, "for L.")
 })
+
+shinyDebuggingPanel::makeDebuggingPanelOutput(session) 
 ```
 
 ```{r}
@@ -137,14 +139,19 @@ notebookColumn =
            h2("Splitting the groups")
          ))
 ```
+
+
+
+
 ```{r}
 #### UI fluidPage####
+require(shinyBS)
 fluidPage(
   title  = 'Bias-variance-smoothing-shrinking', 
   # Application title
   titlePanel("Bias-variance-smoothing-shrinking"),
-  
-  notebookColumn,
+  shinyDebuggingPanel::withDebuggingPanel(), 
+  #notebookColumn,
   
   column(width = 8, 
          h1("Response by Predictor"),
