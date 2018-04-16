@@ -108,7 +108,7 @@ output$title_1_ID = renderText({rValues$title_1})
 output$title_2_ID = renderText({rValues$title_2})
 output$title_3_ID = renderText({rValues$title_3})
 
-output$thePlot = renderPlot(width=700, height=700,
+output$thePlot = renderPlot(width=500, height=500,
                             {
                               par(mai=c(1.4,1.4,1.1,0.6))
                               par(mar=c(5,5,4,2) + 0.2)
