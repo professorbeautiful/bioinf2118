@@ -8,18 +8,18 @@ plotPlightPdarkPosterior = function(
 
   logit.hat = logit(apply(DLdata, 1, function(r)r[1]/sum(r)))
   varhat = apply(DLdata, 1, function(r)sum(1/r))
-  if(any(abs(logit.hat) == Inf) | addFudge){
-    DLdataFudged = DLdata + fudgeFactor  # if needed, if any zero cells.
-    logit.hat.fudged = logit(apply(DLdataFudged, 1, function(r)r[1]/sum(r)))
-    varhat.fudged = apply(DLdataFudged, 1, function(r)sum(1/r))
-    logit.hat = logit.hat.fudged
-    varhat = varhat.fudged
-  }
+  if(any(DLdata==0)) fudgeFactor = max(fudgeFactor, 0.001)
+    # if wanted, or if needed (if any zero cells).
+  DLdataFudged = DLdata + fudgeFactor  
+  logit.hat.fudged = logit(apply(DLdataFudged, 1, function(r)r[1]/sum(r)))
+  varhat.fudged = apply(DLdataFudged, 1, function(r)sum(1/r))
   ### deltat method with protection from zero's.
   sig11 = sig12 = sig21 = matrix(c(tau+phi,tau,tau,tau+phi),nrow=2)  
   sig22 = sig11 + diag(varhat)   ## marginal variance of the data?
   logit.prior.mean = c(mu0, mu0)
-  postmean.logit = logit.prior.mean + sig12%*%solve(sig22) %*% (logit.hat-logit.prior.mean) 
+  ## always use fudged here:
+  postmean.logit = logit.prior.mean + 
+    sig12%*%solve(sig22) %*% (logit.hat.fudged-logit.prior.mean) 
   postmean.p = antilogit(postmean.logit)
   postvar.logit = sig11 - sig12%*%solve(sig22)%*%sig21
   ####################
@@ -84,7 +84,8 @@ plotPlightPdarkPosterior = function(
 #       lines(c(D1, D1, D2, D2), c(L1, L2, L2, L1), col= ColorForLikelihood)
 #      }
 #  }
-  points(antilogit(logit.hat)[1], antilogit(logit.hat)[2],	pch = "X", cex=3)
+  points(antilogit(logit.hat)[1], antilogit(logit.hat)[2],	
+         pch = "X", cex=3)
   mtext(text = paste("posterior mean for Pr(R | D) = ",
                      round(digits=4, postmean.p[1])),
         side=3, cex=2,
