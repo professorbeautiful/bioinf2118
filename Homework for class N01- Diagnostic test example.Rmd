@@ -1,6 +1,8 @@
 ---
-title: "Homework for class N01: Diagnostic test example"
-output: html_notebook
+title: 'Homework for class N01: Diagnostic test example'
+output:
+  html_document:
+    df_print: paged
 ---
 
 # Homework for class N01.
@@ -18,9 +20,10 @@ if(length(previousAnswerVariables) > 0) rm(list=previousAnswerVariables)
 Table1_data = diagnosticModelFamily = 
   rbind(c(0.95, 0.03, 0.02), 
         c(0.03, 0.95, 0.02)) 
-parameterSpace = c("healthy","sick")
-sampleSpace = c("negative","positive","indeterminate")
-dimnames(diagnosticModelFamily) = list(parameterSpace, sampleSpace)
+parameterSpace = thetaValues = c("healthy","sick")
+sampleSpace = Xvalues = c("negative","positive","indeterminate")
+dimnames(diagnosticModelFamily) = dimnames(Table1_data) = 
+  list(theta=parameterSpace, X=sampleSpace)
 print(diagnosticModelFamily)
 ```
 
@@ -28,7 +31,7 @@ print(diagnosticModelFamily)
 (Replace NULL with your answer, in this chunk.)
 
 ```{r}
-Answer1a = NULL
+Answer1a = 'theta'
 ```
 Here are the row sums (could be informative!):
 
@@ -43,7 +46,23 @@ print(colSums(Table1_data))
 Don't just calculate them.  Write a function to do it.
 
 ```{r}
-Answer1b = NULL
+SensitivitySpecificity = function(
+  diagnosticModelFamily = Table1_data
+) {
+  diagnosticModelFamilyCollapsed = cbind(
+    diagnosticModelFamily[ , 1], 
+    rowSums(diagnosticModelFamily[ , -1])
+  ) 
+  dimnames(diagnosticModelFamilyCollapsed)[[2]] = 
+    c('negative','pos or ind')
+  sens = diagnosticModelFamilyCollapsed[2,2]
+  sens = diagnosticModelFamilyCollapsed['sick', 'pos or ind']
+  spec = diagnosticModelFamilyCollapsed['healthy', 'negative']
+  return(c(sensitivity=sens, specificity=spec))  
+}
+
+Answer1b = SensitivitySpecificity()
+Answer1b
 ```
 
 
