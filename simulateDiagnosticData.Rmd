@@ -22,7 +22,7 @@ options(digits=2)
 sapply (LRexpressions, function(ex) 
         eval(parse(text=ex)) )
 ```
-# Table 2: Joint probabilities
+### Table 2: Joint probabilities
 Now we get Table 2 by multiplying each row by its probability.
 ```{r}
 prior = c(0.9, 0.1)
@@ -72,12 +72,13 @@ What is our term for "patient truth"? For "test"?
 
 Now let's look at the variability due just to chance.
 ```{r}
+par(mfcol=c(3,2))
 for (truth in parameterSpace) {
   for (result in sampleSpace) {
     print(paste("Truth=", truth, "  Result=", result))
     print(summary(samples[ , truth, result]))
-    #     hist(samples[ , truth, result],
-    #          main = paste("Truth=", truth, "  Result=", result))
+    hist(samples[ , truth, result],
+         main = paste("Truth=", truth, "  Result=", result))
   }
 }
 ```
