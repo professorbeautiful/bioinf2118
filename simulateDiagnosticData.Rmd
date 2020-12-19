@@ -16,11 +16,15 @@ The specificity is `r diagnosticModelFamily["healthy", "negative"]`.
 
 Here are the likelihood ratios:
 ```{r}
-LRexpressions = paste0(diagnosticModelFamily[1,], '/',
-                      diagnosticModelFamily[2,])
-options(digits=2)
-sapply (LRexpressions, function(ex) 
-        eval(parse(text=ex)) )
+# Oooh, the complicated way!
+# LRexpressions = paste0(diagnosticModelFamily[1,], '/',
+#                       diagnosticModelFamily[2,])
+# options(digits=2)
+# sapply (LRexpressions, function(ex) 
+#         eval(parse(text=ex)) )
+# The easy way:
+diagnosticModelFamily[1,] /
+  diagnosticModelFamily[2,]
 ```
 ### Table 2: Joint probabilities
 Now we get Table 2 by multiplying each row by its probability.
