@@ -1,7 +1,6 @@
 ---
 title: "Simple Bayes decision plots"
 author: "Roger Day"
-date: "January 12, 2015"
 output: html_document
 runtime: shiny
 ---
@@ -39,7 +38,6 @@ INTERACTIVE CONTROLS:
 source("simplebayesdecision.R")
 ```
 
-paramArgDefaults = NULL
 The default values and plotting ranges for all parameters are:
 
 ```{r, echo=FALSE}
@@ -48,6 +46,11 @@ longparamnames = c(prev="prevalence",
                L.SW="Loss_given_S_and_W",
                L.HT="Loss_given_H_and_T")
 paramArgDefaults = unlist(formals(plot.simple.bayes)[1:5])
+###  a few alterations...
+paramArgDefaults['prev'] = 0.1
+paramArgDefaults['sens'] = 0.95
+paramArgDefaults['spec'] = 0.95
+
 paramArgNames = names(paramArgDefaults)
 paramPlotRangeDefaults = c(
                         prev='1/10^seq(0.5,4,0.1)',
@@ -68,6 +71,7 @@ inputPanel(
                'specificity default',
                value = paramArgDefaults['spec'],
                min = 0, max=1, step = 0.01),
+  br(),
   numericInput('L.SWDefault',
                'Loss Sick&Wait default',
                value = paramArgDefaults['L.SW'],
@@ -76,7 +80,7 @@ inputPanel(
                'Loss Healthy&Treat default',
                value = paramArgDefaults['L.HT'],
                min = 0, max=1, step = 0.01),
-  br(),
+  br(),br(),
   selectInput("parameterInputID", label = "Parameter to vary:",
               choices = longparamnames, 
               selected = longparamnames[1]),
@@ -85,7 +89,12 @@ inputPanel(
   )
 
 renderPlot({
-  ## First, reset all parameters to their defaults.
+  ## First, set all parameters to their defaults.
+    paramArgDefaults['prev'] = input$prevalenceDefault
+  paramArgDefaults['sens'] = input$sensitivityDefault
+  paramArgDefaults['spec'] = input$specificityDefault
+  paramArgDefaults['L.SW'] = input$L.SWDefault
+  paramArgDefaults['L.HT'] = input$L.HTDefault
   sapply(paramArgNames, function(param) 
     assign(param, paramArgDefaults[param], envir=.GlobalEnv))
   ### Here pos=1 is the same as env=.GlobalEnv -- try search().
@@ -103,19 +112,20 @@ renderPlot({
   )
   horiz.values = horiz.value.list[[which.varies]]
   #Save the default value, and reassign the vector of values
-  paramArgDefaults['prev'] = input$prevalenceDefault
-  paramArgDefaults['sens'] = input$sensitivityDefault
-  paramArgDefaults['spec'] = input$specificityDefault
-  paramArgDefaults['L.SW'] = input$L.SWDefault
-  paramArgDefaults['L.HT'] = input$L.HTDefault
+
   default.value = paramArgDefaults[which.varies]
   # You need to use "assign"; we doncan't hard-code the variable name.
-  assign(paramArgNames[which.varies],
+  cat ('paramArgNames[which.varies] ',
+       paramArgNames[which.varies], '\n')
+  assign(which.varies,
          horiz.values)
-  cat(horiz.label, default.value, horiz.values, "\n")
+  cat(horiz.label, 'default VALUE=',
+      default.value, '\nvalues\n', 
+      horiz.values, "\n")
   #  assign(input$parameterInputID, horiz.values)
   E.loss = simple.bayes.vectorized(
     prev, sens, spec, L.SW, L.HT, input$dataInputID)
+  cat('E.loss', '\n')
   print(E.loss)
   E.loss.W = E.loss[ , 1]
   E.loss.T = E.loss[ , 2]
@@ -126,9 +136,9 @@ renderPlot({
     main=paste("Varying ", input$parameterInputID))
   lines (horiz.values, E.loss.W, pch= "W", col="red", lwd=3)
   lines (horiz.values, E.loss.T, pch= "T", col="green", lwd=3)
-  points(horiz.values, E.loss.W, pch= "W", col="red", lwd=3)
-  points(horiz.values, E.loss.T, pch= "T", col="green", lwd=3)
-  abline(v=default.value, lty=3, lwd=5, col="blue")
+  points(horiz.values, E.loss.W, pch= "W", col="red", cex=4)
+  points(horiz.values, E.loss.T, pch= "T", col="green", cex=4)
+  abline(v=default.value, lty=3, lwd=10, col="blue")
   })
 ```
 
