@@ -93,7 +93,7 @@ renderPlot({
   which.varies = names(longparamnames)[which(input$parameterInputID == longparamnames)]
   cat(which.varies, '- ',
       longparamnames[which.varies], "--  ",
-      paramArgNames, "\n")
+       "\n")
   horiz.label = input$parameterInputID 
   horiz.value.list = sapply(
     names(paramPlotRangeDefaults),
