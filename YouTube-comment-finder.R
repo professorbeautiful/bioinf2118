@@ -1,6 +1,6 @@
 ### YouTube-comment-finder.R
 
-# install.packages('vosonSML')
+install.packages('vosonSML')
 require('vosonSML')
 youtube_key <- 'AIzaSyARyZoMghXUtqJGG6iGr7NG3EpJgnVNYs0'
 
@@ -10,12 +10,12 @@ credential = Authenticate(socialmedia = 'youtube',
 ## boreal-augury-270315
 ## dKklcL1WNec   Hughes and Tyson
 # HQrfbPAoHW8   -- Banuelos comment
+
 comments = Collect(credential, 
-        videoIDs='dKklcL1WNec', 
+        videoIDs='pWlk1gLkF2Y', 
         verbose = TRUE,
         writeToFile = FALSE, 
         maxComments = 1000)
-
 sum(comments$AuthorDisplayName == 'ProfessorBeautiful')
 ## 5
 mine = which(comments$AuthorDisplayName == 'ProfessorBeautiful')
