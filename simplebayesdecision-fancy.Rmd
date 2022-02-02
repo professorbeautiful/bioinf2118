@@ -184,8 +184,8 @@ renderPlot({
     substr(input$dataInputID, 1, 1) )
   cat('E.loss', '\n')
   print(E.loss)
-  E.loss.T = E.loss[ , 1]
-  E.loss.W = E.loss[ , 2]
+  E.loss.W = E.loss[ , 1]
+  E.loss.T = E.loss[ , 2]
   plot(
     c(horiz.values, horiz.values), 
     c(E.loss.T, E.loss.W), 
@@ -193,10 +193,14 @@ renderPlot({
     ylab="Bayes expected loss",
     xlab=input$parameterInputID,
     main=paste("Varying ", input$parameterInputID))
-  lines (horiz.values, E.loss.W, pch= "W", col="red", lwd=3)
-  lines (horiz.values, E.loss.T, pch= "T", col="green", lwd=3)
-  points(horiz.values, E.loss.W, pch= "W", col="red", cex=4)
-  points(horiz.values, E.loss.T, pch= "T", col="green", cex=4)
+  Wbetter = 1 + (E.loss.W < E.loss.T) 
+  colorWbetter = c('red', 'green')[Wbetter]
+  Tbetter = 1 + (E.loss.W > E.loss.T) 
+  colorTbetter = c('red', 'green')[Tbetter]
+  lines (horiz.values, E.loss.W, pch= "W", col=colorWbetter, lwd=3)
+  lines (horiz.values, E.loss.T, pch= "T", col=colorTbetter, lwd=3)
+  points(horiz.values, E.loss.W, pch= "W", col=colorWbetter, cex=2*Wbetter)
+  points(horiz.values, E.loss.T, pch= "T", col=colorTbetter, cex=2*Tbetter)
   abline(v=default.value, lty=3, lwd=10, col="blue")
   })
   
