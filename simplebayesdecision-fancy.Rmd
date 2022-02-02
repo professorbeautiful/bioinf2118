@@ -47,7 +47,8 @@ paramArgDefaults['sens'] = 0.95
 paramArgDefaults['spec'] = 0.95
 
 paramArgNames = names(paramArgDefaults)
-paramPlotRangeDefaults = c(
+paramPlotRange = 
+  paramPlotRangeDefaults = c(
                         prev='1/10^seq(0.5,4,0.1)',
                         sens='seq(0.1,1,.01)',
                         spec='seq(0.99,1,.0002)',
@@ -111,7 +112,6 @@ fluidPage(
 ```
 
 * "__Parameter to vary__":  the parameter along the horizontal axis.
-
 The vertical blue line occurs at the default value.
 
 * "__Observation__":  Either $P$ for positive test, or $N$ for negative test. Bayes expected loss for the two actions $T$ and $W$ is conditional on the observation.
@@ -156,6 +156,14 @@ renderPlot({
   paramArgDefaults['L.HT'] = input$L.HTDefault
   sapply(paramArgNames, function(param) 
     assign(param, paramArgDefaults[param], envir=.GlobalEnv))
+  paramPlotRange['prev'] = input$prevalenceRange
+  paramPlotRange['sens'] = input$sensitivityRange
+  paramPlotRange['spec'] = input$specificityRange
+  paramPlotRange['L.SW'] = input$L.SWRange
+  paramPlotRange['L.HT'] = input$L.HTRange
+  # sapply(paramArgNames, function(param) 
+  #   assign(param, paramPlotRange[param], envir=.GlobalEnv))
+  assign('paramPlotRange', paramPlotRange, envir=.GlobalEnv)
   ### Here pos=1 is the same as env=.GlobalEnv -- try search().
   ### Now, swap in the vector for the selected parameter.
   which.varies = names(longparamnames)[which(input$parameterInputID == longparamnames)]
@@ -164,15 +172,15 @@ renderPlot({
        "\n")
   horiz.label = input$parameterInputID 
   horiz.value.list = sapply(
-    names(paramPlotRangeDefaults),
+    names(paramPlotRange),
     function(the.rangeName)
       eval(parse(text=
-                   paramPlotRangeDefaults[
+                   paramPlotRange[
                      the.rangeName]))
   )
   horiz.values = horiz.value.list[[which.varies]]
+  
   #Save the default value, and reassign the vector of values
-
   default.value = paramArgDefaults[which.varies]
   # You need to use "assign"; we can't hard-code the variable name.
   cat ('paramArgNames[which.varies] ',
@@ -221,6 +229,30 @@ renderPlot({
   abline(v=default.value, lty=3, lwd=10, col="blue")
   })
   
+```
+
+```{r, echo=F}
+
+
+fluidPage(
+  fluidRow(
+    splitLayout(
+      textInput('prevalenceRange',
+                   'prevalence axis',
+                   value = paramPlotRange['prev']),
+      textInput('sensitivityRange',
+                   'sensitivity axis',
+                   value = paramPlotRange['sens']),
+      textInput('specificityRange',
+                   'specificity axis',
+                   value = paramPlotRange['spec']),
+      textInput('L.SWRange',
+                   'Loss S&Waxis',
+                   value = paramPlotRange['L.SW']),
+      textInput('L.HTRange',
+                   'Loss H&Taxis',
+                   value = paramPlotRange['L.HT'])
+)))
 ```
 
 
