@@ -190,7 +190,8 @@ renderPlot({
   print(E.loss)
   E.loss.W = E.loss[ , 1]
   E.loss.T = E.loss[ , 2]
-  plot(
+  #https://stackoverflow.com/questions/3778084/how-to-adjust-the-size-of-y-axis-labels-only-in-r
+  plot(cex.axis=2, cex.lab=2,
     c(horiz.values, horiz.values), 
     c(E.loss.T, E.loss.W), 
     pch=" ",
