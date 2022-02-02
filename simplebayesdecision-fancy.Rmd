@@ -86,7 +86,7 @@ fluidPage(
     " "
   
   )),
-  br(),
+  br(), br(),
   fluidRow(splitLayout(
     numericInput('L.SWDefault',
                  'Loss Sick&Wait ',
@@ -108,7 +108,9 @@ fluidPage(
 #)
 ```
 
-* "__Parameter to vary__":  the parameter along the horizontal axis. The vertical blue line occurs at the default value.
+* "__Parameter to vary__":  the parameter along the horizontal axis.
+
+The vertical blue line occurs at the default value.
 
 * "__Observation__":  Either $P$ for positive test, or $N$ for negative test. Bayes expected loss for the two actions $T$ and $W$ is conditional on the observation.
 
