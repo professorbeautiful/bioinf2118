@@ -192,7 +192,9 @@ renderPlot({
     pch=" ",
     ylab="Bayes expected loss",
     xlab=input$parameterInputID,
-    main=paste("Varying ", input$parameterInputID))
+    main=paste(
+      "X = ", input$dataInputID,
+      "   Varying ", input$parameterInputID))
   Wbetter = 1 + (E.loss.W < E.loss.T) 
   colorWbetter = c('red', 'green')[Wbetter]
   Tbetter = 1 + (E.loss.W > E.loss.T) 
