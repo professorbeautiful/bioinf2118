@@ -55,40 +55,43 @@ paramPlotRangeDefaults = c(
                         L.HT='seq(0,1,0.05)')
 
 
-#fluidPage(  
 
-  inputPanel(
-  br(),
-  numericInput('prevalenceDefault',
-               'prevalence ',
-               value = paramArgDefaults['prev'],
-               min = 0, max=1, step = 0.01),
-  numericInput('sensitivityDefault',
-               'sensitivity',
-               value = paramArgDefaults['sens'],
-               min = 0, max=1, step = 0.01),
-  numericInput('specificityDefault',
-               'specificity',
-               value = paramArgDefaults['spec'],
-               min = 0, max=1, step = 0.01),
-  br(),
-  numericInput('L.SWDefault',
-               'Loss Sick&Wait ',
-               value = paramArgDefaults['L.SW'],
-               min = 0, max=1, step = 0.01),
-  numericInput('L.HTDefault',
-               'Loss Healthy&Treat ',
-               value = paramArgDefaults['L.HT'],
-               min = 0, max=1, step = 0.01),
-  
-  br(),br(),
-  selectInput("parameterInputID", 
-              label = "Parameter to vary:",
-              choices = longparamnames, 
-              selected = longparamnames[1]),
-  selectInput("dataInputID", label="Observation",
-              choices = c("P","N"), selected="P")
-  )
+fluidPage(
+  fluidRow(
+    splitLayout(
+      numericInput('prevalenceDefault',
+                   'prevalence ',
+                   value = paramArgDefaults['prev'],
+                   min = 0, max=1, step = 0.01),
+      numericInput('sensitivityDefault',
+                   'sensitivity',
+                   value = paramArgDefaults['sens'],
+                   min = 0, max=1, step = 0.01),
+      numericInput('specificityDefault',
+                   'specificity',
+                   value = paramArgDefaults['spec'],
+                   min = 0, max=1, step = 0.01)
+    )),
+  fluidRow(splitLayout(
+    numericInput('L.SWDefault',
+                 'Loss Sick&Wait ',
+                 value = paramArgDefaults['L.SW'],
+                 min = 0, max=1, step = 0.01),
+    numericInput('L.HTDefault',
+                 'Loss Healthy&Treat ',
+                 value = paramArgDefaults['L.HT'],
+                 min = 0, max=1, step = 0.01)
+    ,
+  # )),
+  # fluidRow(splitLayout(
+    selectInput("parameterInputID", 
+                label = "Parameter to vary:",
+                choices = longparamnames, 
+                selected = longparamnames[1]),
+    selectInput("dataInputID", label="Observation",
+                choices = c("P","N"), selected="P")
+  ))
+)
 #)
 ```
 
