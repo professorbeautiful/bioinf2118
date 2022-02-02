@@ -73,23 +73,36 @@ fluidPage(
                    min = 0, max=1, step = 0.01)
     )),
   fluidRow(splitLayout(
+    span(strong("Prior odds:",
+                textOutput('priorOdds'))),
+    " ", 
+    selectInput("dataInputID", label="Observation X",
+                choices = c("Positive","Negative"),
+                selected="Positive"),
+    " ",
+    span(strong("Posterior odds given ",
+                textOutput('observation'),
+                textOutput('postOdds'))),
+    " "
+  
+  )),
+  br(),
+  fluidRow(splitLayout(
     numericInput('L.SWDefault',
                  'Loss Sick&Wait ',
                  value = paramArgDefaults['L.SW'],
-                 min = 0, max=1, step = 0.01),
+                 min = 0, max=10, step = 0.1),
     numericInput('L.HTDefault',
                  'Loss Healthy&Treat ',
                  value = paramArgDefaults['L.HT'],
-                 min = 0, max=1, step = 0.01)
+                 min = 0, max=10, step = 0.1)
     ,
   # )),
   # fluidRow(splitLayout(
     selectInput("parameterInputID", 
                 label = "Parameter to vary:",
                 choices = longparamnames, 
-                selected = longparamnames[1]),
-    selectInput("dataInputID", label="Observation",
-                choices = c("P","N"), selected="P")
+                selected = longparamnames[1])
   ))
 )
 #)
@@ -102,7 +115,34 @@ fluidPage(
 
 
 ```{r echo=FALSE} 
+output$observation = renderText(
+  paste("X =", input$dataInputID))
 
+output$priorOdds = renderText(
+  as.character(signif(
+    digits=2,
+    input$prevalenceDefault /
+      (1-input$prevalenceDefault)
+  ))
+)
+output$postOdds = renderText( {
+  priorOdds = input$prevalenceDefault /
+    (1-input$prevalenceDefault) 
+  LR = switch(
+    input$dataInputID,
+    Positive = 
+      input$sensitivityDefault / 
+      (1 - input$specificityDefault),
+    Negative = 
+      (1-input$sensitivityDefault) /
+      input$specificityDefault
+  )
+  postOdds = priorOdds * LR
+  as.character(
+    signif(digits=2, postOdds
+  ))
+  })
+    
 renderPlot({
   ## First, set all parameters to their defaults.
   paramArgDefaults['prev'] = input$prevalenceDefault
@@ -140,7 +180,8 @@ renderPlot({
       horiz.values, "\n")
   #  assign(input$parameterInputID, horiz.values)
   E.loss = simple.bayes.vectorized(
-    prev, sens, spec, L.SW, L.HT, input$dataInputID)
+    prev, sens, spec, L.SW, L.HT, 
+    substr(input$dataInputID, 1, 1) )
   cat('E.loss', '\n')
   print(E.loss)
   E.loss.T = E.loss[ , 1]
