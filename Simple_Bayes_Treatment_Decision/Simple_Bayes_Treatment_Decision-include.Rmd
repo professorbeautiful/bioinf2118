@@ -1,0 +1,20 @@
+This "shiny app" shows Bayes expected loss for decisions 
+
+* "T": Treat
+* "W": Wait
+
+
+
+The vertical blue lines occur at the default values.
+
+* Where the W line is below the T line, the better decision is `W`.
+* Where the T line is below the W line, the better decision is `T`.
+* Where (if) the W and T lines cross, the two decisions are equivalent, because they have the same Bayes expected loss:
+
+Bayes expected loss = $\rho$ = $\rho (a|X) = {E_{\theta |X}}(L(\theta ,a))$.
+
+INTERACTIVE CONTROLS:
+
+* "Parameter to vary":  the parameter along the horizontal axis.
+* "Observation":  Either P for positive test, or N for negative test. Results are conditional on the observation.
+

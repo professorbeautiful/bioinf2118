@@ -1,44 +1,39 @@
 ---
 title: "Simple Bayes decision plots"
-author: "Roger Day"
 output: html_document
 runtime: shiny
 ---
 
  
-This "shiny app" shows Bayes expected loss for decisions 
+### Using Bayes expected loss to support a medical decision. 
 
-* "T": Treat
-* "W": Wait
+### Actions to choose from:
 
+* $T$: Treat
+* $W$: Wait ("Watchful Waiting")
 
+### Bayes expected loss for action $A$ = $\rho$ = $\rho (A|X) = {E_{\theta |X}}(Loss(\theta, A))$.
 
-The vertical blue lines occur at the default values.
+* $\rho (T|X) = Loss(Healthy, Treat) \times Pr(Healthy | X)$
 
-* Where the W line is below the T line, the better decision is `W`.
-* Where the T line is below the W line, the better decision is `T`.
-* Where (if) the W and T lines cross, the two decisions are equivalent, because they have the same Bayes expected loss:
-
-Bayes expected loss = $\rho$ = $\rho (a|X) = {E_{\theta |X}}(L(\theta ,a))$.
+* $\rho (W|X) = Loss(Sick, Wait) \times Pr(Sick | X)$
 
 
-**To make this document work, the file "simplebayesdecision.R" must be in the same folder. **
-This will make the function plot.simple.bayes() available,
- through the line  `source("simplebayesdecision.R)"` in this document. You can explore the coding in this file on your own.)
+### Best decisions  (Bayes rule):
 
-INTERACTIVE CONTROLS:
-
-* "Parameter to vary":  the parameter along the horizontal axis.
-* "Observation":  Either P for positive test, or N for negative test. Results are conditional on the observation.
+* Where the $W$ line is below the $T$ line, the better decision is $W$.
+* Where the $T$ line is below the $W$ line, the better decision is $T$.
+* Where (if) the $W$ and $T$ lines cross, the two decisions are equivalent, because they have the same Bayes expected loss.
 
 
-## Shiny Inputs and Outputs
+### You can change the default values here.
+
 
 ```{r, echo=FALSE}
 source("simplebayesdecision.R")
 ```
 
-The default values and plotting ranges for all parameters are:
+
 
 ```{r, echo=FALSE}
 longparamnames = c(prev="prevalence", 
@@ -58,39 +53,56 @@ paramPlotRangeDefaults = c(
                         spec='seq(0.99,1,.0002)',
                         L.SW='seq(0.5,20,1)',
                         L.HT='seq(0,1,0.05)')
-inputPanel(
+
+
+#fluidPage(  
+
+  inputPanel(
+  br(),
   numericInput('prevalenceDefault',
-               'prevalence default',
+               'prevalence ',
                value = paramArgDefaults['prev'],
                min = 0, max=1, step = 0.01),
   numericInput('sensitivityDefault',
-               'sensitivity default',
+               'sensitivity',
                value = paramArgDefaults['sens'],
                min = 0, max=1, step = 0.01),
   numericInput('specificityDefault',
-               'specificity default',
+               'specificity',
                value = paramArgDefaults['spec'],
                min = 0, max=1, step = 0.01),
   br(),
   numericInput('L.SWDefault',
-               'Loss Sick&Wait default',
+               'Loss Sick&Wait ',
                value = paramArgDefaults['L.SW'],
                min = 0, max=1, step = 0.01),
   numericInput('L.HTDefault',
-               'Loss Healthy&Treat default',
+               'Loss Healthy&Treat ',
                value = paramArgDefaults['L.HT'],
                min = 0, max=1, step = 0.01),
+  
   br(),br(),
-  selectInput("parameterInputID", label = "Parameter to vary:",
+  selectInput("parameterInputID", 
+              label = "Parameter to vary:",
               choices = longparamnames, 
               selected = longparamnames[1]),
   selectInput("dataInputID", label="Observation",
               choices = c("P","N"), selected="P")
   )
+#)
+```
+
+* "__Parameter to vary__":  the parameter along the horizontal axis. The vertical blue line occurs at the default value.
+
+* "__Observation__":  Either $P$ for positive test, or $N$ for negative test. Bayes expected loss for the two actions $T$ and $W$ is conditional on the observation.
+
+
+
+```{r echo=FALSE} 
 
 renderPlot({
   ## First, set all parameters to their defaults.
-    paramArgDefaults['prev'] = input$prevalenceDefault
+  paramArgDefaults['prev'] = input$prevalenceDefault
   paramArgDefaults['sens'] = input$sensitivityDefault
   paramArgDefaults['spec'] = input$specificityDefault
   paramArgDefaults['L.SW'] = input$L.SWDefault
@@ -108,13 +120,14 @@ renderPlot({
     names(paramPlotRangeDefaults),
     function(the.rangeName)
       eval(parse(text=
-                   paramPlotRangeDefaults[the.rangeName]))
+                   paramPlotRangeDefaults[
+                     the.rangeName]))
   )
   horiz.values = horiz.value.list[[which.varies]]
   #Save the default value, and reassign the vector of values
 
   default.value = paramArgDefaults[which.varies]
-  # You need to use "assign"; we doncan't hard-code the variable name.
+  # You need to use "assign"; we can't hard-code the variable name.
   cat ('paramArgNames[which.varies] ',
        paramArgNames[which.varies], '\n')
   assign(which.varies,
@@ -127,10 +140,12 @@ renderPlot({
     prev, sens, spec, L.SW, L.HT, input$dataInputID)
   cat('E.loss', '\n')
   print(E.loss)
-  E.loss.W = E.loss[ , 1]
-  E.loss.T = E.loss[ , 2]
+  E.loss.T = E.loss[ , 1]
+  E.loss.W = E.loss[ , 2]
   plot(
-    c(horiz.values, horiz.values), c(E.loss.W, E.loss.T), pch=" ",
+    c(horiz.values, horiz.values), 
+    c(E.loss.T, E.loss.W), 
+    pch=" ",
     ylab="Bayes expected loss",
     xlab=input$parameterInputID,
     main=paste("Varying ", input$parameterInputID))
@@ -140,6 +155,7 @@ renderPlot({
   points(horiz.values, E.loss.T, pch= "T", col="green", cex=4)
   abline(v=default.value, lty=3, lwd=10, col="blue")
   })
+  
 ```
 
 
