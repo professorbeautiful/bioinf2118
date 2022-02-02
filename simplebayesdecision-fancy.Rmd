@@ -195,14 +195,24 @@ renderPlot({
     main=paste(
       "X = ", input$dataInputID,
       "   Varying ", input$parameterInputID))
-  Wbetter = 1 + (E.loss.W < E.loss.T) 
-  colorWbetter = c('red', 'green')[Wbetter]
-  Tbetter = 1 + (E.loss.W > E.loss.T) 
-  colorTbetter = c('red', 'green')[Tbetter]
-  lines (horiz.values, E.loss.W, pch= "W", col=colorWbetter, lwd=3)
-  lines (horiz.values, E.loss.T, pch= "T", col=colorTbetter, lwd=3)
-  points(horiz.values, E.loss.W, pch= "W", col=colorWbetter, cex=2*Wbetter)
-  points(horiz.values, E.loss.T, pch= "T", col=colorTbetter, cex=2*Tbetter)
+  Wbetter = (E.loss.W < E.loss.T - 1e-2) 
+  Tbetter = (E.loss.W > E.loss.T + 1e-2) 
+  WbetterPlusOne = 1 + (E.loss.W < E.loss.T) 
+  TbetterPlusOne = 1 + (E.loss.W > E.loss.T) 
+  colorW = c('red', 'green')[WbetterPlusOne]
+  colorT = c('red', 'green')[TbetterPlusOne]
+  colorT[!(Wbetter | Tbetter)] = 
+    colorW[!(Wbetter | Tbetter)] = 'blue'
+  cexT = c(1,4)[TbetterPlusOne]
+  cexW = c(1,4)[WbetterPlusOne]
+  cexT[!(Wbetter | Tbetter)] = 
+    cexW[!(Wbetter | Tbetter)] = 0
+  # lines (horiz.values, E.loss.W, col=colorWbetter, lwd=3)
+  # lines (horiz.values, E.loss.T, col=colorTbetter, lwd=3)
+  points(horiz.values, E.loss.W, pch= "W",
+         col=colorW, cex=cexW)
+  points(horiz.values, E.loss.T, pch= "T",
+         col=colorT, cex=cexT)
   abline(v=default.value, lty=3, lwd=10, col="blue")
   })
   
