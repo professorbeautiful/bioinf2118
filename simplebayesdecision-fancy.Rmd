@@ -78,7 +78,8 @@ fluidPage(
     " ", 
     selectInput("dataInputID", label="Observation X",
                 choices = c("Positive","Negative"),
-                selected="Positive"),
+                selected="Positive",
+                selectize=FALSE),
     " ",
     span(strong("Posterior odds given ",
                 textOutput('observation'),
@@ -86,7 +87,7 @@ fluidPage(
     " "
   
   )),
-  br(), br(),
+  br(),
   fluidRow(splitLayout(
     numericInput('L.SWDefault',
                  'Loss Sick&Wait ',
@@ -102,7 +103,8 @@ fluidPage(
     selectInput("parameterInputID", 
                 label = "Parameter to vary:",
                 choices = longparamnames, 
-                selected = longparamnames[1])
+                selected = longparamnames[1],
+                selectize=FALSE)
   ))
 )
 #)
