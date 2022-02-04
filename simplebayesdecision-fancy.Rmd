@@ -73,22 +73,23 @@ controls = list(
                    value = paramArgDefaults['spec'],
                    min = 0, max=1, step = 0.01)
     )),
-  fluidRow(splitLayout(
-    span(strong("Prior odds:",
-                textOutput('priorOdds'))),
-    " ", 
-    selectInput("dataInputID", label="Observation X",
-                choices = c("Positive","Negative"),
+  fluidRow(
+    column(2, span(strong(
+      "Prior odds:",
+      textOutput('priorOdds')))),
+    column(5, selectInput(
+      "dataInputID",
+      label="Observation X",
+      choices = c("Positive","Negative"),
                 selected="Positive",
-                selectize=FALSE),
-    " ",
-    span(strong("Posterior odds given ",
-                textOutput('observation'),
-                textOutput('postOdds'))),
-    " "
-  
+                selectize=FALSE)),
+    column(5,
+    span(strong("Posterior odds  ",br(),
+                 textOutput(
+                  'observation'),
+                textOutput('postOdds')))
   )),
-  br(),
+  hr(),
   fluidRow(splitLayout(
     numericInput('L.SWDefault',
                  'Loss Sick&Wait ',
@@ -108,7 +109,6 @@ controls = list(
                 selectize=FALSE)
   ))
 )
-assign('controls', controls, pos=1)
 
 ```
 
@@ -121,7 +121,7 @@ The vertical blue line occurs at the default value.
 
 ```{r echo=FALSE} 
 output$observation = renderText(
-  paste("X =", input$dataInputID))
+  paste("given X =", input$dataInputID))
 
 output$priorOdds = renderText(
   as.character(signif(
@@ -148,7 +148,7 @@ output$postOdds = renderText( {
   ))
   })
     
-renderPlot({
+thePlot = renderPlot({
   ## First, set all parameters to their defaults.
   paramArgDefaults['prev'] = input$prevalenceDefault
   paramArgDefaults['sens'] = input$sensitivityDefault
@@ -235,7 +235,7 @@ renderPlot({
 ```{r, echo=F}
 
 
-plotDisplay = list(
+plotAxisControls = list(
   fluidRow(
     splitLayout(
       textInput('prevalenceRange',
@@ -256,9 +256,10 @@ plotDisplay = list(
 )))
 
 fluidPage(
+  
   fluidRow(
-    column(6, controls),
-    column(6, plotDisplay)
+    column(5, controls, plotAxisControls),
+    column(7, thePlot)
   )
 )
 
