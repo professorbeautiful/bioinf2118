@@ -57,7 +57,7 @@ paramPlotRange =
 
 
 
-fluidPage(
+controls = list(
   fluidRow(
     splitLayout(
       numericInput('prevalenceDefault',
@@ -108,7 +108,8 @@ fluidPage(
                 selectize=FALSE)
   ))
 )
-#)
+assign('controls', controls, pos=1)
+
 ```
 
 * "__Parameter to vary__":  the parameter along the horizontal axis.
@@ -234,7 +235,7 @@ renderPlot({
 ```{r, echo=F}
 
 
-fluidPage(
+plotDisplay = list(
   fluidRow(
     splitLayout(
       textInput('prevalenceRange',
@@ -253,6 +254,15 @@ fluidPage(
                    'Loss H&Taxis',
                    value = paramPlotRange['L.HT'])
 )))
+
+fluidPage(
+  fluidRow(
+    column(6, controls),
+    column(6, plotDisplay)
+  )
+)
+
+
 ```
 
 
