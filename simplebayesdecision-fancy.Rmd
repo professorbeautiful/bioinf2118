@@ -58,7 +58,7 @@ paramPlotRange =
 
 
 controls = list(
-  h3("Defaults"),
+  h3("Scenario"),
   wellPanel(
   fluidRow(
     splitLayout(
@@ -85,35 +85,63 @@ controls = list(
                  value = paramArgDefaults['L.HT'],
                  min = 0, max=10, step = 0.1)
     ,
+    selectInput(
+      "dataInputID",
+      label=HTML("Observation<br> (X)"),
+      choices = c("Positive","Negative"),
+      selected="Positive",
+      selectize=FALSE)
+  )),
     selectInput("parameterInputID", 
                 label = HTML(
-                  "Horizontal<br> axis"),
+                  "Horizontal axis"),
                 choices = longparamnames, 
                 selected = longparamnames[1],
                 selectize=FALSE)
-  ))
-  ),
-  h3("Observation and odds"),
-  wellPanel(
+  )
+)
+
+#### predictiveValueDisplay ####
+predictiveValueDisplay = list(
+        h3(style='align:center', 'Predictive values'),
+      fluidRow(
+        column(6, span(strong(
+          "Pr(Sick given Positive):",
+          em(textOutput('predValuePos'))))
+        ),
+        column(6, span(strong(
+          "Pr(Healthy given Negative):",
+          em(textOutput('predValueNeg'))))
+
+)))
+#### odds_display ####
+odds_display = list(
+  h3('Odds'),
   fluidRow(
-    column(2, span(strong(
+    column(6, span(strong(
       "Prior odds:",
       em(textOutput('priorOdds')))) ),
-    column(5, selectInput(
-      "dataInputID",
-      label="Observation (X)",
-      choices = c("Positive","Negative"),
-                selected="Positive",
-                selectize=FALSE)),
-    column(5,
+    column(6,
     span(strong("Posterior odds  ",br(),
                  textOutput(
                   'observation'),
                 em(textOutput('postOdds'))))
-  ))
+    )
+))
+
+#### Odds_and_predictive_values ####
+Odds_and_predictive_values = list(
+  fluidRow(
+    column(
+    6,
+    odds_display
+  ),
+  column(
+    6,
+    predictiveValueDisplay
+  )
   )
 )
-
 ```
 
 * "__Horizontal axis Parameter__":  the parameter along the horizontal axis.
@@ -149,6 +177,22 @@ output$postOdds = renderText( {
     signif(digits=2, postOdds
   ))
   })
+output$predValuePos = renderText({
+  prev = input$prevalenceDefault
+  sens = input$sensitivityDefault
+  spec = input$specificityDefault
+  signif(digits=3,
+         prev * sens / (prev * sens + (1-prev)*(1-spec))
+  )
+})
+output$predValueNeg = renderText({
+  prev = input$prevalenceDefault
+  sens = input$sensitivityDefault
+  spec = input$specificityDefault
+  signif(digits=3,
+         (1-prev) * spec / ((1-prev) * spec + prev*(1-sens))
+)
+})
     
 thePlot = renderPlot({
   ## First, set all parameters to their defaults.
@@ -264,6 +308,7 @@ fluidPage(
            
     column(6, thePlot, offset=1)
   ),
+  (Odds_and_predictive_values),
   h3("Axis controls"),
   wellPanel(plotAxisControls)  
 )
