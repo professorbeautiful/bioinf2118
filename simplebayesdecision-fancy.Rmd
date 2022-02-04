@@ -98,10 +98,10 @@ controls = list(
   fluidRow(
     column(2, span(strong(
       "Prior odds:",
-      textOutput('priorOdds')))),
+      em(textOutput('priorOdds')))) ),
     column(5, selectInput(
       "dataInputID",
-      label="Observation X",
+      label="Observation (X)",
       choices = c("Positive","Negative"),
                 selected="Positive",
                 selectize=FALSE)),
@@ -109,7 +109,7 @@ controls = list(
     span(strong("Posterior odds  ",br(),
                  textOutput(
                   'observation'),
-                textOutput('postOdds')))
+                em(textOutput('postOdds'))))
   ))
   )
 )
@@ -123,7 +123,7 @@ The vertical blue line occurs at the chosen value.
 
 ```{r echo=FALSE} 
 output$observation = renderText(
-  paste("given X =", input$dataInputID))
+  paste("given ", input$dataInputID))
 
 output$priorOdds = renderText(
   as.character(signif(
