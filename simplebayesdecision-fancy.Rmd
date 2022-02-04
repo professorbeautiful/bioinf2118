@@ -50,10 +50,10 @@ paramArgNames = names(paramArgDefaults)
 paramPlotRange = 
   paramPlotRangeDefaults = c(
                         prev='1/10^seq(0.5,4,0.1)',
-                        sens='seq(0.1,1,.01)',
-                        spec='seq(0.99,1,.0002)',
-                        L.SW='seq(0.5,20,1)',
-                        L.HT='seq(0,1,0.05)')
+                        sens='seq(0.5,1,.05)',
+                        spec='seq(0.9,1,.01)',
+                        L.SW='seq(0.5,10,0.5)',
+                        L.HT='seq(0.5,10,0.5)')
 
 
 
@@ -211,6 +211,7 @@ thePlot = renderPlot({
   paramArgDefaults['L.HT'] = input$L.HTDefault
   sapply(paramArgNames, function(param) 
     assign(param, paramArgDefaults[param], envir=.GlobalEnv))
+  #### paramPlotRange ####
   paramPlotRange['prev'] = input$prevalenceRange
   paramPlotRange['sens'] = input$sensitivityRange
   paramPlotRange['spec'] = input$specificityRange
