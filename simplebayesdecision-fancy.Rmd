@@ -26,7 +26,6 @@ runtime: shiny
 * Where (if) the $W$ and $T$ lines cross, the two decisions are equivalent, because they have the same Bayes expected loss.
 
 
-### You can change the default values here.
 
 
 ```{r, echo=FALSE}
@@ -92,18 +91,19 @@ controls = list(
   hr(),
   fluidRow(splitLayout(
     numericInput('L.SWDefault',
-                 'Loss Sick&Wait ',
+                 HTML('Loss<br>Sick&Wait'),
                  value = paramArgDefaults['L.SW'],
                  min = 0, max=10, step = 0.1),
     numericInput('L.HTDefault',
-                 'Loss Healthy&Treat ',
+                 HTML('Loss<br>Healthy&Treat'),
                  value = paramArgDefaults['L.HT'],
                  min = 0, max=10, step = 0.1)
     ,
   # )),
   # fluidRow(splitLayout(
     selectInput("parameterInputID", 
-                label = "Parameter to vary:",
+                label = HTML(
+                  "X-axis<br>Parameter:"),
                 choices = longparamnames, 
                 selected = longparamnames[1],
                 selectize=FALSE)
@@ -112,12 +112,10 @@ controls = list(
 
 ```
 
-* "__Parameter to vary__":  the parameter along the horizontal axis.
-The vertical blue line occurs at the default value.
+* "__X-axis Parameter__":  the parameter along the horizontal axis.
+The vertical blue line occurs at the chosen value. 
 
 * "__Observation__":  Either $P$ for positive test, or $N$ for negative test. Bayes expected loss for the two actions $T$ and $W$ is conditional on the observation.
-
-
 
 ```{r echo=FALSE} 
 output$observation = renderText(
@@ -167,7 +165,9 @@ thePlot = renderPlot({
   assign('paramPlotRange', paramPlotRange, envir=.GlobalEnv)
   ### Here pos=1 is the same as env=.GlobalEnv -- try search().
   ### Now, swap in the vector for the selected parameter.
-  which.varies = names(longparamnames)[which(input$parameterInputID == longparamnames)]
+  which.varies = names(longparamnames)[
+    which(input$parameterInputID ==
+            longparamnames)]
   cat(which.varies, '- ',
       longparamnames[which.varies], "--  ",
        "\n")
@@ -200,7 +200,7 @@ thePlot = renderPlot({
   E.loss.W = E.loss[ , 1]
   E.loss.T = E.loss[ , 2]
   #https://stackoverflow.com/questions/3778084/how-to-adjust-the-size-of-y-axis-labels-only-in-r
-  plot(cex.axis=2, cex.lab=2,
+  plot(cex.axis=2, cex.lab=1.8,
     c(horiz.values, horiz.values), 
     c(E.loss.T, E.loss.W), 
     pch=" ",
@@ -229,12 +229,10 @@ thePlot = renderPlot({
          col=colorT, cex=cexT)
   abline(v=default.value, lty=3, lwd=10, col="blue")
   })
-  
+
 ```
 
 ```{r, echo=F}
-
-
 plotAxisControls = list(
   fluidRow(
     splitLayout(
@@ -258,9 +256,12 @@ plotAxisControls = list(
 fluidPage(
   
   fluidRow(
-    column(5, controls, plotAxisControls),
-    column(7, thePlot)
-  )
+    column(5, wellPanel(controls)),
+           
+    column(6, thePlot, offset=1)
+  ),
+  h3("Axis controls"),
+  wellPanel(plotAxisControls)  
 )
 
 
