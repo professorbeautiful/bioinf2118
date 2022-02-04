@@ -93,16 +93,16 @@ controls = list(
       selectize=FALSE)
   )),
   fluidRow(
-    column(4, ""),
-    column(4, 
+    column(2, ""),
+    column(8, 
     selectInput("parameterInputID", 
                 label = HTML(
                   "Horizontal axis"),
-                choices = longparamnames, 
-                selected = longparamnames[1],
+                choices = as.vector(longparamnames), 
+                selected = as.vector(longparamnames[1]),
                 selectize=FALSE)
     ),
-    column(4, "")
+    column(2, "")
     )
   )
 )
@@ -110,43 +110,43 @@ controls = list(
 #### predictiveValueDisplay ####
 predictiveValueDisplay = list(
   h3(style='text-align:center', 'Predictive values'),
-  fluidRow(
-    column(5, span(strong(
-      "Pr(Sick given Positive):",
+  wellPanel(fluidRow(
+    column(6, span(strong(
+      "Pr(Sick given Positive)",
       em(textOutput('predValuePos'))))
     ),
-    column(7, span(strong(
-      "Pr(Healthy given Negative):",
+    column(6, span(strong(
+      "Pr(Healthy given Negative)",
       em(textOutput('predValueNeg'))))
-)))
+))))
 #### odds_display ####
 odds_display = list(
   h3(style='text-align:center', 'Odds'),
-  fluidRow(
+  wellPanel(fluidRow(
     column(
       4, 
       span(strong(
-        HTML("Prior <br>odds:"),
+        HTML("Prior odds"),
              em(textOutput('priorOdds')))) ),
     column(
       8,
-      span(strong("Posterior odds  ", br(),
+      span(strong(#"Posterior odds  ", 
                   textOutput(
                     'observation'),
                   em(textOutput('postOdds'))))
     )
-  ))
+  )))
 
 #### Odds_and_predictive_values ####
 Odds_and_predictive_values = list(
   fluidRow(
     column(
       6,
-      wellPanel(odds_display)
+      (odds_display)
     ),
     column(
       6,
-      wellPanel(predictiveValueDisplay)
+      (predictiveValueDisplay)
     )
   )
 )
@@ -159,7 +159,7 @@ The vertical blue line occurs at the chosen value.
 
 ```{r echo=FALSE} 
 output$observation = renderText(
-  paste("given ", input$dataInputID))
+  paste("Posterior odds ", "given ", input$dataInputID))
 
 output$priorOdds = renderText(
   as.character(signif(
@@ -284,6 +284,7 @@ thePlot = renderPlot({
   points(horiz.values, E.loss.T, pch= "T",
          col=colorT, cex=cexT)
   abline(v=default.value, lty=3, lwd=10, col="blue")
+
   })
 
 ```
@@ -313,8 +314,10 @@ fluidPage(
   
   fluidRow(
     column(5, (controls)),
-           
-    column(6, thePlot, offset=1)
+    column(6, 
+           h3(style='text-align:center; color:green', HTML(
+                   'Best action is in GREEN')),
+              thePlot, offset=1)
   ),
   (Odds_and_predictive_values),
   h3("Axis controls"),
