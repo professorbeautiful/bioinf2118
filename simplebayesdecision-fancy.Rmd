@@ -58,7 +58,7 @@ paramPlotRange =
 
 
 controls = list(
-  h3("Scenario"),
+  h3(style='text-align:center', "Scenario"),
   wellPanel(
   fluidRow(
     splitLayout(
@@ -92,54 +92,62 @@ controls = list(
       selected="Positive",
       selectize=FALSE)
   )),
+  fluidRow(
+    column(4, ""),
+    column(4, 
     selectInput("parameterInputID", 
                 label = HTML(
                   "Horizontal axis"),
                 choices = longparamnames, 
                 selected = longparamnames[1],
                 selectize=FALSE)
+    ),
+    column(4, "")
+    )
   )
 )
 
 #### predictiveValueDisplay ####
 predictiveValueDisplay = list(
-        h3(style='align:center', 'Predictive values'),
-      fluidRow(
-        column(6, span(strong(
-          "Pr(Sick given Positive):",
-          em(textOutput('predValuePos'))))
-        ),
-        column(6, span(strong(
-          "Pr(Healthy given Negative):",
-          em(textOutput('predValueNeg'))))
-
+  h3(style='text-align:center', 'Predictive values'),
+  fluidRow(
+    column(5, span(strong(
+      "Pr(Sick given Positive):",
+      em(textOutput('predValuePos'))))
+    ),
+    column(7, span(strong(
+      "Pr(Healthy given Negative):",
+      em(textOutput('predValueNeg'))))
 )))
 #### odds_display ####
 odds_display = list(
-  h3('Odds'),
+  h3(style='text-align:center', 'Odds'),
   fluidRow(
-    column(6, span(strong(
-      "Prior odds:",
-      em(textOutput('priorOdds')))) ),
-    column(6,
-    span(strong("Posterior odds  ",br(),
-                 textOutput(
-                  'observation'),
-                em(textOutput('postOdds'))))
+    column(
+      4, 
+      span(strong(
+        HTML("Prior <br>odds:"),
+             em(textOutput('priorOdds')))) ),
+    column(
+      8,
+      span(strong("Posterior odds  ", br(),
+                  textOutput(
+                    'observation'),
+                  em(textOutput('postOdds'))))
     )
-))
+  ))
 
 #### Odds_and_predictive_values ####
 Odds_and_predictive_values = list(
   fluidRow(
     column(
-    6,
-    odds_display
-  ),
-  column(
-    6,
-    predictiveValueDisplay
-  )
+      6,
+      wellPanel(odds_display)
+    ),
+    column(
+      6,
+      wellPanel(predictiveValueDisplay)
+    )
   )
 )
 ```
