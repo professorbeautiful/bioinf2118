@@ -36,7 +36,8 @@ source("simplebayesdecision.R")
 
 ```{r, echo=FALSE}
 longparamnames = c(prev="prevalence", 
-                   sens="sensitivity", spec="specificity",
+                   sens="sensitivity",
+                   spec="specificity",
                L.SW="Loss_given_S_and_W",
                L.HT="Loss_given_H_and_T")
 paramArgDefaults = unlist(formals(plot.simple.bayes)[1:5])
@@ -57,6 +58,8 @@ paramPlotRange =
 
 
 controls = list(
+  h3("Defaults"),
+  wellPanel(
   fluidRow(
     splitLayout(
       numericInput('prevalenceDefault',
@@ -72,6 +75,26 @@ controls = list(
                    value = paramArgDefaults['spec'],
                    min = 0, max=1, step = 0.01)
     )),
+  fluidRow(splitLayout(
+    numericInput('L.SWDefault',
+                 HTML('Loss<br>Sick&Wait'),
+                 value = paramArgDefaults['L.SW'],
+                 min = 0, max=10, step = 0.1),
+    numericInput('L.HTDefault',
+                 HTML('Loss<br>Healthy&Treat'),
+                 value = paramArgDefaults['L.HT'],
+                 min = 0, max=10, step = 0.1)
+    ,
+    selectInput("parameterInputID", 
+                label = HTML(
+                  "Horizontal<br> axis"),
+                choices = longparamnames, 
+                selected = longparamnames[1],
+                selectize=FALSE)
+  ))
+  ),
+  h3("Observation and odds"),
+  wellPanel(
   fluidRow(
     column(2, span(strong(
       "Prior odds:",
@@ -87,32 +110,13 @@ controls = list(
                  textOutput(
                   'observation'),
                 textOutput('postOdds')))
-  )),
-  hr(),
-  fluidRow(splitLayout(
-    numericInput('L.SWDefault',
-                 HTML('Loss<br>Sick&Wait'),
-                 value = paramArgDefaults['L.SW'],
-                 min = 0, max=10, step = 0.1),
-    numericInput('L.HTDefault',
-                 HTML('Loss<br>Healthy&Treat'),
-                 value = paramArgDefaults['L.HT'],
-                 min = 0, max=10, step = 0.1)
-    ,
-  # )),
-  # fluidRow(splitLayout(
-    selectInput("parameterInputID", 
-                label = HTML(
-                  "X-axis<br>Parameter:"),
-                choices = longparamnames, 
-                selected = longparamnames[1],
-                selectize=FALSE)
   ))
+  )
 )
 
 ```
 
-* "__X-axis Parameter__":  the parameter along the horizontal axis.
+* "__Horizontal axis Parameter__":  the parameter along the horizontal axis.
 The vertical blue line occurs at the chosen value. 
 
 * "__Observation__":  Either $P$ for positive test, or $N$ for negative test. Bayes expected loss for the two actions $T$ and $W$ is conditional on the observation.
@@ -256,7 +260,7 @@ plotAxisControls = list(
 fluidPage(
   
   fluidRow(
-    column(5, wellPanel(controls)),
+    column(5, (controls)),
            
     column(6, thePlot, offset=1)
   ),
