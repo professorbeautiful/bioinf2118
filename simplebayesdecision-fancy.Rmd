@@ -26,21 +26,83 @@ runtime: shiny
 * Where (if) the $W$ and $T$ lines cross, the two decisions are equivalent, because they have the same Bayes expected loss.
 
 
+* "__Horizontal axis Parameter__":  the parameter along the horizontal axis.
+The vertical blue line occurs at the chosen value. 
+
+* "__Observation__":  Either $P$ for positive test, or $N$ for negative test. Bayes expected loss for the two actions $T$ and $W$ is conditional on the observation.
+
 
 
 ```{r, echo=FALSE}
+
+#### predictiveValueDisplay ####
+predictiveValueDisplay = list(
+  h3(style='text-align:center', 'Predictive values'),
+  wellPanel(fluidRow(
+    column(6, span(strong(
+      "Pr(Sick given Positive)",
+      em(textOutput('predValuePos'))))
+    ),
+    column(6, span(strong(
+      "Pr(Healthy given Negative)",
+      em(textOutput('predValueNeg'))))
+))))
+
+
+
+#### odds_display ####
+odds_display = list(
+  h3(style='text-align:center', 'Odds'),
+  wellPanel(fluidRow(
+    column(
+      4, 
+      span(strong(
+        HTML("Prior odds"),
+             em(textOutput('priorOdds')))) ),
+    column(
+      8,
+      span(strong(#"Posterior odds  ", 
+                  textOutput(
+                    'observation'),
+                  em(textOutput('postOdds'))))
+    )
+  )))
+
+#### controls ####
+
+controls <<- list(
+  h3(style='text-align:center', "Scenario"),
+    uiOutput('parameterUI')
+)
+
+#### Odds_and_predictive_values ####
+Odds_and_predictive_values = list(
+  fluidRow(
+    column(
+      6,
+      (odds_display)
+    ),
+    column(
+      6,
+      (predictiveValueDisplay)
+    )
+  )
+)
+ 
+
+   ####  server ####
+
+server =   server = function(input, output) {
+require(shinyjs)
 source("simplebayesdecision.R")
-```
 
-
-
-```{r, echo=FALSE}
 f_which.varies = function()
   names(longparamnames)[
     which(input$parameterInputID ==
             longparamnames)]
 
 #border-left:3px dashed;
+
 dashWrap = function(s)
              HTML(paste0(
                   "<div style = 'color: rgba(0, 100, 200, 1);
@@ -92,8 +154,18 @@ observeEvent(
     )
     #return()  ### sigh;  
         #HTML won't work here. Better to have the Loss labels wrap.
-    for(param in paramArgNames) {
-      #str = longparamnames[param]
+    setJSdefaultsAttribute = function(param, att, value, parent=FALSE) {
+      thisId = paste0(param, 'Default')
+      jsString = paste0(
+        "document.getElementById('",
+        thisId, "')", ifelse(parent, ".parentElement", ""),
+        ".style.", att, " = '", value, "'")
+      cat('jsString :', jsString, '\n')
+      shinyjs::runjs(jsString)
+      shinyjs::alert('ALERT')
+    }
+    #document.getElementById('specDefault').parentElement.style.color = 'green'
+    for(param in paramArgNames[1:3]) {
       str = namesForNumericInputs[[param]]
       updateNumericInput(inputId=
         paste0(param, 'Default'),
@@ -102,6 +174,9 @@ observeEvent(
           dashWrap(str),
           HTML(str) )
       )
+      setJSdefaultsAttribute(param, 'color', 'blue')
+      setJSdefaultsAttribute(param, 'color', 'green', parent=TRUE)
+      # runjs("document.getElementById('specDefault').style.color = 'red'")
     }
     ### now, updating the rangeInputID
     updateTextInput(inputId='rangeInputID',
@@ -168,62 +243,6 @@ output$parameterUI = renderUI(
   }
 )
 
-controls = list(
-  h3(style='text-align:center', "Scenario"),
-    uiOutput('parameterUI')
-)
-
-#### predictiveValueDisplay ####
-predictiveValueDisplay = list(
-  h3(style='text-align:center', 'Predictive values'),
-  wellPanel(fluidRow(
-    column(6, span(strong(
-      "Pr(Sick given Positive)",
-      em(textOutput('predValuePos'))))
-    ),
-    column(6, span(strong(
-      "Pr(Healthy given Negative)",
-      em(textOutput('predValueNeg'))))
-))))
-#### odds_display ####
-odds_display = list(
-  h3(style='text-align:center', 'Odds'),
-  wellPanel(fluidRow(
-    column(
-      4, 
-      span(strong(
-        HTML("Prior odds"),
-             em(textOutput('priorOdds')))) ),
-    column(
-      8,
-      span(strong(#"Posterior odds  ", 
-                  textOutput(
-                    'observation'),
-                  em(textOutput('postOdds'))))
-    )
-  )))
-
-#### Odds_and_predictive_values ####
-Odds_and_predictive_values = list(
-  fluidRow(
-    column(
-      6,
-      (odds_display)
-    ),
-    column(
-      6,
-      (predictiveValueDisplay)
-    )
-  )
-)
-```
-
-* "__Horizontal axis Parameter__":  the parameter along the horizontal axis.
-The vertical blue line occurs at the chosen value. 
-
-* "__Observation__":  Either $P$ for positive test, or $N$ for negative test. Bayes expected loss for the two actions $T$ and $W$ is conditional on the observation.
-
-```{r echo=FALSE} 
 output$observation = renderText(
   paste("Posterior odds ", "given ", input$dataInputID))
 
@@ -331,9 +350,10 @@ output$thePlot = renderPlot({
 
   })
 
-```
+}   #### End of server ####
 
-```{r, echo=F}
+#### UI ####
+ui = 
 fluidPage(
   fluidRow(
     column(6, 
@@ -345,6 +365,7 @@ fluidPage(
   (Odds_and_predictive_values) 
 )
 
+shinyApp(ui = ui, server = server)
 
 ```
 
