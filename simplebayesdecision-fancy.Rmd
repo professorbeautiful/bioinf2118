@@ -55,11 +55,9 @@ paramPlotRange =
                         L.SW='seq(0.5,10,0.5)',
                         L.HT='seq(0.5,10,0.5)')
 
-
-
-controls = list(
-  h3(style='text-align:center', "Scenario"),
-  wellPanel(
+output$parameterUI = renderUI(
+  {
+    wellPanel(
   fluidRow(
     splitLayout(
       numericInput('prevalenceDefault',
@@ -105,6 +103,13 @@ controls = list(
     column(2, "")
     )
   )
+  }
+)
+
+controls = list(
+  h3(style='text-align:center', "Scenario"),
+    uiOutput('parameterUI')
+  
 )
 
 #### predictiveValueDisplay ####
