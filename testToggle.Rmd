@@ -22,19 +22,19 @@ prevalenceRangeBox = div(id=
                                    'prevalence axis',
                                    value = "paramPlotRange['prev']")
 )
- ui = 
- fluidPage(
+ui = 
+  fluidPage(
     useShinyjs(),  # Set up shinyjs
     #actionButton("btn", "Click me"),
     textInput(inputId = "text", "Type 'hide' to hide the box below"),
     prevalenceRangeBox
   )
-  server = function(input, output) {
-    observe({
-      toggleElement("prevalenceRangeBox",
-      condition = input$text != 'hide')
-    })
-  }
-  shinyApp(ui, server)
+server = function(input, output) {
+  observe({
+    toggleElement("prevalenceRangeBox",
+                  condition = input$text != 'hide')
+  })
+}
+shinyApp(ui, server)
 
 ```
