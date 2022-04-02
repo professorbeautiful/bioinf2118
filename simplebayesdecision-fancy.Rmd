@@ -202,7 +202,7 @@ output$predValueNeg = renderText({
 )
 })
     
-thePlot = renderPlot({
+output$thePlot = renderPlot({
   ## First, set all parameters to their defaults.
   paramArgDefaults['prev'] = input$prevalenceDefault
   paramArgDefaults['sens'] = input$sensitivityDefault
@@ -313,12 +313,13 @@ plotAxisControls = list(
 
 fluidPage(
   
+
   fluidRow(
-    column(5, (controls)),
     column(6, 
            h3(style='text-align:center; color:green', HTML(
                    'Best action is in GREEN')),
-              thePlot, offset=1)
+              plotOutput('thePlot')),
+    column(5, (controls), offset=1)
   ),
   (Odds_and_predictive_values),
   h3("Axis controls"),
