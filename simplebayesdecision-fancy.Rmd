@@ -171,7 +171,6 @@ output$parameterUI = renderUI(
 controls = list(
   h3(style='text-align:center', "Scenario"),
     uiOutput('parameterUI')
-  
 )
 
 #### predictiveValueDisplay ####
@@ -279,30 +278,13 @@ output$thePlot = renderPlot({
   paramArgDefaults['L.HT'] = input$L.HTDefault
   sapply(paramArgNames, function(param) 
     assign(param, paramArgDefaults[param], envir=.GlobalEnv))
-  #### paramPlotRange ####
-  # paramPlotRange['prev'] = input$prevRange
-  # paramPlotRange['sens'] = input$sensRange
-  # paramPlotRange['spec'] = input$specRange
-  # paramPlotRange['L.SW'] = input$L.SWRange
-  # paramPlotRange['L.HT'] = input$L.HTRange
-  # sapply(paramArgNames, function(param) 
-  #   assign(param, paramPlotRange[param], envir=.GlobalEnv))
   assign('paramPlotRange', paramPlotRange, envir=.GlobalEnv)
   ### Here pos=1 is the same as env=.GlobalEnv -- try search().
   ### Now, swap in the vector for the selected parameter.
-
   cat(f_which.varies(), '- ',
       longparamnames[f_which.varies()], "--  ",
        "\n")
   horiz.label = input$parameterInputID 
-  # horiz.value.list = sapply(
-  #   names(paramPlotRange),
-  #   function(the.rangeName)
-  #     eval(parse(text=
-  #                  paramPlotRange[
-  #                    the.rangeName]))
-  # )
-  #horiz.value.list[[f_which.varies()]]
   horiz.values = eval(parse(text=input$rangeInputID))
   
   #Save the default value, and reassign the vector of values
@@ -310,20 +292,13 @@ output$thePlot = renderPlot({
   # You need to use "assign"; we can't hard-code the variable name.
   cat ('paramArgNames \n')
   print(paramArgNames)
-cat('longparamnames', '\n')
-print(longparamnames)
-
+  cat('longparamnames', '\n')
+  print(longparamnames)
          assign(f_which.varies(),
          horiz.values)
-  # cat(horiz.label, 'default VALUE=',
-  #     default.value, '\nvalues\n', 
-  #     horiz.values, "\n")
-  #  assign(input$parameterInputID, horiz.values)
   E.loss = simple.bayes.vectorized(
     prev, sens, spec, L.SW, L.HT, 
     substr(input$dataInputID, 1, 1) )
-  #cat('E.loss', '\n')
-  #print(E.loss)
   E.loss.W = E.loss[ , 1]
   E.loss.T = E.loss[ , 2]
   #https://stackoverflow.com/questions/3778084/how-to-adjust-the-size-of-y-axis-labels-only-in-r
@@ -348,8 +323,6 @@ print(longparamnames)
   cexW = c(1,4)[WbetterPlusOne]
   cexT[!(Wbetter | Tbetter)] = 
     cexW[!(Wbetter | Tbetter)] = 0
-  # lines (horiz.values, E.loss.W, col=colorWbetter, lwd=3)
-  # lines (horiz.values, E.loss.T, col=colorTbetter, lwd=3)
   points(horiz.values, E.loss.W, pch= "W",
          col=colorW, cex=cexW)
   points(horiz.values, E.loss.T, pch= "T",
@@ -382,8 +355,6 @@ plotAxisControls = list(
 )))
 
 fluidPage(
-  
-
   fluidRow(
     column(6, 
            h3(style='text-align:center; color:green', HTML(
