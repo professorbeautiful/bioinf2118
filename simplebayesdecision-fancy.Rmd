@@ -68,39 +68,44 @@ paramPlotRange =
                         L.SW='seq(0.5,10,0.5)',
                         L.HT='seq(0.5,10,0.5)')
 
+observeEvent(
+  input$parameterInputID,
+  {
+    for(param in paramArgNames) 
+      updateNumericInput(inputId=
+        paste0(param, 'Default'),
+        label= ifelse(
+          param == input$parameterInputID,
+          dashWrap(param),
+          param) )
+  })
 output$parameterUI = renderUI(
   {
-    dashOrNot = function(s) {
-      cat('dashOrNot:', s, ' ', input$parameterInputID, '\n')
-      HTML(s)
-      # ifelse(s == input$parameterInputID,
-      #        dashWrap(s), s)
-    }
     wellPanel(
   fluidRow(
     splitLayout(
       
            numericInput(
-                   'prevalenceDefault',
-                    dashOrNot('prevalence') ,
+                   'prevDefault',
+                    ('prevalence') ,
                    value = paramArgDefaults['prev'],
                    min = 0, max=1, step = 0.01),
-      numericInput('sensitivityDefault',
-                   dashOrNot('sensitivity'),
+      numericInput('sensDefault',
+                   ('sensitivity'),
                    value = paramArgDefaults['sens'],
                    min = 0, max=1, step = 0.01),
-      numericInput('specificityDefault',
-                   dashOrNot('specificity'),
+      numericInput('specDefault',
+                   ('specificity'),
                    value = paramArgDefaults['spec'],
                    min = 0, max=1, step = 0.01)
     )),
   fluidRow(splitLayout(
     numericInput('L.SWDefault',
-                 dashOrNot('Loss<br>Sick&Wait'),
+                 ('Loss<br>Sick&Wait'),
                  value = paramArgDefaults['L.SW'],
                  min = 0, max=10, step = 0.1),
     numericInput('L.HTDefault',
-                 dashOrNot('Loss<br>Healthy&Treat'),
+                 ('Loss<br>Healthy&Treat'),
                  value = paramArgDefaults['L.HT'],
                  min = 0, max=10, step = 0.1)
     ,
@@ -190,21 +195,21 @@ output$observation = renderText(
 output$priorOdds = renderText(
   as.character(signif(
     digits=2,
-    input$prevalenceDefault /
-      (1-input$prevalenceDefault)
+    input$prevDefault /
+      (1-input$prevDefault)
   ))
 )
 output$postOdds = renderText( {
-  priorOdds = input$prevalenceDefault /
-    (1-input$prevalenceDefault) 
+  priorOdds = input$prevDefault /
+    (1-input$prevDefault) 
   LR = switch(
     input$dataInputID,
     Positive = 
-      input$sensitivityDefault / 
-      (1 - input$specificityDefault),
+      input$sensDefault / 
+      (1 - input$specDefault),
     Negative = 
-      (1-input$sensitivityDefault) /
-      input$specificityDefault
+      (1-input$sensDefault) /
+      input$specDefault
   )
   postOdds = priorOdds * LR
   as.character(
@@ -212,17 +217,17 @@ output$postOdds = renderText( {
   ))
   })
 output$predValuePos = renderText({
-  prev = input$prevalenceDefault
-  sens = input$sensitivityDefault
-  spec = input$specificityDefault
+  prev = input$prevDefault
+  sens = input$sensDefault
+  spec = input$specDefault
   signif(digits=3,
          prev * sens / (prev * sens + (1-prev)*(1-spec))
   )
 })
 output$predValueNeg = renderText({
-  prev = input$prevalenceDefault
-  sens = input$sensitivityDefault
-  spec = input$specificityDefault
+  prev = input$prevDefault
+  sens = input$sensDefault
+  spec = input$specDefault
   signif(digits=3,
          (1-prev) * spec / ((1-prev) * spec + prev*(1-sens))
 )
@@ -230,17 +235,17 @@ output$predValueNeg = renderText({
     
 output$thePlot = renderPlot({
   ## First, set all parameters to their defaults.
-  paramArgDefaults['prev'] = input$prevalenceDefault
-  paramArgDefaults['sens'] = input$sensitivityDefault
-  paramArgDefaults['spec'] = input$specificityDefault
+  paramArgDefaults['prev'] = input$prevDefault
+  paramArgDefaults['sens'] = input$sensDefault
+  paramArgDefaults['spec'] = input$specDefault
   paramArgDefaults['L.SW'] = input$L.SWDefault
   paramArgDefaults['L.HT'] = input$L.HTDefault
   sapply(paramArgNames, function(param) 
     assign(param, paramArgDefaults[param], envir=.GlobalEnv))
   #### paramPlotRange ####
-  paramPlotRange['prev'] = input$prevalenceRange
-  paramPlotRange['sens'] = input$sensitivityRange
-  paramPlotRange['spec'] = input$specificityRange
+  paramPlotRange['prev'] = input$prevRange
+  paramPlotRange['sens'] = input$sensRange
+  paramPlotRange['spec'] = input$specRange
   paramPlotRange['L.SW'] = input$L.SWRange
   paramPlotRange['L.HT'] = input$L.HTRange
   # sapply(paramArgNames, function(param) 
@@ -267,9 +272,12 @@ output$thePlot = renderPlot({
   #Save the default value, and reassign the vector of values
   default.value = paramArgDefaults[which.varies]
   # You need to use "assign"; we can't hard-code the variable name.
-  cat ('paramArgNames[which.varies] ',
-       paramArgNames[which.varies], '\n')
-  assign(which.varies,
+  cat ('paramArgNames \n')
+  print(paramArgNames)
+cat('longparamnames', '\n')
+print(longparamnames)
+
+         assign(which.varies,
          horiz.values)
   # cat(horiz.label, 'default VALUE=',
   #     default.value, '\nvalues\n', 
@@ -320,13 +328,13 @@ output$thePlot = renderPlot({
 plotAxisControls = list(
   fluidRow(
     splitLayout(
-      textInput('prevalenceRange',
+      textInput('prevRange',
                    'prevalence axis',
                    value = paramPlotRange['prev']),
-      textInput('sensitivityRange',
+      textInput('sensRange',
                    'sensitivity axis',
                    value = paramPlotRange['sens']),
-      textInput('specificityRange',
+      textInput('specRange',
                    'specificity axis',
                    value = paramPlotRange['spec']),
       textInput('L.SWRange',
