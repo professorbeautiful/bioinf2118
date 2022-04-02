@@ -38,9 +38,11 @@ source("simplebayesdecision.R")
 #border-left:3px dashed;
 dashWrap = function(s)
              HTML(paste0(
-                  "<div style = 'color: rgba(0, 100, 200, 1); font-weight:strong';
-                  font-style: italic;> ∎", s,
-                  "</div>") )
+#                  "<div style = 'color: rgba(0, 100, 200, 1); font-weight:strong';",
+                  #"font-style: italic;>",
+                  "∎", s
+                  # , "</div>"
+                  ) )
 DashedLine = "
             border-color:  rgba(0, 100, 200, 1);
 color: rgba(0, 100, 200, 1); 
@@ -74,14 +76,18 @@ observeEvent(
     which.varies = names(longparamnames)[
       which(input$parameterInputID ==
               longparamnames)]
-    for(param in paramArgNames) 
+    for(param in paramArgNames) {
+      #str = longparamnames[param]
+      str = param
       updateNumericInput(inputId=
         paste0(param, 'Default'),
         label= ifelse(
           param == which.varies,
-          dashWrap(longparamnames[param]),
-          longparamnames[param]) )
-  })
+          dashWrap(str),
+          HTML(str) )
+      )
+    }
+    })
 output$parameterUI = renderUI(
   {
     wellPanel(
