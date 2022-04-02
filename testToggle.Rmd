@@ -1,0 +1,37 @@
+---
+title: "test"
+output: html_document
+runtime: shiny
+---
+You must use the call
+
+shinyApp(ui, server)
+
+The RMarkdown style separating ui and server does not work!
+
+```{r echo=F}
+library(shiny)
+library(shinyjs)
+
+prevalenceRangeBox = div(id=
+                           'prevalenceRangeBox',
+                         textInput('prevalenceRange',
+                                   'prevalence axis',
+                                   value = "paramPlotRange['prev']")
+)
+shinyApp(
+ ui = 
+ fluidPage(
+    useShinyjs(),  # Set up shinyjs
+    #actionButton("btn", "Click me"),
+    textInput(inputId = "text", "Type 'hide' to hide the box below"),
+    prevalenceRangeBox
+  ),
+  server = function(input, output) {
+    observe({
+      toggleElement("prevalenceRangeBox",
+      condition = input$text != 'hide')
+    })
+  }
+)
+```
