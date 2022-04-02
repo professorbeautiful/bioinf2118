@@ -35,13 +35,19 @@ source("simplebayesdecision.R")
 
 
 ```{r, echo=FALSE}
+f_which.varies = function()
+  names(longparamnames)[
+    which(input$parameterInputID ==
+            longparamnames)]
+
 #border-left:3px dashed;
 dashWrap = function(s)
              HTML(paste0(
-#                  "<div style = 'color: rgba(0, 100, 200, 1); font-weight:strong';",
-                  #"font-style: italic;>",
+                  "<div style = 'color: rgba(0, 100, 200, 1);
+                  font-weight:strong';",
+                  "font-style: italic;>",
                   "∎", s
-                  # , "</div>"
+                   , "</div>"
                   ) )
 DashedLine = "
             border-color:  rgba(0, 100, 200, 1);
@@ -70,23 +76,36 @@ paramPlotRange =
                         L.SW='seq(0.5,10,0.5)',
                         L.HT='seq(0.5,10,0.5)')
 
+observeEvent(input$rangeInputID, {
+  paramPlotRange[[f_which.varies()]] = input$rangeInputID
+  #might not be needed
+})
 observeEvent(
   input$parameterInputID,
   {
-    which.varies = names(longparamnames)[
-      which(input$parameterInputID ==
-              longparamnames)]
+    namesForNumericInputs = list(
+      sens='sensitivity',
+      spec='specificity',
+      prev='prevalence',
+      L.SW = 'Loss<br>Sick&Wait',
+      L.HT = 'Loss<br>Healthy&Treat'
+    )
+    #return()  ### sigh;  
+        #HTML won't work here. Better to have the Loss labels wrap.
     for(param in paramArgNames) {
       #str = longparamnames[param]
-      str = param
+      str = namesForNumericInputs[[param]]
       updateNumericInput(inputId=
         paste0(param, 'Default'),
         label= ifelse(
-          param == which.varies,
+          param == f_which.varies(),
           dashWrap(str),
           HTML(str) )
       )
     }
+    ### now, the range
+    updateTextInput(inputId='rangeInputID',
+                    value=paramPlotRange[[f_which.varies()]])
     })
 output$parameterUI = renderUI(
   {
@@ -110,11 +129,11 @@ output$parameterUI = renderUI(
     )),
   fluidRow(splitLayout(
     numericInput('L.SWDefault',
-                 ('Loss<br>Sick&Wait'),
+                 HTML('Loss<br>Sick&Wait'),
                  value = paramArgDefaults['L.SW'],
                  min = 0, max=10, step = 0.1),
     numericInput('L.HTDefault',
-                 ('Loss<br>Healthy&Treat'),
+                 HTML('Loss<br>Healthy&Treat'),
                  value = paramArgDefaults['L.HT'],
                  min = 0, max=10, step = 0.1)
     ,
@@ -128,12 +147,20 @@ output$parameterUI = renderUI(
   fluidRow(
     column(2, ""),
     column(8, 
-           
-    selectInput("parameterInputID", 
-                label = dashWrap('horizontal axis'),
-                choices = as.vector(longparamnames), 
-                selected = as.vector(longparamnames[1]),
-                selectize=FALSE)
+           selectInput("parameterInputID", 
+                       label = dashWrap('horizontal axis'),
+                       choices = as.vector(longparamnames), 
+                       selected = as.vector(longparamnames[1]),
+                       selectize=FALSE)
+    ),
+    column(2, "")
+    ),
+  fluidRow(
+    column(2, ""),
+    column(8, 
+           textInput('rangeInputID',
+                       label = dashWrap('horizontal axis points'),
+                   value = paramPlotRange['prev']),
     ),
     column(2, "")
     )
@@ -243,6 +270,7 @@ output$predValueNeg = renderText({
 })
     
 output$thePlot = renderPlot({
+  input$rangeInputID  ## to incur a reactivity
   ## First, set all parameters to their defaults.
   paramArgDefaults['prev'] = input$prevDefault
   paramArgDefaults['sens'] = input$sensDefault
@@ -252,21 +280,19 @@ output$thePlot = renderPlot({
   sapply(paramArgNames, function(param) 
     assign(param, paramArgDefaults[param], envir=.GlobalEnv))
   #### paramPlotRange ####
-  paramPlotRange['prev'] = input$prevRange
-  paramPlotRange['sens'] = input$sensRange
-  paramPlotRange['spec'] = input$specRange
-  paramPlotRange['L.SW'] = input$L.SWRange
-  paramPlotRange['L.HT'] = input$L.HTRange
+  # paramPlotRange['prev'] = input$prevRange
+  # paramPlotRange['sens'] = input$sensRange
+  # paramPlotRange['spec'] = input$specRange
+  # paramPlotRange['L.SW'] = input$L.SWRange
+  # paramPlotRange['L.HT'] = input$L.HTRange
   # sapply(paramArgNames, function(param) 
   #   assign(param, paramPlotRange[param], envir=.GlobalEnv))
   assign('paramPlotRange', paramPlotRange, envir=.GlobalEnv)
   ### Here pos=1 is the same as env=.GlobalEnv -- try search().
   ### Now, swap in the vector for the selected parameter.
-  which.varies = names(longparamnames)[
-    which(input$parameterInputID ==
-            longparamnames)]
-  cat(which.varies, '- ',
-      longparamnames[which.varies], "--  ",
+
+  cat(f_which.varies(), '- ',
+      longparamnames[f_which.varies()], "--  ",
        "\n")
   horiz.label = input$parameterInputID 
   horiz.value.list = sapply(
@@ -276,17 +302,18 @@ output$thePlot = renderPlot({
                    paramPlotRange[
                      the.rangeName]))
   )
-  horiz.values = horiz.value.list[[which.varies]]
+  #horiz.value.list[[f_which.varies()]]
+  horiz.values = eval(parse(text=input$rangeInputID))
   
   #Save the default value, and reassign the vector of values
-  default.value = paramArgDefaults[which.varies]
+  default.value = paramArgDefaults[f_which.varies()]
   # You need to use "assign"; we can't hard-code the variable name.
   cat ('paramArgNames \n')
   print(paramArgNames)
 cat('longparamnames', '\n')
 print(longparamnames)
 
-         assign(which.varies,
+         assign(f_which.varies(),
          horiz.values)
   # cat(horiz.label, 'default VALUE=',
   #     default.value, '\nvalues\n', 
