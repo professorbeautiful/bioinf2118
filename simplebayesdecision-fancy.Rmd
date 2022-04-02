@@ -334,26 +334,6 @@ output$thePlot = renderPlot({
 ```
 
 ```{r, echo=F}
-plotAxisControls = list(
-  fluidRow(
-    splitLayout(
-      textInput('prevRange',
-                   'prevalence axis',
-                   value = paramPlotRange['prev']),
-      textInput('sensRange',
-                   'sensitivity axis',
-                   value = paramPlotRange['sens']),
-      textInput('specRange',
-                   'specificity axis',
-                   value = paramPlotRange['spec']),
-      textInput('L.SWRange',
-                   'Loss S&Waxis',
-                   value = paramPlotRange['L.SW']),
-      textInput('L.HTRange',
-                   'Loss H&Taxis',
-                   value = paramPlotRange['L.HT'])
-)))
-
 fluidPage(
   fluidRow(
     column(6, 
@@ -362,9 +342,7 @@ fluidPage(
               plotOutput('thePlot')),
     column(5, (controls), offset=1)
   ),
-  (Odds_and_predictive_values),
-  h3("Axis controls"),
-  wellPanel(plotAxisControls)  
+  (Odds_and_predictive_values) 
 )
 
 
