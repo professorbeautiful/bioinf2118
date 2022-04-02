@@ -35,9 +35,18 @@ source("simplebayesdecision.R")
 
 
 ```{r, echo=FALSE}
-
-DashedLine = "border-left:3px dashed;
-            border-color:  rgba(0, 100, 200, 1);"
+#border-left:3px dashed;
+dashWrap = function(s)
+             HTML(paste0(
+                  "<div style = 'color: rgba(0, 100, 200, 1); font-weight:strong';
+                  font-style: italic;> ∎", s,
+                  "</div>") )
+DashedLine = "
+            border-color:  rgba(0, 100, 200, 1);
+color: rgba(0, 100, 200, 1); 
+font-weight: bold; 
+background-color: rgba(200, 100, 0, 1)
+"
 
 longparamnames = c(prev="prevalence", 
                    sens="sensitivity",
@@ -61,31 +70,37 @@ paramPlotRange =
 
 output$parameterUI = renderUI(
   {
+    dashOrNot = function(s) {
+      cat('dashOrNot:', s, ' ', input$parameterInputID, '\n')
+      HTML(s)
+      # ifelse(s == input$parameterInputID,
+      #        dashWrap(s), s)
+    }
     wellPanel(
   fluidRow(
     splitLayout(
-      span(style = DashedLine,
+      
            numericInput(
                    'prevalenceDefault',
-                   'prevalence ',
+                    dashOrNot('prevalence') ,
                    value = paramArgDefaults['prev'],
-                   min = 0, max=1, step = 0.01)),
+                   min = 0, max=1, step = 0.01),
       numericInput('sensitivityDefault',
-                   'sensitivity',
+                   dashOrNot('sensitivity'),
                    value = paramArgDefaults['sens'],
                    min = 0, max=1, step = 0.01),
       numericInput('specificityDefault',
-                   'specificity',
+                   dashOrNot('specificity'),
                    value = paramArgDefaults['spec'],
                    min = 0, max=1, step = 0.01)
     )),
   fluidRow(splitLayout(
     numericInput('L.SWDefault',
-                 HTML('Loss<br>Sick&Wait'),
+                 dashOrNot('Loss<br>Sick&Wait'),
                  value = paramArgDefaults['L.SW'],
                  min = 0, max=10, step = 0.1),
     numericInput('L.HTDefault',
-                 HTML('Loss<br>Healthy&Treat'),
+                 dashOrNot('Loss<br>Healthy&Treat'),
                  value = paramArgDefaults['L.HT'],
                  min = 0, max=10, step = 0.1)
     ,
@@ -99,9 +114,9 @@ output$parameterUI = renderUI(
   fluidRow(
     column(2, ""),
     column(8, 
+           
     selectInput("parameterInputID", 
-                label = HTML(
-                  "Horizontal axis"),
+                label = dashWrap('horizontal axis'),
                 choices = as.vector(longparamnames), 
                 selected = as.vector(longparamnames[1]),
                 selectize=FALSE)
@@ -256,15 +271,15 @@ output$thePlot = renderPlot({
        paramArgNames[which.varies], '\n')
   assign(which.varies,
          horiz.values)
-  cat(horiz.label, 'default VALUE=',
-      default.value, '\nvalues\n', 
-      horiz.values, "\n")
+  # cat(horiz.label, 'default VALUE=',
+  #     default.value, '\nvalues\n', 
+  #     horiz.values, "\n")
   #  assign(input$parameterInputID, horiz.values)
   E.loss = simple.bayes.vectorized(
     prev, sens, spec, L.SW, L.HT, 
     substr(input$dataInputID, 1, 1) )
-  cat('E.loss', '\n')
-  print(E.loss)
+  #cat('E.loss', '\n')
+  #print(E.loss)
   E.loss.W = E.loss[ , 1]
   E.loss.T = E.loss[ , 2]
   #https://stackoverflow.com/questions/3778084/how-to-adjust-the-size-of-y-axis-labels-only-in-r
