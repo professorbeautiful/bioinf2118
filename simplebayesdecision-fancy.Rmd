@@ -77,7 +77,7 @@ paramPlotRange =
                         L.HT='seq(0.5,10,0.5)')
 
 observeEvent(input$rangeInputID, {
-  paramPlotRange[[f_which.varies()]] = input$rangeInputID
+  paramPlotRange[[f_which.varies()]] <<- input$rangeInputID
   #might not be needed
 })
 observeEvent(
@@ -103,7 +103,7 @@ observeEvent(
           HTML(str) )
       )
     }
-    ### now, the range
+    ### now, updating the rangeInputID
     updateTextInput(inputId='rangeInputID',
                     value=paramPlotRange[[f_which.varies()]])
     })
@@ -295,13 +295,13 @@ output$thePlot = renderPlot({
       longparamnames[f_which.varies()], "--  ",
        "\n")
   horiz.label = input$parameterInputID 
-  horiz.value.list = sapply(
-    names(paramPlotRange),
-    function(the.rangeName)
-      eval(parse(text=
-                   paramPlotRange[
-                     the.rangeName]))
-  )
+  # horiz.value.list = sapply(
+  #   names(paramPlotRange),
+  #   function(the.rangeName)
+  #     eval(parse(text=
+  #                  paramPlotRange[
+  #                    the.rangeName]))
+  # )
   #horiz.value.list[[f_which.varies()]]
   horiz.values = eval(parse(text=input$rangeInputID))
   
