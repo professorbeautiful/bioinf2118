@@ -369,8 +369,13 @@ fluidPage(
   (Odds_and_predictive_values) 
 )
 
-shinyApp(ui = ui, server = server)
-#ui
+wantShinyJstoWork = FALSE
+if(wantShinyJstoWork) {
+  shinyApp(ui = ui, server = server)
+} else {
+  server(input, output)
+  ui
+}
 
 ##' Using shinyApp, runjs works, but the app is in a scrollpane, and the JS console can't see the elements by ID.
 
