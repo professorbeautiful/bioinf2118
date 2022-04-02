@@ -71,13 +71,16 @@ paramPlotRange =
 observeEvent(
   input$parameterInputID,
   {
+    which.varies = names(longparamnames)[
+      which(input$parameterInputID ==
+              longparamnames)]
     for(param in paramArgNames) 
       updateNumericInput(inputId=
         paste0(param, 'Default'),
         label= ifelse(
-          param == input$parameterInputID,
-          dashWrap(param),
-          param) )
+          param == which.varies,
+          dashWrap(longparamnames[param]),
+          longparamnames[param]) )
   })
 output$parameterUI = renderUI(
   {
