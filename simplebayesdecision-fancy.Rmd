@@ -32,7 +32,6 @@ The vertical blue line occurs at the chosen value.
 * "__Observation__":  Either $P$ for positive test, or $N$ for negative test. Bayes expected loss for the two actions $T$ and $W$ is conditional on the observation.
 
 
-
 ```{r, echo=FALSE}
 
 #### predictiveValueDisplay ####
@@ -92,7 +91,7 @@ Odds_and_predictive_values = list(
 ####  server ####
 
 server = function(input, output) {
-temp = require('shinyjs', quietly=TRUE)
+temp = suppressPackageStartupMessages(require('shinyjs', quietly=TRUE))
 source("simplebayesdecision.R")
 
 f_which.varies = function()
@@ -356,7 +355,7 @@ output$thePlot = renderPlot({
 }   #### End of server ####
 
 #### UI ####
-temp = require('shinyjs', quietly=TRUE)
+temp = suppressPackageStartupMessages(require('shinyjs', quietly=TRUE))
 ui = 
 fluidPage(
    useShinyjs(),  ## this is the place!!
@@ -376,5 +375,4 @@ shinyApp(ui = ui, server = server)
 ##' Using shinyApp, runjs works, but the app is in a scrollpane, and the JS console can't see the elements by ID.
 
 ```
-
 
