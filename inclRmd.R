@@ -1,7 +1,9 @@
 # Alternative solution:
 # ```{r child = 'DrWho.Rmd'}
 # ```
-require("magrittr")
+suppressPackageStartupMessages(
+  require('magrittr', quietly=TRUE))
+
 inclRmd <- function(path, wd, openMe=FALSE) {
   if(!missing(wd)) {
     savedwd = getwd()
