@@ -39,29 +39,43 @@ predictiveValueDisplay = list(
   h3(style='text-align:center', 'Predictive values'),
   wellPanel(fluidRow(
     column(6, span(strong(
+      "\"Positive P.V.\"",br(),
       "Pr(Sick given Positive)",
       em(textOutput('predValuePos'))))
     ),
     column(6, span(strong(
+      "\"Negative P.V.\"", br(),
       "Pr(Healthy given Negative)",
       em(textOutput('predValueNeg'))))
 ))))
 
 
 #### odds_display ####
+mathOp = function(s)
+  span(style='color: blue',
+       strong(
+        HTML(paste0('<br><br>',s))
+  ))
 odds_display = list(
   h3(style='text-align:center', 'Odds'),
   wellPanel(fluidRow(
-    column(
-      4, 
+    column(2
+      , 
       span(strong(
-        HTML("Prior odds"),
+        HTML("Prior <br>odds"),
              em(textOutput('priorOdds')))) ),
+    column(1, mathOp('X')),
     column(
-      8,
-      span(strong(#"Posterior odds  ", 
+      3,
+      span(strong(
+        HTML("Likelihood <br>ratio"),
+        em(textOutput('likelihoodRatio')))) ),
+    column(1, mathOp("=")),
+    column(
+      5,
+      span(strong( 
                   textOutput(
-                    'observation'),
+                    'posteriorOddsLabel'),
                   em(textOutput('postOdds'))))
     )
   )))
@@ -216,7 +230,7 @@ output$parameterUI = renderUI(
     ,
     selectInput(
       "dataInputID",
-      label=HTML("Observation<br> (X)"),
+      label=HTML("Observation<br> (test)"),
       choices = c("Positive","Negative"),
       selected="Positive",
       selectize=FALSE)
@@ -245,8 +259,8 @@ output$parameterUI = renderUI(
   }
 )
 
-output$observation = renderText(
-  paste("Posterior odds ", "given ", input$dataInputID))
+output$posteriorOddsLabel = renderText(
+  paste("Posterior odds ", "given test = ", input$dataInputID))
 
 output$priorOdds = renderText(
   as.character(signif(
@@ -255,19 +269,26 @@ output$priorOdds = renderText(
       (1-input$prevDefault)
   ))
 )
-output$postOdds = renderText( {
-  priorOdds = input$prevDefault /
-    (1-input$prevDefault) 
-  LR = switch(
+
+LikRat = reactive(
+  switch(
     input$dataInputID,
     Positive = 
       input$sensDefault / 
       (1 - input$specDefault),
     Negative = 
       (1-input$sensDefault) /
-      input$specDefault
-  )
-  postOdds = priorOdds * LR
+      input$specDefault)
+)
+output$likelihoodRatio = renderText( {
+  as.character(
+    signif(digits=2, LikRat()
+  ))
+})
+output$postOdds = renderText( {
+  priorOdds = input$prevDefault /
+    (1-input$prevDefault) 
+  postOdds = priorOdds * LikRat()
   as.character(
     signif(digits=2, postOdds
   ))
