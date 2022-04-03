@@ -1,6 +1,8 @@
 ---
 title: "Simple Bayes decision plots"
 output: html_document
+author: Roger Day
+date: "`r Sys.Date()`"
 runtime: shiny
 ---
 
