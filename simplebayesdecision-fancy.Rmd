@@ -6,6 +6,9 @@ date: "`r Sys.Date()`"
 runtime: shiny
 ---
 
+```{r, echo=F}
+wantShinyJstoWork = FALSE
+```
  
 ### Using Bayes expected loss to support a medical decision. 
 
@@ -392,7 +395,6 @@ fluidPage(
   (Odds_and_predictive_values) 
 )
 
-wantShinyJstoWork = FALSE
 if(wantShinyJstoWork) {
   shinyApp(ui = ui, server = server)
 } else {
