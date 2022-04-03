@@ -6,13 +6,46 @@ date: "`r Sys.Date()`"
 runtime: shiny
 ---
 
-```{r, echo=F}
-wantShinyJstoWork = FALSE
 
- conditionalPanelWithCheckbox(
-  labelString = 'Overview of the topic', 
-  filename = 'simplebayesdecision-info.Rmd', 
-  initialValue = TRUE)
+
+### Using Bayes expected loss to support a medical decision. 
+
+### Actions to choose from:
+
+* $T$: Treat
+* $W$: Wait ("Watchful Waiting")
+
+### Bayes expected loss for action $A$ = $\rho$ = $\rho (A|X) = {E_{\theta |X}}(Loss(\theta, A))$.
+
+* $\rho (T|X) = Loss(Healthy, Treat) \times Pr(Healthy | X)$
+
+* $\rho (W|X) = Loss(Sick, Wait) \times Pr(Sick | X)$
+
+
+### Best decisions  (Bayes rule):
+
+* Where the $W$ line is below the $T$ line, the better decision is $W$.
+* Where the $T$ line is below the $W$ line, the better decision is $T$.
+* Where (if) the $W$ and $T$ lines cross, the two decisions are equivalent, because they have the same Bayes expected loss.
+
+
+* "__Horizontal axis Parameter__":  the parameter along the horizontal axis.
+The vertical blue line occurs at the chosen value. 
+
+* "__Observation__":  Either $P$ for positive test, or $N$ for negative test. Bayes expected loss for the two actions $T$ and $W$ is conditional on the observation.
+
+```{r, echo=F}
+usingShinyApp = FALSE
+
+ # conditionalPanelWithCheckbox(
+ #  labelString = 'Overview of the topic', 
+ #  filename = 'simplebayesdecision-info.Rmd', 
+ #  initialValue = TRUE)
+#source("inclRmd.R")
+#inclRmd("simplebayesdecision-info.Rmd")
+# simplebayesdecision-info.Rmd.inclOutput.Rmd
+# is created but not appearing in doc.
+
 ```
 
 
@@ -363,7 +396,7 @@ output$thePlot = renderPlot({
 temp = suppressPackageStartupMessages(require('shinyjs', quietly=TRUE))
 ui = 
 fluidPage(
-   useShinyjs(),  ## this is the place!!
+   useShinyjs(rmd=TRUE, debug=TRUE),  ## this is the place!!
   fluidRow(
     column(6, 
            h3(style='text-align:center; color:green', HTML(
@@ -374,7 +407,7 @@ fluidPage(
   (Odds_and_predictive_values) 
 )
 
-if(wantShinyJstoWork) {
+if(usingShinyApp) {
   shinyApp(ui = ui, server = server)
 } else {
   server(input, output)
