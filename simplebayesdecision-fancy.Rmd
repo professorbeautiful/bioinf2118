@@ -154,18 +154,19 @@ longparamnames = c(prev="prevalence",
                L.HT="Loss_given_H_and_T")
 paramArgDefaults = unlist(formals(plot.simple.bayes)[1:5])
 ###  a few alterations...
-paramArgDefaults['prev'] = 0.1
-paramArgDefaults['sens'] = 0.95
-paramArgDefaults['spec'] = 0.95
+paramArgDefaults['prev'] = 0.01
+paramArgDefaults['sens'] = 0.90
+paramArgDefaults['spec'] = 0.91
 
 paramArgNames = names(paramArgDefaults)
 paramPlotRange = 
-  paramPlotRangeDefaults = c(
-                        prev='1/10^seq(0.5,4,0.1)',
-                        sens='seq(0.5,1,.05)',
-                        spec='seq(0.9,1,.01)',
-                        L.SW='seq(0.5,10,0.5)',
-                        L.HT='seq(0.5,10,0.5)')
+  paramPlotRangeDefaults = 
+  c(
+    prev='seq(0.0, 0.2, by=0.01)',
+    sens='seq(0.5,1,.05)',
+    spec='seq(0.9,1,.01)',
+    L.SW='seq(0.5,10,0.5)',
+    L.HT='seq(0.5,10,0.5)')
 
 observeEvent(input$rangeInputID, {
   paramPlotRange[[f_which.varies()]] <<- input$rangeInputID
