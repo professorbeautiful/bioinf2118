@@ -24,9 +24,11 @@ runtime: shiny
 
 ### Best decisions  (Bayes rule):
 
-* Where the $W$ line is below the $T$ line, the better decision is $W$.
 * Where the $T$ line is below the $W$ line, the better decision is $T$.
-* Where (if) the $W$ and $T$ lines cross, the two decisions are equivalent, because they have the same Bayes expected loss.
+* Where the $W$ line is below the $T$ line, the better decision is $W$.
+* Where (if) the $W$ and $T$ lines cross, $W$ and $T$ are equally good/bad;
+
+    $\ \ \ \ \ \ \ \ \rho (W|X) = \rho (T|X)$.
 
 
 * "__Horizontal axis Parameter__":  the parameter along the horizontal axis.
