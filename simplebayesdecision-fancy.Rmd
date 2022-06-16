@@ -398,10 +398,15 @@ output$thePlot = renderPlot({
   })
   output$gerdUI = 
     renderUI({
-    #cat('gerdUI\n')
-      # div(
-        plotOutput('gerdPlot2') 
-        # )
+    cat('gerdUI, plotChoice = ', input$plotChoice, '\n')
+      div(
+        conditionalPanel(condition = 'input.plotChoice === "0"',
+                         plotOutput('thePlot') ),
+        conditionalPanel(condition = 'input.plotChoice === "1"',
+                         plotOutput('gerdPlot') ),
+        conditionalPanel(condition = 'input.plotChoice === "2"',
+                         plotOutput('gerdPlot2') ),
+       )
   })
   output$gerdPlot =
     renderPlot({
@@ -415,13 +420,13 @@ output$thePlot = renderPlot({
              spec = input$specDefault,
              prev = input$prevDefault)
   })
-  observeEvent(input$plotToggle,
-               try(
-                 updateCheckboxInput(inputId = 'plotToggle',
-               label = ifelse(input$plotToggle,
-                              'uncheck to see a decision plot',
-                              'check to see a "people plot"')))
-  )
+  # observeEvent(input$plotToggle,
+  #              try(
+  #                updateCheckboxInput(inputId = 'plotToggle',
+  #              label = ifelse(input$plotToggle,
+  #                             'uncheck to see a decision plot',
+  #                             'check to see a "people plot"')))
+  # )
 }   #### End of server ####
 
 #### UI ####
@@ -433,13 +438,16 @@ fluidPage(
     column(6, 
            h3(style='text-align:center; color:green', HTML(
                    'Best action is in GREEN')),
-           checkboxInput('plotToggle', value=FALSE,
-                         label='select for a "people plot"'),
+           radioButtons('plotChoice', label='', choiceValues=0:2,
+                        choiceNames = c('decision plot', 'people plot #1',  'people plot #2'), 
+                        inline = TRUE),
+           # checkboxInput('plotToggle', value=FALSE,
+           #               label='select for a "people plot"'),
            #plotOutput('thePlot')
-           conditionalPanel(condition = 'input.plotToggle === false',
-                            plotOutput('thePlot')),
-           conditionalPanel(condition = 'input.plotToggle === true',
-                            uiOutput('gerdUI'))
+           # conditionalPanel(condition = 'input.plotToggle === false',
+           #                  plotOutput('thePlot')),
+           # conditionalPanel(condition = 'input.plotToggle === true',
+                            uiOutput('gerdUI') #)
            ),
     column(5, (controls), offset=1)
   ),
