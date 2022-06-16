@@ -128,7 +128,7 @@ server = function(input, output) {
 temp = suppressPackageStartupMessages(require('shinyjs', quietly=TRUE))
 source("simplebayesdecision.R")
 source("gerdPlot.R")
-# source("gerdPlot2.R")
+source("gerdPlot2.R")
 
 f_which.varies = function()
   names(longparamnames)[
@@ -397,13 +397,21 @@ output$thePlot = renderPlot({
 
   })
   output$gerdUI = 
-  #   renderUI({
-  #   cat('gerdUI\n')
-  #   plotOutput('gerdPlot')
-  # })
-  # output$gerdPlot =
+    renderUI({
+    #cat('gerdUI\n')
+      # div(
+        plotOutput('gerdPlot2') 
+        # )
+  })
+  output$gerdPlot =
     renderPlot({
     gerdPlot(sens = input$sensDefault,
+             spec = input$specDefault,
+             prev = input$prevDefault)
+  })
+  output$gerdPlot2 =
+    renderPlot({
+    gerdPlot2(sens = input$sensDefault,
              spec = input$specDefault,
              prev = input$prevDefault)
   })
@@ -431,7 +439,7 @@ fluidPage(
            conditionalPanel(condition = 'input.plotToggle === false',
                             plotOutput('thePlot')),
            conditionalPanel(condition = 'input.plotToggle === true',
-                            plotOutput('gerdUI'))
+                            uiOutput('gerdUI'))
            ),
     column(5, (controls), offset=1)
   ),
