@@ -184,7 +184,7 @@ setJSdefaultsAttribute =
       "document.getElementById('",
       thisId, "')", ifelse(parent, ".parentElement", ""),
       ".style.", att, " = '", value, "'")
-    cat('jsString :', jsString, '\n')
+    #cat('jsString :', jsString, '\n')
     shinyjs::runjs(jsString)
   }
 observeEvent(

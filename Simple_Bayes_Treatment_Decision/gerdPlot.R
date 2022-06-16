@@ -11,12 +11,12 @@ gerdPlot = function(nRow=25, nCol=40, sens = 0.90, spec=0.90, prev=0.01) {
   combo = combo[comboOrder]
   pcombo = pcombo[comboOrder]
   ncombo = round(N*pcombo)
-  print(ncombo)
-  print(sum(ncombo))
+  # print(ncombo)
+  # print(sum(ncombo))
   comboCum = cumsum(ncombo)
-  print(comboCum)
+  # print(comboCum)
   comboCum = c(0, comboCum[-length(ncombo)])
-  print(comboCum)
+  # print(comboCum)
   names(comboCum) = combo
   colors = c(TP='red', TN='blue',FP='green', FN='black')
   plot(grid, axes=F, pch="",
@@ -34,4 +34,4 @@ gerdPlot = function(nRow=25, nCol=40, sens = 0.90, spec=0.90, prev=0.01) {
           outer=FALSE, xpd=NA, line=which(group==combo)-1, adj=1)
   
 }
-gerdPlot()
+#gerdPlot()
