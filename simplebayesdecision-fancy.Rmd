@@ -36,6 +36,7 @@ The vertical blue line occurs at the chosen value.
 
 * "__Observation__":  Either $P$ for positive test, or $N$ for negative test. Bayes expected loss for the two actions $T$ and $W$ is conditional on the observation.
 
+
 ```{r, echo=F}
 usingShinyApp = FALSE
 
@@ -126,6 +127,7 @@ Odds_and_predictive_values = list(
 server = function(input, output) {
 temp = suppressPackageStartupMessages(require('shinyjs', quietly=TRUE))
 source("simplebayesdecision.R")
+source("gerdPlot.R")
 
 f_which.varies = function()
   names(longparamnames)[
@@ -392,7 +394,19 @@ output$thePlot = renderPlot({
   abline(v=default.value, lty=3, lwd=10, col="blue")
 
   })
-
+  output$gerdUI = renderPlot({
+    cat('gerdUI\n')
+    gerdPlot(sens = input$sensDefault,
+             spec = input$specDefault,
+             prev = input$prevDefault)
+  })
+  observeEvent(input$plotToggle,
+               try(
+                 updateCheckboxInput(inputId = 'plotToggle',
+               label = ifelse(input$plotToggle,
+                              'uncheck to see a decision plot',
+                              'check to see a "people plot"')))
+  )
 }   #### End of server ####
 
 #### UI ####
@@ -404,7 +418,14 @@ fluidPage(
     column(6, 
            h3(style='text-align:center; color:green', HTML(
                    'Best action is in GREEN')),
-              plotOutput('thePlot')),
+           checkboxInput('plotToggle', value=FALSE,
+                         label='select for a "people plot"'),
+           #plotOutput('thePlot')
+           conditionalPanel(condition = 'input.plotToggle === false',
+                            plotOutput('thePlot')),
+           conditionalPanel(condition = 'input.plotToggle === true',
+                            plotOutput('gerdUI'))
+           ),
     column(5, (controls), offset=1)
   ),
   (Odds_and_predictive_values) 
