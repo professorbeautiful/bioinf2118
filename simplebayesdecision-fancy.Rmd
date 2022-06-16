@@ -128,6 +128,7 @@ server = function(input, output) {
 temp = suppressPackageStartupMessages(require('shinyjs', quietly=TRUE))
 source("simplebayesdecision.R")
 source("gerdPlot.R")
+# source("gerdPlot2.R")
 
 f_which.varies = function()
   names(longparamnames)[

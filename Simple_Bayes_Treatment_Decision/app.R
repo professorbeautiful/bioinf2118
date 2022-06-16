@@ -4,6 +4,7 @@ library(shiny)
 
 source("simplebayesdecision.R")
 source('inclRmd.R')
+source('gerdPlot.R')
 inclRmd('Simple_Bayes_Treatment_Decision/Simple_Bayes_Treatment_Decision-include.Rmd')
 
 
