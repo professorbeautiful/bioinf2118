@@ -44,6 +44,6 @@ gerdPlot2 = function(nRow=25, nCol=40, sens = 0.90, spec=0.90, prev=0.01) {
         c(1, sens, sens, 1-spec, 1-spec, 0),
         lwd=7, lty='dashed')
 }
-gerdPlot2(spec=0.8, prev=0.1)
+#gerdPlot2(spec=0.8, prev=0.1)
 #abline(h=(1:99)/100, v=(1:99)/100, col='white', lty='dotted')
 #points(expand.grid((1:99)/100, (1:99)/100), col='white', pch='.')
