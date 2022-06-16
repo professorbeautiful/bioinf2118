@@ -29,13 +29,18 @@ gerdPlot2 = function(nRow=25, nCol=40, sens = 0.90, spec=0.90, prev=0.01) {
   )
   symbols(rectCenters, rectangles =rectangles, add=TRUE,
           inches=F, bg=colors)
-  labelXY = cbind(
-    c(-0.05, 0.05),
-    c(-0.05, 0.95),
-    c(1.05, 0.95), #TN
-    c(1.05, 0.05)
+  labelXY = rbind(
+    c(-0.05, -0.05),
+    c(-0.05, 1.05),
+    c(1.05, 1.05), #TN
+    c(1.05, -0.05)
   )
-  text(t(labelXY), labels=combo, col=colors, xpd=NA)
+  print(labelXY)
+  for(group in 1:4)
+    lines(x=c(labelXY[group, 1], round(labelXY[group, 1])), 
+          y=c(labelXY[group, 2], round(labelXY[group, 2])),
+          col=colors[group], xpd=NA)
+  text((labelXY), labels=combo, col=colors, xpd=NA)
   print(pcombo)
   pPos = pcombo['TP'] + pcombo['FP']
   lines(c(0,0,1,1,0),c(0,1,1,0,0),lwd=4)
@@ -43,6 +48,10 @@ gerdPlot2 = function(nRow=25, nCol=40, sens = 0.90, spec=0.90, prev=0.01) {
   lines(c(0, 0, prev, prev, 1, 1), 
         c(1, sens, sens, 1-spec, 1-spec, 0),
         lwd=7, lty='dashed')
+  mtext("Positive test", 1, cex=2)
+  mtext("Negative test", 3, cex=2)
+  mtext("Sick", 2, cex=2)
+  mtext("Healthy", 4, cex=2)
 }
 #gerdPlot2(spec=0.8, prev=0.1)
 #abline(h=(1:99)/100, v=(1:99)/100, col='white', lty='dotted')
