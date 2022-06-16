@@ -396,8 +396,13 @@ output$thePlot = renderPlot({
   abline(v=default.value, lty=3, lwd=10, col="blue")
 
   })
-  output$gerdUI = renderPlot({
-    cat('gerdUI\n')
+  output$gerdUI = 
+  #   renderUI({
+  #   cat('gerdUI\n')
+  #   plotOutput('gerdPlot')
+  # })
+  # output$gerdPlot =
+    renderPlot({
     gerdPlot(sens = input$sensDefault,
              spec = input$specDefault,
              prev = input$prevDefault)
