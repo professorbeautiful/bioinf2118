@@ -26,4 +26,4 @@ gerdPlot = function(nRow=25, nCol=40, sens = 0.90, spec=0.90, prev=0.01) {
          label=group, cex=0.7, col=colors[group])
   
 }
-gerdPlot()
+#gerdPlot()
