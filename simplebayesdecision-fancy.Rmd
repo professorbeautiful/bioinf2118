@@ -40,11 +40,12 @@ The vertical blue line occurs at the chosen value.
 ```{r, echo=F}
 usingShinyApp = FALSE
 
- # conditionalPanelWithCheckbox(
- #  labelString = 'Overview of the topic', 
- #  filename = 'simplebayesdecision-info.Rmd', 
- #  initialValue = TRUE)
-#source("inclRmd.R")
+source("inclRmd.R")
+source("conditionalPanelWithCheckbox.R")
+ conditionalPanelWithCheckbox(
+  labelString = 'Overview of the topic',
+  filename = 'simplebayesdecision-info.Rmd',
+  initialValue = TRUE)
 #inclRmd("simplebayesdecision-info.Rmd")
 # simplebayesdecision-info.Rmd.inclOutput.Rmd
 # is created but not appearing in doc.
