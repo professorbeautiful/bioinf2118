@@ -42,13 +42,7 @@ usingShinyApp = FALSE
 
 source("inclRmd.R")
 source("conditionalPanelWithCheckbox.R")
- conditionalPanelWithCheckbox(
-  labelString = 'Overview of the topic',
-  filename = 'simplebayesdecision-info.Rmd',
-  initialValue = TRUE)
-#inclRmd("simplebayesdecision-info.Rmd")
-# simplebayesdecision-info.Rmd.inclOutput.Rmd
-# is created but not appearing in doc.
+
 
 ```
 
@@ -58,6 +52,8 @@ source("conditionalPanelWithCheckbox.R")
 #### predictiveValueDisplay ####
 predictiveValueDisplay = list(
   h3(style='text-align:center', 'Predictive values'),
+
+  
   wellPanel(fluidRow(
     column(6, span(strong(
       "\"Positive P.V.\"",br(),
@@ -130,6 +126,8 @@ temp = suppressPackageStartupMessages(require('shinyjs', quietly=TRUE))
 source("simplebayesdecision.R")
 source("gerdPlot.R")
 source("gerdPlot2.R")
+
+
 
 f_which.varies = function()
   names(longparamnames)[
@@ -434,7 +432,13 @@ output$thePlot = renderPlot({
 temp = suppressPackageStartupMessages(require('shinyjs', quietly=TRUE))
 ui = 
 fluidPage(
-   useShinyjs(rmd=TRUE, debug=TRUE),  ## this is the place!!
+  useShinyjs(rmd=TRUE, debug=TRUE),  ## this is the place!!
+  # conditionalPanelWithCheckbox(
+  #   labelString = 'Overview of the topic',
+  #   #filename = 'simplebayesdecision-info.Rmd',
+  #   html = "hello world", 
+  #   initialValue = TRUE),
+  #uiOutput('topicId'),
   fluidRow(
     column(6, 
            h3(style='text-align:center; color:green', HTML(
