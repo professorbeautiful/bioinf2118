@@ -273,8 +273,8 @@ output$priorOdds = renderText(
   ))
 )
 
-LikRat = reactive(
-  try(switch(EXPR = 
+LikRat = reactive( {
+  value = try(switch(EXPR = 
     input$dataInputID,
     Positive = 
       input$sensDefault / 
@@ -283,7 +283,9 @@ LikRat = reactive(
       (1-input$sensDefault) /
       input$specDefault)
   )
-)
+  if(class(value)== 'try-error') value = NA
+  value
+})
 output$likelihoodRatio = renderText( {
   as.character(
     signif(digits=2, LikRat()
