@@ -10,38 +10,13 @@ runtime: shiny
 
 ### Using Bayes expected loss to support a medical decision. 
 
-### Actions to choose from:
-
-* $T$: Treat
-* $W$: Wait ("Watchful Waiting")
-
-### Bayes expected loss for action $A$ = $\rho$ = $\rho (A|X) = {E_{\theta |X}}(Loss(\theta, A))$.
-
-* $\rho (T|X) = Loss(Healthy, Treat) \times Pr(Healthy | X)$
-
-* $\rho (W|X) = Loss(Sick, Wait) \times Pr(Sick | X)$
-
-
-### Best decisions  (Bayes rule):
-
-* Where the $T$ line is below the $W$ line, the better decision is $T$.
-* Where the $W$ line is below the $T$ line, the better decision is $W$.
-* Where (if) the $W$ and $T$ lines cross, $W$ and $T$ are equally good/bad;
-
-    $\ \ \ \ \ \ \ \ \rho (W|X) = \rho (T|X)$.
-
-
-* "__Horizontal axis Parameter__":  the parameter along the horizontal axis.
-The vertical blue line occurs at the chosen value. 
-
-* "__Observation__":  Either $P$ for positive test, or $N$ for negative test. Bayes expected loss for the two actions $T$ and $W$ is conditional on the observation.
-
-
 ```{r, echo=F}
 usingShinyApp = FALSE
+temp = suppressPackageStartupMessages(require('shinyjs', quietly=TRUE))
 
 source("inclRmd.R")
 source("conditionalPanelWithCheckbox.R")
+source("addOpacity.R")
 
 
 ```
@@ -52,8 +27,6 @@ source("conditionalPanelWithCheckbox.R")
 #### predictiveValueDisplay ####
 predictiveValueDisplay = list(
   h3(style='text-align:center', 'Predictive values'),
-
-  
   wellPanel(fluidRow(
     column(6, span(strong(
       "\"Positive P.V.\"",br(),
@@ -122,7 +95,6 @@ Odds_and_predictive_values = list(
 ####  server ####
 
 server = function(input, output) {
-temp = suppressPackageStartupMessages(require('shinyjs', quietly=TRUE))
 source("simplebayesdecision.R")
 source("gerdPlot.R")
 source("gerdPlot2.R")
@@ -484,7 +456,31 @@ output$thePlot = renderPlot({
       arrows(x0 = 1-0.78, x1 = 1-0.55, y0=Ylevels[3]-0.1, y1=Ylevels[4]-0.05, lwd=3)
       arrows(x0 = 0.78, x1 = 0.55, y0=Ylevels[3]-0.1, y1=Ylevels[4]-0.05, lwd=3)
 
-    })    
+    })  ### end of happy face
+  
+  cbStringId = 'topicId'
+  output$topicId  <- renderUI({
+    wellPanel(
+      checkboxInput(cbStringId,
+                    strong(em(showhideString('details', FALSE)
+                    )),
+                    value=FALSE),
+      conditionalPanel(condition = paste0('input.', cbStringId),
+                     inclRmd(
+                       'simplebayesdecision-info.Rmd'
+                     )  )
+      #### HERE ####
+    )  })
+
+  observeEvent(
+    input[[cbStringId]], {
+      fullString = showhideString('details', input[[cbStringId]])
+      updateCheckboxInput(
+        session, cbStringId,
+        label=fullString)
+    }
+  )
+
 }   #### End of server ####
 
 #### UI ####
