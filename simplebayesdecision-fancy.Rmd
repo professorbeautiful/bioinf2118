@@ -13,6 +13,7 @@ runtime: shiny
 ```{r, echo=F}
 usingShinyApp = FALSE
 temp = suppressPackageStartupMessages(require('shinyjs', quietly=TRUE))
+temp = suppressPackageStartupMessages(require('markdown', quietly=TRUE))
 
 source("inclRmd.R")
 source("conditionalPanelWithCheckbox.R")
