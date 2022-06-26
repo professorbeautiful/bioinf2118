@@ -144,7 +144,8 @@ dashWrap = function(s)
                   "∎", s
                    , "</div>"
                   ) )
-DashedLine = "
+DashedLine = ## NOT USED
+"
             border-color:  rgba(0, 100, 200, 1);
 color: rgba(0, 100, 200, 1); 
 font-weight: bold; 
