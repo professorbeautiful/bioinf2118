@@ -225,12 +225,11 @@ output$parameterUI = renderUI(
     wellPanel(
   fluidRow(
     splitLayout(
-      
-           numericInput(
-                   'prevDefault',
-                    ('prevalence') ,
-                   value = paramArgDefaults['prev'],
-                   min = 0, max=1, step = 0.01),
+      numericInput(
+        'prevDefault',
+        ('prevalence') ,
+        value = paramArgDefaults['prev'],
+        min = 0, max=1, step = 0.01),
       numericInput('sensDefault',
                    ('sensitivity'),
                    value = paramArgDefaults['sens'],
@@ -240,6 +239,8 @@ output$parameterUI = renderUI(
                    value = paramArgDefaults['spec'],
                    min = 0, max=1, step = 0.01)
     )),
+  
+  conditionalPanel('input.plotChoice === "3"', 
   fluidRow(splitLayout(
     numericInput('L.SWDefault',
                  HTML('Loss<br>Sick&Wait'),
@@ -256,7 +257,7 @@ output$parameterUI = renderUI(
       choices = c("Positive","Negative"),
       selected="Positive",
       selectize=FALSE)
-  )),
+  ))),
   fluidRow(
     column(2, ""),
     column(8, 
@@ -399,7 +400,7 @@ output$thePlot = renderPlot({
     renderUI({
     cat('gerdUI, plotChoice = ', input$plotChoice, '\n')
       div(
-        conditionalPanel(condition = 'input.plotChoice === "0"', {
+        conditionalPanel(condition = 'input.plotChoice === "3"', {
                     div( h3(style='text-align:center; color:green',
                         HTML('Best action is in GREEN')),
                          plotOutput('thePlot') ) }),
@@ -407,7 +408,7 @@ output$thePlot = renderPlot({
                          plotOutput('gerdPlot') ),
         conditionalPanel(condition = 'input.plotChoice === "2"',
                          plotOutput('gerdPlot2') ),
-        conditionalPanel(condition = 'input.plotChoice === "3"',
+        conditionalPanel(condition = 'input.plotChoice === "0"',
                          plotOutput('happyImage') ),
        )
   })
@@ -436,15 +437,19 @@ output$thePlot = renderPlot({
       text(0.5, Ylevels[1] - 0.05 , 'people tested', xpd=NA)
       Sick = round(N * input$prevDefault)
       text(0.3, Ylevels[2] , Sick)
-      text(0.3, Ylevels[2] - 0.05 , 'have it')
+      text(0.3, Ylevels[2] - 0.05 , 'is Sick')
+      text(x = 0.375, y=(Ylevels[1]- 0.1 + Ylevels[2]+ 0.05)/2,
+           'prevalence', col='blue', cex=2)
       arrows(x0 = 0.4, x1 = 0.35, y0=Ylevels[1]- 0.1, y1=Ylevels[2]+ 0.05, lwd = 3)
       NotSick =  N - Sick
       text(0.7, Ylevels[2] , NotSick)
-      text(0.7, Ylevels[2] - 0.05 , 'don\'t have it')
+      text(0.7, Ylevels[2] - 0.05 , 'is not Sick')
       arrows(x0 = 0.6, x1 = 0.65, y0=Ylevels[1]- 0.1, y1=Ylevels[2]+ 0.05, lwd = 3)
       TP = round(Sick * input$sensDefault)
       text(0.2, Ylevels[3] , TP)
       text(0.2, Ylevels[3] - 0.05, 'true positive')
+      text(x = 0.25, y=(Ylevels[2]- 0.1 + Ylevels[3]+ 0.05)/2,
+           'sensitivity', col='blue', cex=1)
       arrows(x0 = 0.27, x1 = 0.22, y0=Ylevels[2]-0.1, y1=Ylevels[3]+0.05, lwd=3)
       FN = round(Sick - TP)
       text(0.4, Ylevels[3] , FN)
@@ -459,13 +464,15 @@ output$thePlot = renderPlot({
       FN = round(NotSick - TP)
       text(0.6, Ylevels[3] , FN)
       text(0.6, Ylevels[3] - 0.05, 'true negative')
+      text(x = 1-0.35, y=(Ylevels[2]- 0.1 + Ylevels[3]+ 0.05)/2,
+           'specificity', col='blue', cex=1)
       arrows(x0 = 1-0.33, x1 = 1-0.38, y0=Ylevels[2]-0.1, y1=Ylevels[3]+0.05, lwd=3)
 
             text(0.5, Ylevels[4], TP)
       text(0.5, Ylevels[4] - 0.03, '___')
       text(0.5, Ylevels[4] - 0.06, paste0(TP, "+", FP))
       text(0.5, Ylevels[4] - 0.12, paste0('= ', round(digits=3, TP/(TP+FP))))
-      text(0.5, Ylevels[4] - 0.2, 'Chance "has it" if test is positive')
+      text(0.5, Ylevels[4] - 0.2, 'Chance the person is "Sick" if test is positive')
       arrows(x0 = 1-0.78, x1 = 1-0.55, y0=Ylevels[3]-0.1, y1=Ylevels[4]-0.05, lwd=3)
       arrows(x0 = 0.78, x1 = 0.55, y0=Ylevels[3]-0.1, y1=Ylevels[4]-0.05, lwd=3)
 
@@ -496,17 +503,17 @@ fluidPage(
   #uiOutput('topicId'),
   fluidRow(
     column(6, 
-           radioButtons('plotChoice', label='', choiceValues=0:3,
-                        choiceNames = c('decision plot', 'people plot #1',  'people plot #2', 'happy face'), 
-                        inline = TRUE),
-           # checkboxInput('plotToggle', value=FALSE,
-           #               label='select for a "people plot"'),
-           #plotOutput('thePlot')
-           # conditionalPanel(condition = 'input.plotToggle === false',
-           #                  plotOutput('thePlot')),
-           # conditionalPanel(condition = 'input.plotToggle === true',
-                            uiOutput('gerdUI') #)
-           ),
+           div(style="color:red;",
+               radioButtons('plotChoice', 
+                            label='', choiceValues=0:3,
+                        choiceNames = list(
+                          HTML('simple <br>probability'), 
+                          HTML('people <br>plot #1'),   
+                          HTML('people <br>plot #2'),  
+                          HTML('decision <br>plot')), 
+                        inline = TRUE)),
+           uiOutput('gerdUI') #)
+    ),
     column(5, (controls), offset=1)
   ),
   (Odds_and_predictive_values) 
