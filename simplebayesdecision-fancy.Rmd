@@ -399,12 +399,16 @@ output$thePlot = renderPlot({
     renderUI({
     cat('gerdUI, plotChoice = ', input$plotChoice, '\n')
       div(
-        conditionalPanel(condition = 'input.plotChoice === "0"',
-                         plotOutput('thePlot') ),
+        conditionalPanel(condition = 'input.plotChoice === "0"', {
+                    div( h3(style='text-align:center; color:green',
+                        HTML('Best action is in GREEN')),
+                         plotOutput('thePlot') ) }),
         conditionalPanel(condition = 'input.plotChoice === "1"',
                          plotOutput('gerdPlot') ),
         conditionalPanel(condition = 'input.plotChoice === "2"',
                          plotOutput('gerdPlot2') ),
+        conditionalPanel(condition = 'input.plotChoice === "3"',
+                         plotOutput('happyImage') ),
        )
   })
   output$gerdPlot =
@@ -419,6 +423,57 @@ output$thePlot = renderPlot({
              spec = input$specDefault,
              prev = input$prevDefault)
   })
+  output$happyImage = 
+    renderPlot({
+      par(oma=c(0,0,0,0))
+      par(mai=c(0,0,1,0))
+      N = 1000
+      Ylevels = c(1.05, 0.8, 0.5, 0.3)
+            
+      plot(0:1, 0:1, axes=F, pch='')
+      title('Natural counts')
+      text(0.5, Ylevels[1] , N, xpd=NA)
+      text(0.5, Ylevels[1] - 0.05 , 'people tested', xpd=NA)
+      Sick = round(N * input$prevDefault)
+      text(0.3, Ylevels[2] , Sick)
+      text(0.3, Ylevels[2] - 0.05 , 'have it')
+      arrows(x0 = 0.4, x1 = 0.35, y0=Ylevels[1]- 0.1, y1=Ylevels[2]+ 0.05, lwd = 3)
+      NotSick =  N - Sick
+      text(0.7, Ylevels[2] , NotSick)
+      text(0.7, Ylevels[2] - 0.05 , 'don\'t have it')
+      arrows(x0 = 0.6, x1 = 0.65, y0=Ylevels[1]- 0.1, y1=Ylevels[2]+ 0.05, lwd = 3)
+      TP = round(Sick * input$sensDefault)
+      text(0.2, Ylevels[3] , TP)
+      text(0.2, Ylevels[3] - 0.05, 'true positive')
+      arrows(x0 = 0.27, x1 = 0.22, y0=Ylevels[2]-0.1, y1=Ylevels[3]+0.05, lwd=3)
+      FN = round(Sick - TP)
+      text(0.4, Ylevels[3] , FN)
+      text(0.4, Ylevels[3] - 0.05, 'false negative')
+      arrows(x0 = 0.33, x1 = 0.38, y0=Ylevels[2]-0.1, y1=Ylevels[3]+0.05, lwd=3)
+
+      TN = round(NotSick * input$specDefault)
+      FP = round(NotSick - TN)
+      text(0.8, Ylevels[3] , FP)
+      text(0.8, Ylevels[3] - 0.05, 'false positive')
+      arrows(x0 = 0.73, x1 = 0.78, y0=Ylevels[2]-0.1, y1=Ylevels[3]+0.05, lwd=3)
+      FN = round(NotSick - TP)
+      text(0.6, Ylevels[3] , FN)
+      text(0.6, Ylevels[3] - 0.05, 'true negative')
+      arrows(x0 = 1-0.33, x1 = 1-0.38, y0=Ylevels[2]-0.1, y1=Ylevels[3]+0.05, lwd=3)
+
+            text(0.5, Ylevels[4], TP)
+      text(0.5, Ylevels[4] - 0.03, '___')
+      text(0.5, Ylevels[4] - 0.06, paste0(TP, "+", FP))
+      text(0.5, Ylevels[4] - 0.12, paste0('= ', round(digits=3, TP/(TP+FP))))
+      text(0.5, Ylevels[4] - 0.2, 'Chance "has it" if test is positive')
+      arrows(x0 = 1-0.78, x1 = 1-0.55, y0=Ylevels[3]-0.1, y1=Ylevels[4]-0.05, lwd=3)
+      arrows(x0 = 0.78, x1 = 0.55, y0=Ylevels[3]-0.1, y1=Ylevels[4]-0.05, lwd=3)
+
+    #   filename <- normalizePath(file.path('./images',
+    #                                      'gerdHappy.png'))
+    #   list(src=filename)
+    # }, deleteFile=FALSE, outputArgs = list(height='100px'))
+    })    
   # observeEvent(input$plotToggle,
   #              try(
   #                updateCheckboxInput(inputId = 'plotToggle',
@@ -441,10 +496,8 @@ fluidPage(
   #uiOutput('topicId'),
   fluidRow(
     column(6, 
-           h3(style='text-align:center; color:green', HTML(
-                   'Best action is in GREEN')),
-           radioButtons('plotChoice', label='', choiceValues=0:2,
-                        choiceNames = c('decision plot', 'people plot #1',  'people plot #2'), 
+           radioButtons('plotChoice', label='', choiceValues=0:3,
+                        choiceNames = c('decision plot', 'people plot #1',  'people plot #2', 'happy face'), 
                         inline = TRUE),
            # checkboxInput('plotToggle', value=FALSE,
            #               label='select for a "people plot"'),
