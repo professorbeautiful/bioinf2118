@@ -7,7 +7,7 @@ gerdPlot2 = function(nRow=25, nCol=40, sens = 0.90, spec=0.90, prev=0.01) {
   names(pcombo) = combo
   ncombo = round(N*pcombo)
   
-  colors = c(TP='red', TN='blue',FP='dark green', FN='purple')
+  colors = c(TP='blue', TN='red',FP='dark green', FN='purple')
   plot(0:1, 0:1, axes=F, pch="", xlim=0:1, ylim=0:1,
        xlab='', ylab='')
   # for(group in combo)
@@ -36,18 +36,26 @@ gerdPlot2 = function(nRow=25, nCol=40, sens = 0.90, spec=0.90, prev=0.01) {
     c(1.05, -0.05)
   )
   print(labelXY)
+  # diagonal corner lines
   for(group in 1:4)
     lines(x=c(labelXY[group, 1], round(labelXY[group, 1])), 
           y=c(labelXY[group, 2], round(labelXY[group, 2])),
           col=colors[group], xpd=NA)
   text((labelXY), labels=combo, col=colors, xpd=NA)
+  numbersXY = rbind(
+    c(-0.1, -0.1),
+    c(-0.1, 1.10),
+    c(1.10, 1.10), #TN
+    c(1.10, -0.1)
+  )
+  text(numbersXY, labels=ncombo, col=colors, xpd=NA)
   print(pcombo)
   pPos = pcombo['TP'] + pcombo['FP']
-  lines(c(0,0,1,1,0),c(0,1,1,0,0),lwd=4)
+  # lines(c(0,0,1,1,0),c(0,1,1,0,0),lwd=4)
   
-  lines(c(0, 0, prev, prev, 1, 1), 
-        c(1, sens, sens, 1-spec, 1-spec, 0),
-        lwd=7, lty='dashed')
+  # lines(c(0, 0, prev, prev, 1, 1), 
+  #       c(1, sens, sens, 1-spec, 1-spec, 0),
+  #       lwd=7, lty='dashed')
   mtext("Positive test", 1, cex=2)
   mtext("Negative test", 3, cex=2)
   mtext("Sick", 2, cex=2)
