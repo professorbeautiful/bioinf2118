@@ -1,14 +1,11 @@
 ---
-title: "Simple Bayes decision plots"
+title: "Bayes expected loss for making medical decisions"
 output: html_document
-author: Roger Day
-date: "`r Sys.Date()`"
+author: Statistics Beautiful, `r Sys.Date()`
 runtime: shiny
 ---
 
 
-
-### Using Bayes expected loss to support a medical decision. 
 
 ```{r, echo=F}
 usingShinyApp = FALSE
