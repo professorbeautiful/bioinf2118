@@ -109,11 +109,11 @@ Odds_and_predictive_values = list(
   fluidRow(
     column(
       6,
-      (odds_display)
+      (predictiveValueDisplay)
     ),
     column(
       6,
-      (predictiveValueDisplay)
+      (odds_display)
     )
   )
 )
