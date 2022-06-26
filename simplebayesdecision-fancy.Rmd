@@ -212,7 +212,7 @@ output$parameterUI = renderUI(
                        value = paramArgDefaults['spec'],
                        min = 0, max=1, step = 0.01)
     ))
-  LossesAndObservationUI = 
+  LossesUI = 
     fluidRow(splitLayout(
     numericInput('L.SWDefault',
                  HTML('Loss<br>Sick&Wait'),
@@ -222,14 +222,15 @@ output$parameterUI = renderUI(
                  HTML('Loss<br>Healthy&Treat'),
                  value = paramArgDefaults['L.HT'],
                  min = 0, max=10, step = 0.1)
-    ,
+    ))
+  ObservationUI = 
     selectInput(
       "dataInputID",
       label=HTML("Observation<br> (test)"),
       choices = c("Positive","Negative"),
       selected="Positive",
       selectize=FALSE)
-  ))
+  
   
   axisUI = div(
     fluidRow(
@@ -253,12 +254,15 @@ output$parameterUI = renderUI(
     column(2, "")
     )
   )
+  
   div(
     wellPanel(probParamUI),
     conditionalPanel('input.plotChoice === "1"', 
                      wellPanel(
-                       div(LossesAndObservationUI, hr(), axisUI)
-                     )))  
+                       div(LossesUI, hr(), axisUI)
+                     )),
+    ObservationUI
+    )  
   }
 )
 
@@ -274,6 +278,7 @@ output$priorOdds = renderText(
 )
 
 LikRat = reactive( {
+  if(is.null(input$dataInputID)) return(NA)
   value = try(switch(EXPR = 
     input$dataInputID,
     Positive = 
