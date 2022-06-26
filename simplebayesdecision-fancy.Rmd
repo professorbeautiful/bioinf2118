@@ -222,26 +222,25 @@ observeEvent(
 
 output$parameterUI = renderUI(
   {
-    wellPanel(
-  fluidRow(
-    splitLayout(
-      numericInput(
-        'prevDefault',
-        ('prevalence') ,
-        value = paramArgDefaults['prev'],
-        min = 0, max=1, step = 0.01),
-      numericInput('sensDefault',
-                   ('sensitivity'),
-                   value = paramArgDefaults['sens'],
-                   min = 0, max=1, step = 0.01),
-      numericInput('specDefault',
-                   ('specificity'),
-                   value = paramArgDefaults['spec'],
-                   min = 0, max=1, step = 0.01)
-    )),
-  
-  conditionalPanel('input.plotChoice === "3"', 
-  fluidRow(splitLayout(
+    probParamUI =   
+      fluidRow(
+        splitLayout(
+          numericInput(
+            'prevDefault',
+            ('prevalence') ,
+            value = paramArgDefaults['prev'],
+            min = 0, max=1, step = 0.01),
+          numericInput('sensDefault',
+                       ('sensitivity'),
+                       value = paramArgDefaults['sens'],
+                       min = 0, max=1, step = 0.01),
+          numericInput('specDefault',
+                       ('specificity'),
+                       value = paramArgDefaults['spec'],
+                       min = 0, max=1, step = 0.01)
+    ))
+  LossesAndObservationUI = 
+    fluidRow(splitLayout(
     numericInput('L.SWDefault',
                  HTML('Loss<br>Sick&Wait'),
                  value = paramArgDefaults['L.SW'],
@@ -257,8 +256,10 @@ output$parameterUI = renderUI(
       choices = c("Positive","Negative"),
       selected="Positive",
       selectize=FALSE)
-  ))),
-  fluidRow(
+  ))
+  
+  axisUI = div(
+    fluidRow(
     column(2, ""),
     column(8, 
            selectInput("parameterInputID", 
@@ -279,6 +280,12 @@ output$parameterUI = renderUI(
     column(2, "")
     )
   )
+  div(
+    wellPanel(probParamUI),
+    conditionalPanel('input.plotChoice === "3"', 
+                     wellPanel(
+                       div(LossesAndObservationUI, hr(), axisUI)
+                     )))  
   }
 )
 
