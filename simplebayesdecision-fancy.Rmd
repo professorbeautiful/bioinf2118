@@ -460,7 +460,7 @@ output$thePlot = renderPlot({
   
   cbStringId = 'topicId'
   output$topicId  <- renderUI({
-    wellPanel(
+    span(
       checkboxInput(cbStringId,
                     strong(em(showhideString('details', FALSE)
                     )),
