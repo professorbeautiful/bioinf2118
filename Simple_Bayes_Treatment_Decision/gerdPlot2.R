@@ -2,12 +2,13 @@ gerdPlot2 = function(nRow=25, nCol=40, sens = 0.90, spec=0.90, prev=0.01) {
   
   N = nRow * nCol
   
-  combo = c('TP', 'FN', 'TN', 'FP' )
+  combo = c('TP', 'FN', 'TN', 'FP' ) 
+  colors = c(TP='blue', TN='red',FP='dark green', FN='purple') [combo]
+  
   pcombo = c(prev*c(sens, 1-sens), (1-prev)*c(spec,1-spec))
   names(pcombo) = combo
   ncombo = round(N*pcombo)
   
-  colors = c(TP='blue', TN='red',FP='dark green', FN='purple')
   plot(0:1, 0:1, axes=F, pch="", xlim=0:1, ylim=0:1,
        xlab='', ylab='')
   # for(group in combo)
@@ -28,16 +29,17 @@ gerdPlot2 = function(nRow=25, nCol=40, sens = 0.90, spec=0.90, prev=0.01) {
     c(1-prev, 1-spec)   #FP
   )
   symbols(rectCenters, rectangles =rectangles, add=TRUE,
-          inches=F, bg=colors)
+          inches=F, bg=addOpacity(colors, opacity = 33))
   labelXY = rbind(
     c(-0.05, -0.05),
     c(-0.05, 1.05),
     c(1.05, 1.05), #TN
     c(1.05, -0.05)
   )
+  rownames(labelXY) = combo
   print(labelXY)
   # diagonal corner lines
-  for(group in 1:4)
+  for(group in combo)
     lines(x=c(labelXY[group, 1], round(labelXY[group, 1])), 
           y=c(labelXY[group, 2], round(labelXY[group, 2])),
           col=colors[group], xpd=NA)

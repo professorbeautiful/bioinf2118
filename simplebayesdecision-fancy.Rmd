@@ -283,7 +283,7 @@ output$parameterUI = renderUI(
   )
   div(
     wellPanel(probParamUI),
-    conditionalPanel('input.plotChoice === "3"', 
+    conditionalPanel('input.plotChoice === "1"', 
                      wellPanel(
                        div(LossesAndObservationUI, hr(), axisUI)
                      )))  
@@ -408,13 +408,13 @@ output$thePlot = renderPlot({
     renderUI({
     cat('gerdUI, plotChoice = ', input$plotChoice, '\n')
       div(
-        conditionalPanel(condition = 'input.plotChoice === "3"', {
+        conditionalPanel(condition = 'input.plotChoice === "1"', {
                     div( h3(style='text-align:center; color:green',
                         HTML('Best action is in GREEN')),
                          plotOutput('thePlot') ) }),
-        conditionalPanel(condition = 'input.plotChoice === "1"',
-                         plotOutput('gerdPlot') ),
         conditionalPanel(condition = 'input.plotChoice === "2"',
+                         plotOutput('gerdPlot') ),
+        conditionalPanel(condition = 'input.plotChoice === "3"',
                          plotOutput('gerdPlot2') ),
         conditionalPanel(condition = 'input.plotChoice === "0"',
                          plotOutput('happyImage') ),
@@ -484,31 +484,14 @@ output$thePlot = renderPlot({
       arrows(x0 = 1-0.78, x1 = 1-0.55, y0=Ylevels[3]-0.1, y1=Ylevels[4]-0.05, lwd=3)
       arrows(x0 = 0.78, x1 = 0.55, y0=Ylevels[3]-0.1, y1=Ylevels[4]-0.05, lwd=3)
 
-    #   filename <- normalizePath(file.path('./images',
-    #                                      'gerdHappy.png'))
-    #   list(src=filename)
-    # }, deleteFile=FALSE, outputArgs = list(height='100px'))
     })    
-  # observeEvent(input$plotToggle,
-  #              try(
-  #                updateCheckboxInput(inputId = 'plotToggle',
-  #              label = ifelse(input$plotToggle,
-  #                             'uncheck to see a decision plot',
-  #                             'check to see a "people plot"')))
-  # )
 }   #### End of server ####
 
 #### UI ####
-temp = suppressPackageStartupMessages(require('shinyjs', quietly=TRUE))
 ui = 
 fluidPage(
   useShinyjs(rmd=TRUE, debug=TRUE),  ## this is the place!!
-  # conditionalPanelWithCheckbox(
-  #   labelString = 'Overview of the topic',
-  #   #filename = 'simplebayesdecision-info.Rmd',
-  #   html = "hello world", 
-  #   initialValue = TRUE),
-  #uiOutput('topicId'),
+  uiOutput('topicId'),
   fluidRow(
     column(6, 
            div(style="color:red;",
@@ -516,9 +499,9 @@ fluidPage(
                             label='', choiceValues=0:3,
                         choiceNames = list(
                           HTML('simple <br>probability'), 
+                          HTML('decision <br>plot'), 
                           HTML('people <br>plot #1'),   
-                          HTML('people <br>plot #2'),  
-                          HTML('decision <br>plot')), 
+                          HTML('people <br>plot #2')),  
                         inline = TRUE)),
            uiOutput('gerdUI') #)
     ),
