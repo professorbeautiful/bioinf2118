@@ -22,6 +22,7 @@ source("addOpacity.R")
 
 ```{r, echo=FALSE}
 
+
 #### predictiveValueDisplay ####
 predictiveValueDisplay = list(
   h3(style='text-align:center', 'Predictive values'),
@@ -71,7 +72,6 @@ odds_display = list(
 #### controls ####
 
 controls <<- list(
-  h3(style='text-align:center', "Scenario"),
     uiOutput('parameterUI')
 )
 
@@ -193,7 +193,8 @@ observeEvent(
 
 output$parameterUI = renderUI(
   {
-    probParamUI =   
+    probParamUI = div(
+      h3(style='text-align:center', "Probabilities"),
       fluidRow(
         splitLayout(
           numericInput(
@@ -209,17 +210,19 @@ output$parameterUI = renderUI(
                        ('specificity'),
                        value = paramArgDefaults['spec'],
                        min = 0, max=1, step = 0.01)
-    ))
+    )))
   LossesUI = 
-    fluidRow(splitLayout(
-    numericInput('L.SWDefault',
-                 HTML('Loss<br>Sick&Wait'),
+    div( #h5(style='text-align:center', "Losses & axis"),
+    fluidRow(
+      column(1, ""),
+    column(5, numericInput('L.SWDefault',
+                 HTML('Loss if Sick&Wait'),
                  value = paramArgDefaults['L.SW'],
-                 min = 0, max=10, step = 0.1),
-    numericInput('L.HTDefault',
-                 HTML('Loss<br>Healthy&Treat'),
+                 min = 0, max=10, step = 0.1, width='100%')),
+    column(5, numericInput('L.HTDefault',
+                 HTML('Loss if Healthy&Treat'),
                  value = paramArgDefaults['L.HT'],
-                 min = 0, max=10, step = 0.1)
+                 min = 0, max=10, step = 0.1, width='100%'))
     ))
   ObservationUI = 
     selectInput(
@@ -232,33 +235,34 @@ output$parameterUI = renderUI(
   
   axisUI = div(
     fluidRow(
-    column(2, ""),
-    column(8, 
+    column(6, 
            selectInput("parameterInputID", 
                        label = dashWrap('horizontal axis'),
                        choices = as.vector(longparamnames), 
                        selected = as.vector(longparamnames[1]),
                        selectize=FALSE)
     ),
-    column(2, "")
-    ),
-  fluidRow(
-    column(2, ""),
-    column(8, 
+   column(6, 
            textInput('rangeInputID',
                        label = dashWrap('horizontal axis points'),
                    value = paramPlotRange['prev']),
-    ),
-    column(2, "")
+    )
     )
   )
   
   div(
-    wellPanel(probParamUI),
+    conditionalPanel('input.plotChoice != "1"',
+                     HTML(paste0(rep('<br>', 13)))
+    ),
     conditionalPanel('input.plotChoice === "1"', 
                      wellPanel(
-                       div(LossesUI, hr(), axisUI)
-                     )),
+                       div(LossesUI, hr(), axisUI), 
+                       style = "padding-bottom: 1px;
+                       padding-top: -10px;"
+    )),
+    wellPanel(probParamUI, 
+              style = "padding-bottom: 1px;padding-top: 1px;
+              padding-right: 25px;"),
     ObservationUI
     )  
   }
@@ -506,7 +510,7 @@ fluidPage(
                         inline = TRUE)),
            uiOutput('gerdUI') #)
     ),
-    column(5, (controls), offset=1)
+    column(6, (controls))
   ),
   (Odds_and_predictive_values) 
 )
