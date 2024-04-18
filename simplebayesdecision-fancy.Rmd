@@ -419,8 +419,9 @@ output$thePlot = renderPlot({
       par(mai=c(0,0,1,0))
       N = 1000
       Ylevels = c(1.05, 0.8, 0.5, 0.3)
-      text_for_treeNumber = function(x, y, NNN){
-              text(x, y, NNN, xpd=NA, cex=1.5, col='darkgreen',
+      text_for_treeNumber = function(x, y, NNN, CEX=1.5){
+              text(x, y, NNN, xpd=NA, cex=CEX,
+                   col='darkgreen',
                    vfont = c('serif', 'bold'))
       } 
       plot(0:1, 0:1, axes=F, pch='')
@@ -463,8 +464,15 @@ output$thePlot = renderPlot({
       text_for_treeNumber(0.5, Ylevels[4], TP)
       text(0.5, Ylevels[4] - 0.03, '___')
       text_for_treeNumber(0.5, Ylevels[4] - 0.06, paste0(TP, "+", FP))
-      text_for_treeNumber(0.5, Ylevels[4] - 0.12, paste0('= ', round(digits=3, TP/(TP+FP))))
-      text(0.5, Ylevels[4] - 0.2, 'Chance the person is "Sick" if test is positive')
+      text_for_treeNumber(
+        0.5, Ylevels[4] - 0.12, 
+        paste0('= ', round(digits=3, TP/(TP+FP))))
+      text(0.5, Ylevels[4] - 0.2, 
+           cex=1.5,
+           'So the chance the person is "Sick" if test is positive equals ')
+      text_for_treeNumber(0.5, Ylevels[4] - 0.28, 
+           CEX=2.5,
+           round(digits=3, TP/(TP+FP)))
       arrows(x0 = 1-0.78, x1 = 1-0.58, y0=Ylevels[3]-0.1, y1=Ylevels[4]-0.05, lwd=3)
       arrows(x0 = 0.78, x1 = 0.58, y0=Ylevels[3]-0.1, y1=Ylevels[4]-0.05, lwd=3)
 
@@ -480,7 +488,8 @@ output$thePlot = renderPlot({
       conditionalPanel(condition = paste0('input.', cbStringId),
                      inclRmd(
                        'simplebayesdecision-info.Rmd'
-                     )  )
+                     )  
+                     )
       #### HERE ####
     )  })
 
