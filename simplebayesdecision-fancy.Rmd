@@ -485,11 +485,13 @@ output$thePlot = renderPlot({
                     strong(em(showhideString('details', FALSE)
                     )),
                     value=FALSE),
-      conditionalPanel(condition = paste0('input.', cbStringId),
-                     inclRmd(
-                       'simplebayesdecision-info.Rmd'
-                     )  
-                     )
+      conditionalPanel(
+        condition = paste0('input.', cbStringId),
+        wellPanel(
+          inclRmd(
+            'simplebayesdecision-info.Rmd'
+          )  )
+      )
       #### HERE ####
     )  })
 

@@ -1,12 +1,11 @@
 
-### Using Bayes expected loss to support a medical decision. 
 
-### Actions to choose from:
+#### Actions to choose from:
 
 * $T$: Treat
 * $W$: Wait ("Watchful Waiting")
 
-### Bayes expected loss for action $A$ = $\rho$ = $\rho (A|X) = {E_{\theta |X}}(Loss(\theta, A))$.
+#### Bayes expected loss for action $A$ = $\rho$ = $\rho (A|X) = {E_{\theta |X}}(Loss(\theta, A))$.
 
 * $\rho (T|X) = Loss(Healthy, Treat) \times Pr(Healthy | X)$
 
