@@ -277,7 +277,8 @@ output$parameterUI = renderUI(
 )
 
 output$posteriorOddsLabel = renderText(
-  paste("Posterior odds ", "given test = ", input$dataInputID))
+  HTML(paste("Posterior odds ", 
+             "given test = ", input$dataInputID)))
 
 output$priorOdds = renderText(
   as.character(signif(
@@ -516,9 +517,14 @@ output$thePlot = renderPlot({
 
 #### UI ####
 ui = 
-fluidPage(
+fillPage(  #fillPage and fluidPage the same.
   useShinyjs(rmd=TRUE, debug=TRUE),  ## this is the place!!
-  uiOutput('topicId'),
+#      tags$style(type = "text/css", "#plot1 {height: calc(100vh - 80px) !important;}"),
+#  tags$style("width: 100% !important;"),
+  # fluidRow(
+  #   column(12, 
+  #          uiOutput('topicId'))),
+  #Removing this topicId at least helps the Odds panel to fill out.
   fluidRow(
     column(6, 
            div(style="color:red;",
