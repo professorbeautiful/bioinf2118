@@ -5,7 +5,15 @@ author: Statistics Beautiful, `r Sys.Date()`
 runtime: shiny
 ---
 
-
+<!-- 
+To Deploy: 
+deployApp(appFiles = 
+c('simplebayesdecision-fancy.Rmd', 'inclRmd.R',
+'conditionalPanelWithCheckbox.R','addOpacity.R',
+'simplebayesdecision-info.Rmd', "simplebayesdecision.R" 
+           , "gerdPlot.R" 
+           , "gerdPlot2.R"  )) 
+-->
 
 ```{r, echo=F}
 usingShinyApp = FALSE
