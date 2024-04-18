@@ -1,7 +1,6 @@
 ---
 title: "Bayes expected loss for making medical decisions"
 output: html_document
-author: Statistics Beautiful, `r Sys.Date()`
 runtime: shiny
 ---
 
@@ -105,7 +104,13 @@ source("simplebayesdecision.R")
 source("gerdPlot.R")
 source("gerdPlot2.R")
 
-
+observeEvent(input$plotChoice, 
+             {
+               if(input$plotChoice==1)
+                 shinyjs::show(id = 'detailPanel')
+               else 
+                 shinyjs::hide(id = 'detailPanel')
+             })
 
 f_which.varies = function()
   names(longparamnames)[
@@ -264,7 +269,8 @@ output$parameterUI = renderUI(
     ),
     conditionalPanel('input.plotChoice === "1"', 
                      wellPanel(
-                       div(LossesUI, hr(), axisUI), 
+                       div(LossesUI, hr(), hr(), hr(),
+                           axisUI), 
                        style = "padding-bottom: 1px;
                        padding-top: -10px;"
     )),
@@ -394,11 +400,14 @@ output$thePlot = renderPlot({
   abline(v=default.value, lty=3, lwd=10, col="blue")
 
   })
+  shinyjs::show(id = 'detailPanel')
+
   output$gerdUI = 
     renderUI({
     cat('gerdUI, plotChoice = ', input$plotChoice, '\n')
       div(
         conditionalPanel(condition = 'input.plotChoice === "1"', {
+
                     div( h3(style='text-align:center; color:green',
                         HTML('Best action is in GREEN')),
                          plotOutput('thePlot') ) }),
@@ -428,10 +437,10 @@ output$thePlot = renderPlot({
       par(mai=c(0,0,1,0))
       N = 1000
       Ylevels = c(1.05, 0.8, 0.5, 0.3)
-      text_for_treeNumber = function(x, y, NNN, CEX=1.5){
+      text_for_treeNumber = function(x, y, NNN, CEX=1.5, ...){
               text(x, y, NNN, xpd=NA, cex=CEX,
                    col='darkgreen',
-                   vfont = c('serif', 'bold'))
+                   vfont = c('serif', 'bold'), ...)
       } 
       plot(0:1, 0:1, axes=F, pch='')
       title('Natural counts')
@@ -478,40 +487,15 @@ output$thePlot = renderPlot({
         paste0('= ', round(digits=3, TP/(TP+FP))))
       text(0.5, Ylevels[4] - 0.2, 
            cex=1.5,
-           'So the chance the person is "Sick" if test is positive equals ')
-      text_for_treeNumber(0.5, Ylevels[4] - 0.28, 
-           CEX=2.5,
+           'So the chance the person is "Sick" \nif test is positive equals ')
+      text_for_treeNumber(0.5, Ylevels[4] - 0.32, 
+           CEX=2.5, 
            round(digits=3, TP/(TP+FP)))
       arrows(x0 = 1-0.78, x1 = 1-0.58, y0=Ylevels[3]-0.1, y1=Ylevels[4]-0.05, lwd=3)
       arrows(x0 = 0.78, x1 = 0.58, y0=Ylevels[3]-0.1, y1=Ylevels[4]-0.05, lwd=3)
 
     })  ### end of happy face
   
-  cbStringId = 'topicId'
-  output$topicId  <- renderUI({
-    span(
-      checkboxInput(cbStringId,
-                    strong(em(showhideString('details', FALSE)
-                    )),
-                    value=FALSE),
-      conditionalPanel(
-        condition = paste0('input.', cbStringId),
-        wellPanel(
-          inclRmd(
-            'simplebayesdecision-info.Rmd'
-          )  )
-      )
-      #### HERE ####
-    )  })
-
-  observeEvent(
-    input[[cbStringId]], {
-      fullString = showhideString('details', input[[cbStringId]])
-      updateCheckboxInput(
-        session, cbStringId,
-        label=fullString)
-    }
-  )
 
 }   #### End of server ####
 
@@ -521,10 +505,15 @@ fillPage(  #fillPage and fluidPage the same.
   useShinyjs(rmd=TRUE, debug=TRUE),  ## this is the place!!
 #      tags$style(type = "text/css", "#plot1 {height: calc(100vh - 80px) !important;}"),
 #  tags$style("width: 100% !important;"),
-  # fluidRow(
-  #   column(12, 
-  #          uiOutput('topicId'))),
+  fluidRow(
+    column(12,
+           uiOutput('topicId'))),
   #Removing this topicId at least helps the Odds panel to fill out.
+fluidRow(column(12, h3(style="text-align:center", "
+                       Statistics Beautiful"))),
+# fluidRow(column(12, a(href='#details', h3(style="text-align:center", "
+#                        details are below")))),
+
   fluidRow(
     column(6, 
            div(style="color:red;",
@@ -543,6 +532,7 @@ fillPage(  #fillPage and fluidPage the same.
   (Odds_and_predictive_values) 
 )
 
+
 if(usingShinyApp) {
   shinyApp(ui = ui, server = server)
 } else {
@@ -553,4 +543,38 @@ if(usingShinyApp) {
 ##' Using shinyApp, runjs works, but the app is in a scrollpane, and the JS console can't see the elements by ID.
 
 ```
+
+<div id=detailPanel>
+
+<hr style='width:100%;height:10px;background:green;font-size:30px'>
+
+### Details for the "decision plot" option<a name="details"></a>:
+
+
+#### Actions to choose from:
+
+* $T$: Treat
+* $W$: Wait ("Watchful Waiting")
+
+#### Bayes expected loss for action $A$ = $\rho$ = $\rho (A|X) = {E_{\theta |X}}(Loss(\theta, A))$.
+
+* $\rho (T|X) = Loss(Healthy, Treat) \times Pr(Healthy | X)$
+
+* $\rho (W|X) = Loss(Sick, Wait) \times Pr(Sick | X)$
+
+
+### Best decisions  (Bayes rule):
+
+* Where the $W$ line is below the $T$ line, the better decision is $W$.
+* Where the $T$ line is below the $W$ line, the better decision is $T$.
+* Where (if) the $W$ and $T$ lines cross, the two decisions are equivalent, because they have the same Bayes expected loss.
+
+
+* "__Horizontal axis Parameter__":  the parameter along the horizontal axis.
+The vertical blue line occurs at the chosen value. 
+
+* "__Observation__":  Either $P$ for positive test, or $N$ for negative test. Bayes expected loss for the two actions $T$ and $W$ is conditional on the observation.
+
+
+</div>
 
