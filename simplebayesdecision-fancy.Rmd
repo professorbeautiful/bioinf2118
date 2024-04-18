@@ -442,7 +442,7 @@ output$thePlot = renderPlot({
                    col='darkgreen',
                    vfont = c('serif', 'bold'), ...)
       } 
-      plot(0:1, 0:1, axes=F, pch='')
+      plot(0:1, c(-0.1,1), axes=F, pch='')
       title('Natural counts')
       text_for_treeNumber(0.5, Ylevels[1], N)
       text(0.5, Ylevels[1] - 0.05 , 'people tested', xpd=NA)
