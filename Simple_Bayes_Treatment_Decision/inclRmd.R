@@ -1,7 +1,7 @@
 # Alternative solution:
 # ```{r child = 'DrWho.Rmd'}
 # ```
-require("magrittr")
+require("magrittr", quietly = TRUE)
 inclRmd <- function(path, wd, openMe=FALSE) {
   if(!missing(wd)) {
     savedwd = getwd()
@@ -21,7 +21,9 @@ inclRmd <- function(path, wd, openMe=FALSE) {
     return(paste("inclRmd: file ", path, " not found in ", getwd()))
   knitrOutput = paste(readLines(path, warn = FALSE), collapse = '\n') %>%
     knitr::knit2html(quiet=TRUE,
-                     text = ., fragment.only = TRUE, options = ""
+                     text = ., 
+                     #fragment.only = TRUE, 
+                     options = ""
                      #,stylesheet=file.path(r_path,"../www/empty.css"
                      # rmarkdown::render(quiet=TRUE,output_format = 'html_document',
                      # input = path, runtime='shiny'
