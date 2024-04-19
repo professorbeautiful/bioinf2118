@@ -6,7 +6,9 @@ runtime: shiny
 
 <!-- 
 To Deploy: 
-deployApp(appFiles = 
+Click Run document, then in upper right: "Republish"
+Or, 
+rsconnect::deployApp(appFiles = 
 c('simplebayesdecision-fancy.Rmd', 'inclRmd.R',
 'conditionalPanelWithCheckbox.R','addOpacity.R',
 'simplebayesdecision-info.Rmd', "simplebayesdecision.R" 
