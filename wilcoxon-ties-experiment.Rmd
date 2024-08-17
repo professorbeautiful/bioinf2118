@@ -15,8 +15,9 @@ Supplement on the Wilcoxon two-sample test: exact vs approximate, & the effect o
 
 
 ```{r include=FALSE}
-sampleSize = 120
+sampleSize = 100
 nFeatures = 300
+DIGITS = 3
 ```
 
 
@@ -46,7 +47,7 @@ do.wilcoxes = function(Xrounded) {
 #options.saved = options(warn=-1)
 p.values.list = lapply(effectSizes, function(effSize){
   X = rnorm(sampleSize) + effSize*outcomeClass
-  Xrounded <<- round(X, digits=3)
+  Xrounded <<- round(X, digits=DIGITS)
   do.wilcoxes(Xrounded)
  }
 )
@@ -61,12 +62,15 @@ p.values.df = ldply(p.values.list)
 table(p.values.df$anyTied)
 
 ```
+
+
+
 Note: plyr is a good library to know! In "ldply", the "l" means the input is a list, and the "d" means the output is a data frame.
 
-###Figure 1
+### Figure 1
 ```{r,fig.height=4.5,fig.width=4.5}
 colors = c("red","darkgreen")[p.values.df$anyTied+1]  
-cex = c(1,0.7)[p.values.df$anyTied+1]  
+cex = c(1,1)[p.values.df$anyTied+1]  
 pch = c("O", "T")[p.values.df$anyTied+1]  
 with(p.values.df, {
     plot(p.approx, p.correct, log="xy", col=colors, pch=pch, cex=cex, 
@@ -74,7 +78,9 @@ with(p.values.df, {
          ylab="P value: \"corrected\" approximation")
     abline(a=0,b=1)
     title('"correct=TRUE" (continuity correction)')
-  }
+  legend(x = 'topleft', legend=c('dataset with ties', 'dataset with NO ties'), pch=c('T', 'O'), col=c('darkgreen', 'red'))
+}
+
 )
 ```
 
@@ -101,6 +107,10 @@ with(p.values.df, {
          ylab="P value: \"exact\" (sometimes)")
     abline(a=0,b=1)
     title('"exact=TRUE" ')
+    legend(x = 'topleft', legend=c('dataset with ties', 
+                                   'dataset with NO ties'),
+           pch=c('T', 'O'), col=c('darkgreen', 'red'))
+
   }
 )
 ```
@@ -118,7 +128,7 @@ When the data contain ties, the exact distribution of the statistic is much MUCH
 Let's look at this by effect size.
 For the approximate P values ties and no-ties data sets follow the same shape.
 
-##Figure 4
+### Figure 4
 
 ```{r}
 plot(effectSizes, p.values.df$p.approx, pch = pch, cex=1/2, col = colors, log='y')
@@ -127,7 +137,7 @@ legend(x = 'topright', legend=c('ties', 'no ties'), pch=c('T', 'O'), col=c('dark
 
 But for the "exact" computation, the presence of ties prevent the "exact" method from being used.
 
-##Figure 5
+### Figure 5
 
 
 ```{r}
