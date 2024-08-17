@@ -173,7 +173,13 @@ t(
     )
 )
 ```
-Once you round to 3 or fewer digits, ties appear. And all hell breaks loose.  In the sense that the "exact" calculation is no longer done, but the approximation substitutes for it.
+Look at the "p.exact" column.
+Once you round to 3 or fewer digits, ties appear. And all hell breaks loose.  In the sense that the "exact" calculation is no longer done, but the approximation substitutes for it. 
+
+Is that good?  Well, if you don't mind increasing the P value by two orders of magnitude...   But if you are committed to coping with multiple testing with some "significance" adjustment like the Bonferroni method, then that is a disaster.
+
+I have a long rap about the perils of the P value, and another long rap about the perils of multiple testing, so ... calm down.
+
 
 ## Breaking the ties
 
