@@ -193,12 +193,16 @@ Xbrokentie = Xrounded3
 Xbrokentie[ties] = Xbrokentie[ties] + 1e-7
 do.wilcoxes(Xbrokentie)
 ```
-Aha!  Now the exact P value is several orders of magnitude smaller, as it should be.
+Aha!  Now the exact P value is two orders of magnitude smaller, as it should be.
 So we have regained the power lost when the ability to do the exact permutation was lost.
 
 ## Computing time
-The computing time increases dramatically due to *exact=TRUE*, when there are no ties. *If there are ties, the option is ignored*. We suppress the warnings again.
+The computing time increases somewhat due to *exact=TRUE*, when there are no ties. *If there are ties, the option is ignored*. We suppress the warnings again.
 ```{r warning=FALSE}
-system.time(for(i in 1:20)do.wilcoxes(Xrounded3))
-system.time(for(i in 1:20)do.wilcoxes(Xbrokentie))
+nREPS = 200
+timingFor.Xrounded3 = system.time(for(i in 1:nREPS)do.wilcoxes(Xrounded3))['user.self']
+timingFor.Xbrokentie = system.time(for(i in 1:nREPS)do.wilcoxes(Xbrokentie))['user.self']
 ```
+
+For looping over `r nREPS` repetitions,
+the computation takes `r timingFor.Xrounded3*1000` milliseconds for the "rounded to 3 digits" dataset, with its ties, and  `r timingFor.Xbrokentie*1000` milliseconds when the ties are broken by tiny arbitrary amounts.
