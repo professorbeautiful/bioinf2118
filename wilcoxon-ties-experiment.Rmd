@@ -52,7 +52,7 @@ p.values.list = lapply(effectSizes, function(effSize){
 )
 #options(options.saved)
 ```
-We suppressed the warning messages, using the chunk option **{r warning=FALSE}**.
+We suppressed the warning messages, using the chunk option **{r warning=FALSE}**. Warnings are so bourgeois.
 
 Now we combine the results.
 ```{r}
@@ -104,22 +104,33 @@ with(p.values.df, {
   }
 )
 ```
-Now this is strange!   For data sets with ties, the green T's agree perfectly like before.  But for those with no ties, when the exact P values is really small, the approximation is terrible, hugely bigger than it should be.
+Now this is strange!   For data sets with ties, the green T's agree perfectly like before.  But for those with no ties, when the exact P values is really small, the approximation is terrible, hugely bigger, less significant, than it should be.
+
+This matters *a lot*, because when there are many many comparisons (high-throughput biological data), small P values are frequent, including small P values generated just by chance. People apply very stringent P value cutoffs to reduce the risk of false positive "discoveries".
 
 What's going on??
 
-show that the exact P value is much smaller than the approximations, as the P value becomes quite small. This difference doesn’t matter much for P values > 0.001, but can be a huge effect for very very small P values.
-This matters *a lot*, because when there are many many comparisons (high-throughput biological data), small P values are frequent, including small P values generated just by chance.  
-
 # The effect of ties
 
+When the data contain ties, the exact distribution of the statistic is much MUCH more computationally intensive, and wilcox.text simply will not do it. Instead it just puts out the approximation. (There is a warning message, but as noted above we have suppressed it.) 
 
-When the data contain ties, the exact distribution of the statistic is much MUCH more computationally intensive, and wilcox.text will not do it. Instead it just puts out the approximation. (There is a warning message, but as noted above we have suppressed it.) 
 
+Let's look at this by effect size.
+For the approximate P values ties and no-ties data sets follow the same shape.
+
+##Figure 4
 
 ```{r}
 plot(effectSizes, p.values.df$p.approx, pch = pch, cex=1/2, col = colors, log='y')
 legend(x = 'topright', legend=c('ties', 'no ties'), pch=c('T', 'O'), col=c('darkgreen', 'red'))
+```
+
+But for the "exact" computation, the presence of ties prevent the "exact" method from being used.
+
+##Figure 5
+
+
+```{r}
 plot(effectSizes, p.values.df$p.exact, pch = pch, cex=1/2, col = colors, log='y')
 legend(x = 'topright', legend=c('ties', 'no ties'), pch=c('T', 'O'), col=c('darkgreen', 'red'))
 
@@ -127,6 +138,7 @@ legend(x = 'topright', legend=c('ties', 'no ties'), pch=c('T', 'O'), col=c('dark
 
 
 ### Studying one data set.
+
 ```{r}
 effSize = 2
 
@@ -134,10 +146,16 @@ effSize = 2
 
 To illustrate, we create a data set with a pretty strong effect size =  `r effSize`. We do a no-tie version, but where the second value is replaced by X[2] = X[1] + 0.0001, very close to a tie.
 
+
 ```{r}
 X = rnorm(sampleSize) + effSize*outcomeClass
 X[2] = X[1] + 0.0001   #almost a tie
 do.wilcoxes(X)
+```
+
+The we successively round the data to fewer and fewer digits.
+
+```{r warning=FALSE}
 t(
   sapply(6:0, function(digits) {
     c(digits=digits, do.wilcoxes(round(X, digits=digits)))
@@ -145,7 +163,11 @@ t(
     )
 )
 ```
-Now we will break the ties for the digits=3 dataset. That should give a more appropriately small P value.
+Once you round to 3 or fewer digits, ties appear. And all hell breaks loose.  In the sense that the "exact" calculation is no longer done, but the approximation substitutes for it.
+
+## Breaking the ties
+
+Now we will take the digits=3 dataset, but break the ties, by adding a tiny increment to a duplicated value. That should give a more appropriately small P value.
 ```{r}
 Xrounded3 = round(X, digits=3)
 do.wilcoxes(Xrounded3)
@@ -155,10 +177,11 @@ Xbrokentie = Xrounded3
 Xbrokentie[ties] = Xbrokentie[ties] + 1e-7
 do.wilcoxes(Xbrokentie)
 ```
+Aha!  Now the exact P value is several orders of magnitude smaller, as it should be.
 So we have regained the power lost when the ability to do the exact permutation was lost.
 
-The 
-computing time increases dramatically due to *exact=TRUE*, when there are no ties. *If there are ties, the option is ignored*. We suppress the warnings again.
+## Computing time
+The computing time increases dramatically due to *exact=TRUE*, when there are no ties. *If there are ties, the option is ignored*. We suppress the warnings again.
 ```{r warning=FALSE}
 system.time(for(i in 1:20)do.wilcoxes(Xrounded3))
 system.time(for(i in 1:20)do.wilcoxes(Xbrokentie))
