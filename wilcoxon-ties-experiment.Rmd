@@ -3,12 +3,13 @@ title: "Wilcoxon two-sample test: ties make a mess of things...what to do?"
 author: "Roger Day"
 date: "2024-08-17"
 output: html_document
-keep_md: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, results='hide')
-#knitr::opts_chunk$set(echo = FALSE)
+# https://medium.com/@rogerday_17101/wilcoxon-two-sample-test-ties-make-a-mess-of-things-what-to-do-ab9c2c7e36e6?source=friends_link&sk=deb92924331cad6e6c6411b4d35e588a
+
+#knitr::opts_chunk$set(echo = FALSE, results='hide')
+knitr::opts_chunk$set(echo = FALSE, comment = '')
 ```
 ---
 Wilcoxon two-sample test: exact vs approximate, & the effect of ties
@@ -25,24 +26,31 @@ effectSizes = rnorm(nFeatures) * effectSD
 ```
 
 Trigger warning: this article uncritically presumes the use of "P values" in comparing two groups of numbers. 
+
 There are loads of reasons to despise P values; elsewhere I have a polemic chanting a few of those reasons.  
 It also presumes that `multiple testing adjustments` are in play.  That's got some ridiculous paradoxes too. And a corresponding   polemic. All in good time on the [`StatisticsBeautiful`](https://www.youtube.com/@statisticsbeautiful1098) channel.
 
-So... let's just agree to get a long for the next few minutes. 
+So... let's just agree to get along for the next few minutes. 
 
 
-An old old work horse of "classical" frequentist statistical analysis, the Wilcoxon test comes in two forms.  This will be about the two-sample form, comparing two collections of numbers, to see if one tends to be bigger than the other (essentially, are the medians different?).
+An old old work horse of "classical" frequentist statistical analysis, the Wilcoxon test comes in two forms.  This will be about the two-sample form, comparing two collections of numbers, to see if one tends to be bigger than the other (essentially, are the medians different?). Those numbers constitute a "feature".  The Wilcoxon test gets employed to judge whether the feature tends to be higher in one sample, one group, than the other.
 
-The tool is the function `wilcox()` in the statistical language `R`. Why was it necessary to cheat poor Mr. Wilcoxon out of the last two letters of his name?  DM me if you know! 
+What is a "feature"?  A number. Statisticians used to call them "covariates".  Not classy. Better PR in computer science. 
+
+The testing tool is the function `wilcox()`, a basic workhorse in the statistical language `R`. Why was it necessary to cheat poor Mr. Wilcoxon out of the last two letters of his name?  DM me if you know! 
 
 #### The problem with ties
 
-The basis for the test is to tally up the number of pairs, one from group #1 and the other from group #2, to see which is larger. Even for pretty large sample sizes, the `wilcox` function When the data contain ties, the exact distribution of the statistic is much more difficult and the approximations are not good. This doesn’t matter much for P values > 0.001, but can be a huge effect for very very small P values. This matters <i>a lot</i>, because when there are many many comparisons (high-throughput biological data), P values come spitting out in great numbers, and many very small P values can be generated just by chance. So one becomes skeptical of "discoveries", and requires extra strong evidence, an exceptionally tiny P value.
+The basis for the test is to count the number of pairs, one from group #1 and the other from group #2, for which the group #2 number is larger. 
 
-In this numerical experiment, we create a data set with `r sampleSize` observations and `r nFeatures` features, and one binary label per observation; no imagination here, so the labels are 1 and 2. 
-What is a "feature"?  A number. Statisticians used to call them "covariates".  Not classy. Better PR in computer science.
+When there are many many features to evaluate  (such as high-throughput genomic data), P values come spitting out in great numbers, and many very small P values can be generated just by chance. So one becomes skeptical of "discoveries", and requires extra strong evidence, an exceptionally tiny P value. That P value can be computed with a approximations, or exactly based on the randomization distribution. The exact calculation has more prestige. (Though, like many frequentist calculations, the sampling distribution assumed is not nature's sampling distribution, so "exact" is  not exactly true.)
 
-In this experiment, for each feature, the effect size is chosen randomly, from a normal distribution with a standard deviation of `r effectSD`. That effect is added to the group #2 observations.
+But when the data contain ties, the exact distribution of the statistic is much more difficult and the approximations are not good. This doesn’t matter much for P values > 0.001, but can be a huge effect for very very small P values. Very very small P values matter <i>a lot</i> when the number of features, the number of comparisons, is huge.
+
+### Numerical experiment
+In this numerical experiment, I create a data set with `r sampleSize` observations and `r nFeatures` features, and one binary label per observation; no imagination here, so the labels are #1 and #2. 
+
+For each feature, the effect size is chosen randomly, from a normal distribution with a standard deviation of `r effectSD`. That effect is added to the group #2 observations.
 
 Let's look at three ways that `wilcox` can calculate the P value: normal approximation (`default`), `correct=TRUE`, and `exact=TRUE`.
 
@@ -63,7 +71,7 @@ do.wilcoxes = function(Xrounded) {
 #options.saved = options(warn=-1)
 p.values.list = lapply(effectSizes, function(effSize){
   X = rnorm(sampleSize) + effSize*outcomeClass
-  Xrounded <- round(X, digits=DIGITS)
+  Xrounded <<- round(X, digits=DIGITS)
   do.wilcoxes(Xrounded)
  }
 )
@@ -80,7 +88,7 @@ Now we combine the results across all the `r nFeatures` features. Here the round
 
 
 #### Figure 1
-```{r figure1,fig.height=4.5,fig.width=4.5, cache=TRUE}
+```{r figure1,fig.height=4.5,fig.width=4.5, cache=FALSE}
 colors = c("red","darkgreen")[p.values.df$anyTied+1]  
 cex = c(1,1)[p.values.df$anyTied+1]  
 pch = c("O", "T")[p.values.df$anyTied+1]  
@@ -113,7 +121,7 @@ Let's instead compare the approximation to the exact P value. Excuse me, the `ex
 
 #### Figure 2
 
-```{r figure2}
+```{r figure2, cache=FALSE}
 with(p.values.df, {
     plot(p.approx,p.exact, log="xy", col=colors, pch=pch, cex=cex,
          xlab="P value: normal approximation", 
@@ -180,12 +188,14 @@ Then we successively round the data to fewer and fewer digits.
 
 #####  Changing the rounding
 ```{r warning=FALSE, results='show'}
-t(
+print.data.frame(
+  row.names=FALSE,
+  as.data.frame(t(
   sapply(6:0, function(digits) {
     c(digits=digits, do.wilcoxes(round(X, digits=digits)))
     }
     )
-)
+)))
 ```
 Look at the "p.exact" column.
 Once you round to 3 or fewer digits, ties appear. And all hell breaks loose.  In the sense that the "exact" calculation is no longer done, but the approximation substitutes for it. 
@@ -197,18 +207,20 @@ Elsewhere, I have a long rap about the perils of the P value, and another long r
 
 ### Breaking the ties
 
-Now we will take the digits=3 feature, but break the ties, by adding a tiny increment to a duplicated value. That should give a more appropriately small P value.
+Now we will take the digits=3 rounded feature, but break the ties, by adding a tiny increment to a duplicated value. That should give a more appropriately small P value.
 
-```{r}
+```{r warning=TRUE, results='hide'}
 Xrounded3 = round(X, digits=3)
-do.wilcoxes(Xrounded3)
+wilc.Xrounded3 = do.wilcoxes(Xrounded3)
 which(duplicated(Xrounded3))
 ties = which(duplicated(Xrounded3))
 Xbrokentie = Xrounded3
 Xbrokentie[ties] = Xbrokentie[ties] + 1e-7
-do.wilcoxes(Xbrokentie)
+wilc.Xbrokentie = do.wilcoxes(Xbrokentie)
 ```
-Aha!  Now the exact P value is orders of magnitude smaller, as it should be.
+
+Oops, I forgot to suppress the warning message this time. But...
+Aha!  with the original data with ties, the P value is `r signif(digits=2, wilc.Xrounded3$p.exact)`, but with the teensy breaking of the ties, it's `r signif(digits=2, wilc.Xbrokentie$p.exact)`.  Now the exact P value is orders of magnitude smaller, as it should be.
 So we have regained the power lost when the ability to do the exact permutation was lost.
 
 The documentation for `wilcox` says:
@@ -220,6 +232,7 @@ That might not be such good advice.
 
 ### Computing time
 The computing time increases somewhat due to *exact=TRUE*, when there are no ties. *If there are ties, the option is ignored*. We suppress the warnings again.
+
 ```{r warning=FALSE}
 nREPS = 200
 timingFor.Xrounded3 = system.time(for(i in 1:nREPS)do.wilcoxes(Xrounded3))['user.self']
@@ -230,4 +243,4 @@ For looping over `r nREPS` repetitions,
 the computation takes `r timingFor.Xrounded3*1000` milliseconds for the "rounded to 3 digits" feature, with its ties, and  `r timingFor.Xbrokentie*1000` milliseconds when the ties are broken by tiny arbitrary amounts.
 
 There is an alternative to the built-in `wilcox.test` function. In the R package 
-[`coin`](https://search.r-project.org/CRAN/refmans/coin/html/00Index.html), the function `wilcox_test` is worth a look (notice the underscore; cool, ... but still the "on" is missing!? No matter; cyberspace shows no WilcoxOFF). 
+[`coin`](https://search.r-project.org/CRAN/refmans/coin/html/00Index.html), the function `wilcox_test` is worth a look (notice the underscore instead of the dot; cool, ... but still the `"on"` is missing!? No matter; cyberspace shows no WilcoxOFF). 
