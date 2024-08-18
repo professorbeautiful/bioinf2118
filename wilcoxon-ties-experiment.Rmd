@@ -1,74 +1,86 @@
 ---
-title: "Supplement on the Wilcoxon two-sample test: exact vs approximate, & the effect of ties
-"
+title: "Wilcoxon two-sample test: ties make a mess of things...what to do?"
 author: "Roger Day"
-date: "3/13/2018"
+date: "2024-08-17"
 output: html_document
+keep_md: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, results='hide')
+#knitr::opts_chunk$set(echo = FALSE)
 ```
 ---
-Supplement on the Wilcoxon two-sample test: exact vs approximate, & the effect of ties
+Wilcoxon two-sample test: exact vs approximate, & the effect of ties
 ---
 
 
-```{r include=FALSE}
+```{r include=FALSE,echo=FALSE}
 sampleSize = 100
 nFeatures = 300
 DIGITS = 3
+effectSD = 2
+effectSizes = rnorm(nFeatures) * effectSD
+
 ```
 
+Trigger warning: this article uncritically presumes the use of "P values" in comparing two groups of numbers. 
+There are loads of reasons to despise P values; elsewhere I have a polemic chanting a few of those reasons.  
+It also presumes that `multiple testing adjustments` are in play.  That's got some ridiculous paradoxes too. And a corresponding   polemic. All in good time on the [`StatisticsBeautiful`](https://www.youtube.com/@statisticsbeautiful1098) channel.
 
-When the data contain ties, the exact distribution of the statistic is much more difficult and the approximations are not good. This doesn’t matter much for P values > 0.001, but can be a huge effect for very very small P values. This matters a lot, because when there are many many comparisons (high-throughput biological data), small P values are frequent, including small P values generated just by chance.
-
-In this numerical experiment, we create a data set with `r sampleSize` observations and `r nFeatures` features, and one binary label per observation.
-The effects range widely from zero to 5 standard deviations.
-We will see what the effect of ties might be.
+So... let's just agree to get a long for the next few minutes. 
 
 
+An old old work horse of "classical" frequentist statistical analysis, the Wilcoxon test comes in two forms.  This will be about the two-sample form, comparing two collections of numbers, to see if one tends to be bigger than the other (essentially, are the medians different?).
+
+The tool is the function `wilcox()` in the statistical language `R`. Why was it necessary to cheat poor Mr. Wilcoxon out of the last two letters of his name?  DM me if you know! 
+
+#### The problem with ties
+
+The basis for the test is to tally up the number of pairs, one from group #1 and the other from group #2, to see which is larger. Even for pretty large sample sizes, the `wilcox` function When the data contain ties, the exact distribution of the statistic is much more difficult and the approximations are not good. This doesn’t matter much for P values > 0.001, but can be a huge effect for very very small P values. This matters <i>a lot</i>, because when there are many many comparisons (high-throughput biological data), P values come spitting out in great numbers, and many very small P values can be generated just by chance. So one becomes skeptical of "discoveries", and requires extra strong evidence, an exceptionally tiny P value.
+
+In this numerical experiment, we create a data set with `r sampleSize` observations and `r nFeatures` features, and one binary label per observation; no imagination here, so the labels are 1 and 2. 
+What is a "feature"?  A number. Statisticians used to call them "covariates".  Not classy. Better PR in computer science.
+
+In this experiment, for each feature, the effect size is chosen randomly, from a normal distribution with a standard deviation of `r effectSD`. That effect is added to the group #2 observations.
+
+Let's look at three ways that `wilcox` can calculate the P value: normal approximation (`default`), `correct=TRUE`, and `exact=TRUE`.
 
 ```{r}
-outcomeClass = rbinom(sampleSize, 1, 1/2)
-effectSizes = rnorm(nFeatures) * 2
+outcomeClass = rbinom(sampleSize, 1, 1/2) + 1
 ```
 ```{r warning=FALSE}
 do.wilcoxes = function(Xrounded) {
-  X0 <- Xrounded[outcomeClass==0]
   X1 <- Xrounded[outcomeClass==1]
-  data.frame(p.approx = wilcox.test(X0, X1)$p.value,
-             p.correct = wilcox.test(X0, X1, correct=T)$p.value,
-             p.exact = wilcox.test(X0, X1, exact=T)$p.value,
+  X2 <- Xrounded[outcomeClass==2]
+  data.frame(p.approx = wilcox.test(X1, X2)$p.value,
+             p.correct = wilcox.test(X1, X2, correct=T)$p.value,
+             p.exact = wilcox.test(X1, X2, exact=T)$p.value,
              anyTied = length(unique(Xrounded)) < sampleSize 
-                  # not all unique.
+                  ## not all unique.
    )
 }
 #options.saved = options(warn=-1)
 p.values.list = lapply(effectSizes, function(effSize){
   X = rnorm(sampleSize) + effSize*outcomeClass
-  Xrounded <<- round(X, digits=DIGITS)
+  Xrounded <- round(X, digits=DIGITS)
   do.wilcoxes(Xrounded)
  }
 )
 #options(options.saved)
-```
-We suppressed the warning messages, using the chunk option **{r warning=FALSE}**. Warnings are so bourgeois.
-
-Now we combine the results.
-```{r}
 library(plyr)
+## Note: plyr is a good library to know! In "ldply", the "l" means the input is a list, and the "d" means the output is a data frame.
 p.values.df = ldply(p.values.list)
-table(p.values.df$anyTied)
+anyTiedTable = table(p.values.df$anyTied)
 
 ```
+(Want to see the R markdown which created this document? Look for the file wilcoxon-ties-experiment.Rmd at https://github.com/professorbeautiful/bioinf2118. In R markdown,  the warning messages have been suppressed using the chunk option **{r warning=FALSE}**. Warnings are so bourgeois.)
+
+Now we combine the results across all the `r nFeatures` features. Here the rounding takes the `r nFeatures` features and creates ties in `r anyTiedTable[2]` of them, with `r anyTiedTable[1]` still without ties.
 
 
-
-Note: plyr is a good library to know! In "ldply", the "l" means the input is a list, and the "d" means the output is a data frame.
-
-### Figure 1
-```{r,fig.height=4.5,fig.width=4.5}
+#### Figure 1
+```{r figure1,fig.height=4.5,fig.width=4.5, cache=TRUE}
 colors = c("red","darkgreen")[p.values.df$anyTied+1]  
 cex = c(1,1)[p.values.df$anyTied+1]  
 pch = c("O", "T")[p.values.df$anyTied+1]  
@@ -78,94 +90,96 @@ with(p.values.df, {
          ylab="P value: \"corrected\" approximation")
     abline(a=0,b=1)
     title('"correct=TRUE" (continuity correction)')
-  legend(x = 'topleft', legend=c('dataset with ties', 'dataset with NO ties'), pch=c('T', 'O'), col=c('darkgreen', 'red'))
+  legend(x = 'topleft', legend=c('feature with ties', 'feature with NO ties'), pch=c('T', 'O'), col=c('darkgreen', 'red'))
 }
 
 )
 ```
 
 
-In Figure 1, each point is a data set, with the effect size chosen randomly.
-The "green T" is a data set that has at least one tie.
-The "red O" has no ties.
-The "correct" and "approx" values are virtually identical for a sample size of `r sampleSize`. Note that "correct" does not mean what it claims. 
-It means only that a "continuity correction" for the normal approximation was applied, to adjust (roughly) for the discreteness of the Wilcoxon test statistic.  Sounds good; but makes no difference.
+In Figure 1, each point is a feature, with the effect size chosen randomly.
+The "green T" is a feature that has at least one tie.
+The "red O" is a feature that has no ties.
+The graph compares to approximation values to the correct values. Excuse me, the `correct=TRUE` P values. 
+"Correct" does not mean they are correct. 
+It means only that a "continuity correction" for the normal approximation was applied, to adjust (roughly) for the discreteness of the Wilcoxon test statistic.  Sounds good; but makes no discernable difference, whether there are ties in the feature or not.
 
-## The Exact-o knife
-
-
-Let's instead compare the approximation to the exact P value.
+### The Exact-o knife
 
 
+Let's instead compare the approximation to the exact P value. Excuse me, the `exact=TRUE` P value. Surprise, it may not be exact, as we'll see.
 
-### Figure 2
 
-```{r}
+
+#### Figure 2
+
+```{r figure2}
 with(p.values.df, {
     plot(p.approx,p.exact, log="xy", col=colors, pch=pch, cex=cex,
          xlab="P value: normal approximation", 
          ylab="P value: \"exact\" (sometimes)")
     abline(a=0,b=1)
     title('"exact=TRUE" ')
-    legend(x = 'topleft', legend=c('dataset with ties', 
-                                   'dataset with NO ties'),
+    legend(x = 'topleft', legend=c('feature with ties', 
+                                   'feature with NO ties'),
            pch=c('T', 'O'), col=c('darkgreen', 'red'))
 
   }
 )
 ```
-Now this is strange!   For data sets with ties, the green T's agree perfectly like before.  But for those with no ties, when the exact P values is really small, the approximation is terrible, hugely bigger, less significant, than it should be.
+Now this is strange!   For features with ties, the green T's agree perfectly like before.  But for those with no ties, when the exact P value is really small, the approximation is terrible, hugely bigger, less significant, than it should be.
 
-This matters *a lot*, because when there are many many comparisons (high-throughput biological data), small P values are frequent, including small P values generated just by chance. People apply very stringent P value cutoffs to reduce the risk of false positive "discoveries".
+This matters *a lot*, because when there are many many comparisons (high-throughput biological data), small P values are frequent, including small P values generated just by chance. People apply very stringent P value cutoffs to reduce the risk of false positive "discoveries" that are just artifacts of chance.
 
 What's going on??
 
-# The effect of ties
+## The effect of ties
 
-When the data contain ties, the exact distribution of the statistic is much MUCH more computationally intensive, and wilcox.text simply will not do it. Instead it just puts out the approximation. (There is a warning message, but as noted above we have suppressed it.) 
+When the data contain ties, the exact distribution of the statistic is much MUCH more computationally intensive, and `wilcox.test` simply will not do it. Instead it just puts out the approximation. (There is a warning message, but as noted above we have suppressed it.) 
 
 
 Let's look at this by effect size.
-For the approximate P values ties and no-ties data sets follow the same shape.
+For the approximate P values, ties and no-ties features follow the same trajectory.
 
-### Figure 4
+#### Figure 3
 
-```{r}
+```{r figure3}
 plot(effectSizes, p.values.df$p.approx, pch = pch, cex=1/2, col = colors, log='y')
 legend(x = 'topright', legend=c('ties', 'no ties'), pch=c('T', 'O'), col=c('darkgreen', 'red'))
 ```
 
-But for the "exact" computation, the presence of ties prevent the "exact" method from being used.
+But for the "exact" computation, the presence of ties prevents the "exact" method from being used.
 
-### Figure 5
+#### Figure 4
 
 
-```{r}
+```{r figure4}
 plot(effectSizes, p.values.df$p.exact, pch = pch, cex=1/2, col = colors, log='y')
 legend(x = 'topright', legend=c('ties', 'no ties'), pch=c('T', 'O'), col=c('darkgreen', 'red'))
 
 ```
 
 
-### Studying one data set.
+#### Studying one feature.
 
 ```{r}
 effSize = 2
 
 ```
 
-To illustrate, we create a data set with a pretty strong effect size =  `r effSize`. We do a no-tie version, but where the second value is replaced by X[2] = X[1] + 0.0001, very close to a tie.
+To illustrate, we create a single feature with a pretty strong effect size =  `r effSize`. We do a no-tie version, but where the second value is replaced by X[2] = X[1] + 0.0001, very close to a tie.
 
 
 ```{r}
 X = rnorm(sampleSize) + effSize*outcomeClass
 X[2] = X[1] + 0.0001   #almost a tie
-do.wilcoxes(X)
+wilcox.out = do.wilcoxes(X)
 ```
 
-The we successively round the data to fewer and fewer digits.
+Then we successively round the data to fewer and fewer digits.
 
-```{r warning=FALSE}
+#####  Changing the rounding
+```{r warning=FALSE, results='show'}
 t(
   sapply(6:0, function(digits) {
     c(digits=digits, do.wilcoxes(round(X, digits=digits)))
@@ -176,14 +190,15 @@ t(
 Look at the "p.exact" column.
 Once you round to 3 or fewer digits, ties appear. And all hell breaks loose.  In the sense that the "exact" calculation is no longer done, but the approximation substitutes for it. 
 
-Is that good?  Well, if you don't mind increasing the P value by two orders of magnitude...   But if you are committed to coping with multiple testing with some "significance" adjustment like the Bonferroni method, then that is a disaster.
+Is that good?  Well, if you don't mind increasing the P value by  orders of magnitude...   But if you are committed to coping with multiple testing with some "significance" adjustment like the Bonferroni method, then that is a disaster.
 
-I have a long rap about the perils of the P value, and another long rap about the perils of multiple testing, so ... calm down.
+Elsewhere, I have a long rap about the perils of the P value, and another long rap about the perils of multiple testing, so ... calm down.
 
 
-## Breaking the ties
+### Breaking the ties
 
-Now we will take the digits=3 dataset, but break the ties, by adding a tiny increment to a duplicated value. That should give a more appropriately small P value.
+Now we will take the digits=3 feature, but break the ties, by adding a tiny increment to a duplicated value. That should give a more appropriately small P value.
+
 ```{r}
 Xrounded3 = round(X, digits=3)
 do.wilcoxes(Xrounded3)
@@ -193,10 +208,17 @@ Xbrokentie = Xrounded3
 Xbrokentie[ties] = Xbrokentie[ties] + 1e-7
 do.wilcoxes(Xbrokentie)
 ```
-Aha!  Now the exact P value is two orders of magnitude smaller, as it should be.
+Aha!  Now the exact P value is orders of magnitude smaller, as it should be.
 So we have regained the power lost when the ability to do the exact permutation was lost.
 
-## Computing time
+The documentation for `wilcox` says:
+<pre>
+For stability reasons, it may be advisable 
+to use rounded data or to set digits.rank = 7, say, ...
+</pre>
+That might not be such good advice.
+
+### Computing time
 The computing time increases somewhat due to *exact=TRUE*, when there are no ties. *If there are ties, the option is ignored*. We suppress the warnings again.
 ```{r warning=FALSE}
 nREPS = 200
@@ -205,4 +227,7 @@ timingFor.Xbrokentie = system.time(for(i in 1:nREPS)do.wilcoxes(Xbrokentie))['us
 ```
 
 For looping over `r nREPS` repetitions,
-the computation takes `r timingFor.Xrounded3*1000` milliseconds for the "rounded to 3 digits" dataset, with its ties, and  `r timingFor.Xbrokentie*1000` milliseconds when the ties are broken by tiny arbitrary amounts.
+the computation takes `r timingFor.Xrounded3*1000` milliseconds for the "rounded to 3 digits" feature, with its ties, and  `r timingFor.Xbrokentie*1000` milliseconds when the ties are broken by tiny arbitrary amounts.
+
+There is an alternative to the built-in `wilcox.test` function. In the R package 
+[`coin`](https://search.r-project.org/CRAN/refmans/coin/html/00Index.html), the function `wilcox_test` is worth a look (notice the underscore; cool, ... but still the "on" is missing!? No matter; cyberspace shows no WilcoxOFF). 
