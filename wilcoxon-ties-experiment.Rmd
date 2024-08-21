@@ -8,6 +8,10 @@ output: html_document
 ```{r setup, include=FALSE}
 # https://medium.com/@rogerday_17101/wilcoxon-two-sample-test-ties-make-a-mess-of-things-what-to-do-ab9c2c7e36e6?source=friends_link&sk=deb92924331cad6e6c6411b4d35e588a
 
+# https://bookdown.org/yihui/rmarkdown-cookbook/chunk-options.html#chunk-options
+# https://yihui.org/knitr/options/#text-output
+
+
 #knitr::opts_chunk$set(echo = FALSE, results='hide')
 knitr::opts_chunk$set(echo = FALSE, comment = '')
 ```
