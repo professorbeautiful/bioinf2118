@@ -9,37 +9,43 @@ $$
   \color{red}{\mathrm{{all{\space}data}} \space }}
 \newcommand{\OR}{\space \mathrm{or}\space}
 \newcommand{\AND}{\space \mathrm{and}\space}
+\newcommand{\RR}{\color{red}{R1 \AND R2}}
+$$
+
+$$
 \begin{aligned}
 Odds(+D|\alldata) & =\frac{Pr(+D|\alldata )}{Pr(-D|\alldata )}\\
-& =\frac{Pr(\alldata |+D)Pr(+D)/Pr(\alldata )}
-      {Pr(\alldata |-D)Pr(-D)/Pr(\alldata )}\\
+& =\frac{Pr(\alldata \AND +D)/Pr(\alldata )}
+      {Pr(\alldata \AND -D)/Pr(\alldata )}\\
 & = \frac{Pr(\alldata |+D)}{Pr(\alldata |-D)}\ \frac{Pr(+D)}{Pr(-D)}\\
-& =LR(\alldata)\times Odds(+D)
-\end{aligned}
-$$
-$$
-\begin{aligned}
-Odds(+D|R1,R2) & =\frac{Pr(+D|R1,R2)}{Pr(-D|R1,R2)}\\
-& =\frac{Pr(R1,R2|+D)Pr(+D)/Pr(R1,R2)}
-      {Pr(R1,R2|-D)Pr(-D)/Pr(R1,R2)}\\
-& = \frac{Pr(R1,R2|+D)}{Pr(R1,R2|-D)}\ \frac{Pr(+D)}{Pr(-D)}\\
-& =LR(R1,R2)\times Odds(+D)
+& = LR(\alldata)\times Odds(+D)
 \end{aligned}
 $$
 
 $$
 \begin{aligned}
-LR(R1,R2) &= 
-\frac{Pr(R1,R2|+D)}{Pr(R1,R2|-D)}\\
+Odds(+D|\RR) & =\frac{Pr(+D|\RR)}{Pr(-D|\RR)}\\
+& =\frac{Pr(\RR \AND +D)\quad/\space Pr(\RR)}
+      {Pr(\RR \AND -D)\quad/\space Pr(\RR)}\\
+& = \frac{Pr(\RR|+D)}{Pr(\RR|-D)}\ \frac{Pr(+D)}{Pr(-D)}\\
+& =LR(\RR)\times Odds(+D)
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+LR(\RR) &= 
+\frac{Pr(\RR|+D)}{Pr(\RR|-D)}\\
 &= \frac{Pr(R1|+D)Pr(R2|+D)}{Pr(R1|-D)Pr(R2|-D)}\\
 &= LR(R1) \times LR(R2)
 \end{aligned}
 $$
+
 Now, suppose the "prior" says that some KNOWN portion of the true D's are "hidden" (hD) from the test, instead of detectable (dD).
 Then the likelihood ratio is now
 $$
 \begin{aligned}
-LR(R1,R2)
+LR(\RR)
 &= 
 \frac{Pr(R1 \AND R2 | dD \OR hD)} 
   {Pr(R1 \AND R2|-D)}
