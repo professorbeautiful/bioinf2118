@@ -53,7 +53,7 @@ LRlist = rep(10,4)
 logLRlist = log(LRlist)
 priorOdds = 0.01
 logoddslist.reduced = log(priorOdds) +
-  cumsum( logLRlist)
+  c(0, cumsum( logLRlist) )
 
 #probsToShow = c(0.1, 0.25, 0.5, 0.75, 0.9)
 for(logoddsUpTo in seq(along=logoddslist.reduced)){
