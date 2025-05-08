@@ -21,7 +21,8 @@ LR(R1,R2) &=
 &= LR(R1) \times LR(R2)
 \end{aligned}
 $$
-Now, suppose the "prior" says that half of the true D's are "hidden" (hD) from the test, instead of detectable (dD).
+Now, suppose the "prior" says that some KNOWN portion of the true D's are "hidden" (hD) from the test, instead of detectable (dD).
+Then the likelihood ratio is now
 $$
 \newcommand{\OR}{\space \mathrm{or}\space}
 \newcommand{\AND}{\space \mathrm{and}\space}
@@ -48,3 +49,19 @@ Pr(R1 \AND R2 | dD \OR hD)
 }\\
 \end{aligned}
 $$
+Note that $Pr(R1 | dD) ^{2}$ is squared, because for dD R1 and R2 are conditionally independent. For a dD person, getting the right answer for R1 doesn't increase or decrease th chance of a right answer for R2.
+
+But $Pr(R1 | hD)$ is not squared, because for $hD$, whatever $R1$ is, $R2$ will give the same answer.
+
+For the denominator of the likelihood ratio,
+$$
+\begin{aligned}
+  {Pr(R1 \AND R2|-D)} 
+  &= {Pr(R1 |-D)} \times 
+  {Pr( R2|-D)}\\
+&= {Pr(R1 |-D)} ^{2}
+\end{aligned}
+$$
+
+because for $-D$, the two reports are conditionally independent. 
+
