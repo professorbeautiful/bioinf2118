@@ -1,8 +1,22 @@
 
 
 Use ampersand ONLY in an aligned section.
+https://tex.stackexchange.com/questions/655/what-is-the-difference-between-def-and-newcommand
+https://en.wikibooks.org/wiki/LaTeX/Macros
 
-
+$$
+\newcommand{\alldata}{\space 
+  \color{red}{\mathrm{{all{\space}data}} \space }}
+\newcommand{\OR}{\space \mathrm{or}\space}
+\newcommand{\AND}{\space \mathrm{and}\space}
+\begin{aligned}
+Odds(+D|\alldata) & =\frac{Pr(+D|\alldata )}{Pr(-D|\alldata )}\\
+& =\frac{Pr(\alldata |+D)Pr(+D)/Pr(\alldata )}
+      {Pr(\alldata |-D)Pr(-D)/Pr(\alldata )}\\
+& = \frac{Pr(\alldata |+D)}{Pr(\alldata |-D)}\ \frac{Pr(+D)}{Pr(-D)}\\
+& =LR(\alldata)\times Odds(+D)
+\end{aligned}
+$$
 $$
 \begin{aligned}
 Odds(+D|R1,R2) & =\frac{Pr(+D|R1,R2)}{Pr(-D|R1,R2)}\\
@@ -24,8 +38,6 @@ $$
 Now, suppose the "prior" says that some KNOWN portion of the true D's are "hidden" (hD) from the test, instead of detectable (dD).
 Then the likelihood ratio is now
 $$
-\newcommand{\OR}{\space \mathrm{or}\space}
-\newcommand{\AND}{\space \mathrm{and}\space}
 \begin{aligned}
 LR(R1,R2)
 &= 
@@ -35,8 +47,6 @@ LR(R1,R2)
 $$
 
 $$
-\newcommand{\OR}{\space \mathrm{or}\space}
-\newcommand{\AND}{\space \mathrm{and}\space}
 \begin{aligned}
 Pr(R1 \AND R2 | dD \OR hD)
 &= 
