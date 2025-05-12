@@ -32,52 +32,101 @@ Odds(+D|\RR) & =\frac{Pr(+D|\RR)}{Pr(-D|\RR)}\\
 \end{aligned}
 $$
 
+If we are lucky, R1 and R2 are CONDITIONALLY INDEPENDENT. Getting the right answer for $R1$ doesn't increase or decrease the chance of a right answer for $R2$. But that's good, it means R2 provides new information.
 $$
 \begin{aligned}
 LR(\RR) &= 
 \frac{Pr(\RR|+D)}{Pr(\RR|-D)}\\
-&= \frac{Pr(R1|+D)Pr(R2|+D)}{Pr(R1|-D)Pr(R2|-D)}\\
-&= LR(R1) \times LR(R2)
+&= \frac{Pr(R1|+D) \quad Pr(R2|+D)}{Pr(R1|-D) \quad Pr(R2|-D)}\\
+&= LR(R1)  \quad  \quad \times  \quad  \quad LR(R2)
 \end{aligned}
 $$
+But, notice, that this only works if TWO conditional independence claims are true... one for the numerator ($+D$) and one for the denominator ($-D$).
 
-Now, suppose the "prior" says that some KNOWN portion of the true D's are "hidden" (hD) from the test, instead of detectable (dD).
+### Adding in "hidden" disease
+
+Now, suppose the "prior" says that some of the true $+D$'s are "hidden" ($hD$) from the test, instead of detectable ($dD$). Aw heck suppose it's a KNOWN proportion $Pr({hD}) \div Pr({+D})$ .
+
+
 Then the likelihood ratio is now
 $$
 \begin{aligned}
 LR(\RR)
 &= 
-\frac{Pr(R1 \AND R2 | dD \OR hD)} 
-  {Pr(R1 \AND R2|-D)}
+\frac{Pr(\RR | dD \OR hD)} 
+  {Pr(\RR|-D)}
 \end{aligned}
 $$
+That numerator is
 
 $$
 \begin{aligned}
-Pr(R1 \AND R2 | dD \OR hD)
+Pr(\RR | dD \OR hD)
 &= 
-\frac{Pr(R1 \AND R2 | dD)Pr(dD)+Pr(R1 \AND R2 | hD)Pr(hD)}
+\frac{Pr(\RR | dD)Pr(dD)+Pr(\RR | hD)Pr(hD)}
 {Pr(dD \OR  hD)
 }\\
 &= 
-\frac{Pr(R1 | dD) ^{2} Pr(dD)+Pr(R1 | hD)Pr(hD)}
+\frac{\color{green}{Pr(R1 | dD) ^{2}} Pr(dD)
++\color{green}{Pr(R1 | hD)}Pr(hD)}
 {Pr(dD) + Pr(hD)
 }\\
 \end{aligned}
 $$
-Note that $Pr(R1 | dD) ^{2}$ is squared, because for dD R1 and R2 are conditionally independent. For a dD person, getting the right answer for R1 doesn't increase or decrease th chance of a right answer for R2.
+Note that $\color{green}{Pr(R1 | dD) ^{2}}$ is squared, because for the $dD$ person $R1$ and $R2$ are conditionally independent.
+$Pr(\RR | dD) = Pr(R1 | dD) \times Pr(R2 | R1, dD) = Pr(R1 | dD) \times Pr(R2 | dD)$ and we are supposing that $Pr(R1 | dD) \space \mathrm{ equals } \space Pr(R2 | dD)$
+For a $dD$ person, getting the right answer for $R1$ doesn't increase or decrease th chance of a right answer for $R2$.
 
-But $Pr(R1 | hD)$ is not squared, because for $hD$, whatever $R1$ is, $R2$ will give the same answer.
+But $\color{green}{Pr(R1 | hD)}$ is not squared, because for $hD$, whatever $R1$ is, $R2$ will give the same answer. It doesn't add ANY new information.
 
 For the denominator of the likelihood ratio,
 $$
 \begin{aligned}
-  {Pr(R1 \AND R2|-D)} 
+  {Pr(\RR|-D)} 
   &= {Pr(R1 |-D)} \times 
   {Pr( R2|-D)}\\
 &= {Pr(R1 |-D)} ^{2}
 \end{aligned}
 $$
 
-because for $-D$, the two reports are conditionally independent. 
+because for $-D$, the two reports are conditionally independent. UNLESS there is a reason that a "false positive" might not be chance. Maybe there is a group of people who are not $+D$, but look like it in the test, consistently. The test might not be "specific" enough to pick out only $+D$ the disease we are looking for, not because of chance but because there is another condition that triggers the test.
+
+If we knew the proportions of $dD, hD, iD, noD$, then we can just get overall sensitivities and specificities as weighted averages. 
+
+```{r}
+options(digits=4)
+priorFor4 = c(0.9,0.10, 9, 90)/100
+names(priorFor4) = c('dD', 'hD',	'iD',	'noD')
+pr_positive_given_group = c(90,10,50, 10)/100
+names(pr_positive_given_group) = 
+  c('dD', 'hD',	'iD',	'noD')
+pr_dist_given_group = rbind(pr_positive_given_group, 1 - pr_positive_given_group) 
+rownames(pr_dist_given_group) = c('pos', 'neg')
+normalize= function(x)  x/sum(x)
+
+makePosteriorSequence = function(
+    priorFor4 = c(0.9,0.10, 9, 90)/100,
+    data = 1,  ### 1's and 2's
+  dataSequence = c(1,1,1,1)) {
+  
+  names(priorFor4) = c('dD', 'hD',	'iD',	'noD')
+  posteriorSequence = posteriorFor4 = priorFor4
+  sapply(dataSequence, function(data) {
+    posteriorFor4 <<- matrix(normalize(
+      posteriorFor4 * pr_dist_given_group[data,]), nrow=1) 
+    rownames(posteriorFor4) =  paste('next data:', data)
+    posteriorSequence <<- rbind(posteriorSequence, posteriorFor4)
+  })
+#rbind(priorFor4, (posteriorSequence))
+  posteriorSequence
+}
+
+makePosteriorSequence()
+makePosteriorSequence(priorFor4 = c(1, 0, 0, 99)/100)
+
+```
+Now repeat if the hD and iD do not exist.
+
+
+$$
 
