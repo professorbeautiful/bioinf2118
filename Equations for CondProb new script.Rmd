@@ -33,11 +33,14 @@ Now I get deluged by a flurry of pieces of evidence supporting the doctrine. Eac
 
 I'll just multiply the current odds, the "prior odds", by the ratio of the two different explanations of how you could have got the data. It's TRUE.  Or it's BS.
 That's called the likelihood ratio for the data:
+
+
 $$
-\frac
-  {\begin{verbatim{"Probability that you'd get this data if the crazy idea is TRUE"}\end{verbatim}}
-	{\begin{verbatim{Probability that you'd get this data if the crazy idea is BS}\end{verbatim}}
+\frac{
+Probability \space that \space you'd \space get \space this \space data \space if \space the \space crazy \space idea \space is \space TRUE}
+{Probability \space that \space you'd \space get \space this \space data \space if \space the \space crazy \space idea \space is \space BS}
 $$
+
 
 where BS is short for... mmm,  NOT true.
 
