@@ -61,13 +61,14 @@ for(logoddsUpTo in seq(along=logoddslist.reduced)){
   odds = exp(logodds)
   thisProb = odds.to.prob(odds)
   (paste(logodds, odds, thisProb, '\n'))
-  if(logoddsUpTo>1) {
+  if(logoddsUpTo>1) {  # incorporate a datum, draw vertical arrow.
     logodds.pair = c(logoddslist.reduced[logoddsUpTo-1], logodds)
     temparrow(c(axis.log.odds, axis.log.odds) - 0.05, 
             logodds.pair, col='black', lwd=2)
     text(axis.log.odds - 0.4, mean(logodds.pair), 
          paste0("R", logoddsUpTo - 1) )
   }
+  #  arrows across 3axes.
   temparrow(c(axis.log.odds, axis.odds), 
             c(logodds, rescaled.odds(odds)), col='black')
   temparrow(c(axis.odds, axis.prob), 
@@ -78,6 +79,9 @@ for(logoddsUpTo in seq(along=logoddslist.reduced)){
   #   text(axis.prob, rescaled.prob(newProb),
   #        newProb, col=probcolor, xpd=NA, adj=c(-0.2,0))
   # }
+  # text(mean(c(axis.odds, axis.prob)), rescaled.odds(odds),labels = 
+  #        round(digits=3, (odds)),
+  #      , col=oddscolor, xpd=NA, adj=c(-0.2,0))
   text(axis.prob, rescaled.prob(thisProb),labels = 
        round(digits=3, (thisProb)),
                , col=probcolor, xpd=NA, adj=c(-0.2,0))

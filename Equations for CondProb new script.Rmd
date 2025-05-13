@@ -1,4 +1,14 @@
 
+---
+title: "CondProb new script"
+author: "Roger Day"
+date: "2025-05-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
 
 Use ampersand ONLY in an aligned section.
 https://tex.stackexchange.com/questions/655/what-is-the-difference-between-def-and-newcommand
@@ -60,22 +70,27 @@ $$
 That numerator is
 
 $$
-\begin{aligned}
 Pr(\RR | dD \OR hD)
-&= 
+= 
 \frac{Pr(\RR | dD)Pr(dD)+Pr(\RR | hD)Pr(hD)}
 {Pr(dD \OR  hD)
 }\\
-&= 
-\frac{\color{green}{Pr(R1 | dD) ^{2}} Pr(dD)
-+\color{green}{Pr(R1 | hD)}Pr(hD)}
-{Pr(dD) + Pr(hD)
-}\\
+$$
+
+If the two reports are $R1=positive$ and $R2=positive$, then 
+
+$$
+\begin{aligned}
+Pr( \RR | dD \OR hD)
+= & \color{green}{Pr(positive | dD) ^{2}} Pr(dD)/ Pr(+D) \\
+& + \color{green}{Pr(positive | hD) ^{2}} Pr(hD)/ Pr(+D)
 \end{aligned}
 $$
+
+
 Note that $\color{green}{Pr(R1 | dD) ^{2}}$ is squared, because for the $dD$ person $R1$ and $R2$ are conditionally independent.
 $Pr(\RR | dD) = Pr(R1 | dD) \times Pr(R2 | R1, dD) = Pr(R1 | dD) \times Pr(R2 | dD)$ and we are supposing that $Pr(R1 | dD) \space \mathrm{ equals } \space Pr(R2 | dD)$
-For a $dD$ person, getting the right answer for $R1$ doesn't increase or decrease th chance of a right answer for $R2$.
+For a $dD$ person, getting the right answer for $R1$ doesn't increase or decrease the chance of a right answer for $R2$.
 
 But $\color{green}{Pr(R1 | hD)}$ is not squared, because for $hD$, whatever $R1$ is, $R2$ will give the same answer. It doesn't add ANY new information.
 
@@ -93,10 +108,23 @@ because for $-D$, the two reports are conditionally independent. UNLESS there is
 
 If we knew the proportions of $dD, hD, iD, noD$, then we can just get overall sensitivities and specificities as weighted averages. 
 
-```{r}
+```{css}
+table {
+  margin: auto;
+  border-top: 1px solid #666;
+  border-bottom: 1px solid #666;
+}
+table thead th { border-bottom: 1px solid #ddd; }
+th, td { padding: 10px; }
+```
+
+```{r defaults}
 options(digits=4)
 priorFor4 = c(0.9,0.10, 9, 90)/100
+
 names(priorFor4) = c('dD', 'hD',	'iD',	'noD')
+longgroupnames = c(dD='detectable', hD='hidden',	
+                   iD='imposter',	noD='no disease')
 pr_positive_given_group = c(90,10,50, 10)/100
 names(pr_positive_given_group) = 
   c('dD', 'hD',	'iD',	'noD')
@@ -106,27 +134,88 @@ normalize= function(x)  x/sum(x)
 
 makePosteriorSequence = function(
     priorFor4 = c(0.9,0.10, 9, 90)/100,
+    pr_pos_given_group = pr_dist_given_group[1,],
     data = 1,  ### 1's and 2's
-  dataSequence = c(1,1,1,1)) {
+  dataSequence = c(1,1,1,1),
+  wordsForData = c("'Pos'\\quad", "'Neg'"),
+  dropZeroGroups = TRUE) {
+  
+  pr_dist_given_group = rbind(pr_pos_given_group,  
+                              1 - pr_pos_given_group)
   
   names(priorFor4) = c('dD', 'hD',	'iD',	'noD')
-  posteriorSequence = posteriorFor4 = priorFor4
-  sapply(dataSequence, function(data) {
+  posteriorFor4 = posteriorSequence = priorFor4
+  sapply(seq(along=dataSequence), function(ndata) {
+    data=- dataSequence[ndata]
     posteriorFor4 <<- matrix(normalize(
       posteriorFor4 * pr_dist_given_group[data,]), nrow=1) 
-    rownames(posteriorFor4) =  paste('next data:', data)
+    rownames(posteriorFor4) =  paste0('Report ', ndata, ':', wordsForData[data])
     posteriorSequence <<- rbind(posteriorSequence, posteriorFor4)
   })
-#rbind(priorFor4, (posteriorSequence))
+  if(dropZeroGroups){
+    posteriorSequence = posteriorSequence[ 
+      , which (priorFor4>0)]
+    rownames(posteriorSequence)[1] = "prior for 2 groups"
+  } else {
+  #rbind(priorFor4, (posteriorSequence))
+    rownames(posteriorSequence)[1] = "prior for 4 groups"
+  }
+  print(sys.call())
   posteriorSequence
 }
+```
 
-makePosteriorSequence()
-makePosteriorSequence(priorFor4 = c(1, 0, 0, 99)/100)
+```{r, results='asis'}
+  print(knitr::kable(makePosteriorSequence(), format='html'))
+  print(knitr::kable(makePosteriorSequence(priorFor4 = c(.01,0,0,.99)), format='html'))
+  print(knitr::kable(makePosteriorSequence(pr_pos_given_group = c(1,0,1,0)), format='html'))
 
 ```
+
+
 Now repeat if the hD and iD do not exist.
 
+```{r}
+makePosteriorSequence(priorFor4 = c(1, 0, 0, 99)/100, )
+
+```
+
+Finally, what if the probabilities in the first table are correct, but we cannot distinguish between dD and hD, between iD and noD?
+
+```{r}
+priorFor2 = c(0.9,0.10, 9, 90)/100
+names(priorFor2) = c('dD', 'hD',	'iD',	'noD')
+pr_positive_given_group = c(90,10,50, 10)/100
+names(pr_positive_given_group) = 
+  c('dD', 'hD',	'iD',	'noD')
+
+```
+
+Let's just suppose the data are ${positive, positive}$
+$$
+\begin{aligned}
+Pr(\RR \space | \space +D) & = Pr(\RR \space | \space dD) {Pr(dD | +D)} \\
+        & + Pr(\RR \space | \space hD) {Pr(hD | +D)} \\  
+        & = Pr(positive \space | \space dD) {^2} {Pr(dD | +D)} \\
+        & + Pr(positive  \space | \space hD) {^2} {Pr(hD | +D)}
+\end{aligned}
+$$
+The two reports $\RR$ are conditionally independent... for $dD$ and for $hD$.  But maybe you don't even know that $+D$ contains two different types of patients.  Then you look at 
 
 $$
+\begin{aligned}
+Pr(\RR \space | \space +D) 
+        & = Pr(positive \space | \space +D) {^2} \quad ?
+\end{aligned}
+$$
+Nope.  In the example, $Pr(\RR \space | \space +D) = 0.9^2 *0.9 + 0.1^2*0.1 = 0.73$, but $Pr(positive \space | \space +D) {^2} = sensitivity^2 =0.82{^2} = 0.67$. So NOT conditionally independent given $+D$.
 
+```{r}
+makePosteriorSequence(priorFor4 = c(0.9, 0.1, 9, 90)/100, pr_pos_given_group = c(1,0,1,0))
+```
+$Pr(\RR \space | \space +D) = 1.00^2 *0.9 + 0.00^2*0.1 = 0.9$, but $Pr(positive \space | \space +D) {^2} = sensitivity^2 = 0.9{^2} = 0.81$. So NOT conditionally independent given $+D$.
+Ideally you could carve up the population of patients into groups using explanations for why the groups differ. Then the only thing remaining would be pure chance mistakes, thus independence. 
+
+That makes sense.  After the 1st report, the next bunch contribute no new information. $Pr(R2 = positive | R1 = positive) = 1$.
+Any data whose probability equals one no matter what the truth is, is useless!   
+And so we return to conspiracy theories and algorithms.
