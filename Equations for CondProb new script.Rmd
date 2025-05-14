@@ -29,6 +29,9 @@ th, td { padding: 10px; }
 ```
 
 ```{r defaults}
+
+CondProb_folder  = '"/Users/Roger/Sites/Bioinf-2118-2018-website/N-files-for-handouts/CondProb video"'
+
 options(digits=4)
 priorFor4 = c(0.9,0.10, 9, 90)/100
 
@@ -201,20 +204,37 @@ Here is the same probability table, but a way different answer, because SOMETHIN
 
 ```
 
+### What's lurking:
 
-Finally, what if the probabilities in the first table are correct, but we cannot distinguish between dD and hD, between iD and noD?
+Here, the positive tests include  GENUINE false positives, because the patient has some OTHER condition, that the test is picking up when we don't want it to.  A misdiagnosis. An imposter. In the lingo, the test is not *specific* enough. "$iD$", means an imposter, when the real deal is "$dD$" for detectable disease.
 
-```{r}
-priorFor2 = c(0.9,0.10, 9, 90)/100
-names(priorFor2) = c('dD', 'hD',	'iD',	'noD')
-pr_positive_given_group = c(90,10,50, 10)/100
+
+What's as bad, some patients WITH the target disease might have a variant of the disease that, in the lingo, the test is not sensitive enough. Hidden disease. "$hD$".
+Everybody with the disease we want to detect is $+D$, either $dD$ or $hD$.
+Everybody who we want to get a negative test for is $-D$, either $noD$ or $iD$.
+
+So, 4 categories instead of 2. Each category of patients has its own Probability of a Positive test.
+
+
+But we didn't know about hD and iD. 
+The probabilities for dD and hD? We only see their sum.  Likewise for iD and noD.
+
+The probabilities in the first table are still correct, but we cannot distinguish between dD and hD, between iD and noD?
+
+The full story is this:
+
+
+
+```{r, asis}
+priorFor4 = c(0.9,0.10, 9, 90)/100
+names(priorFor4) = c('dD', 'hD',	'iD',	'noD')
+pr_positive_given_group = c(90,10, 50, 10)/100
 names(pr_positive_given_group) = 
   c('dD', 'hD',	'iD',	'noD')
-
 ```
 ### dD and hD = +D
 
-Let's just suppose the data are ${positive, positive}$.
+Let's just suppose the data are ${positive, positive}$. And, that conditional independence IS true for the 4 subgroups. Then
 
 $$
 \begin{aligned}
@@ -228,7 +248,7 @@ $$
 
 The two reports $\RR$ are conditionally independent... for $dD$ and for $hD$.  But not if you condition only on $+D$.
 
-Maybe you don't even know that $+D$ contains two different types of patients.  Then you look at 
+Maybe you don't even know that $+D$ contains two different types of patients.  Then you wonder: 
 
 $$
 \begin{aligned}
@@ -236,7 +256,17 @@ Pr(\RR \space | \space +D)
         & = Pr(positive \space | \space +D) {^2} \quad ?
 \end{aligned}
 $$
-Nope.  In the example, $Pr(\RR \space | \space +D) = 0.9^2 *0.9 + 0.1^2*0.1 = 0.73$, but $Pr(positive \space | \space +D) {^2} = sensitivity^2 =0.82{^2} = 0.67$. So NOT conditionally independent given $+D$.
+Nope.  In the example, if conditional independent, then  $Pr(positive \space | \space +D) {^2} = sensitivity^2 =0.82{^2} = 0.67$. But $Pr(\RR \space | \space +D) = 0.9^2 *0.9 + 0.1^2*0.1 = 0.73$ is different, so NOT conditionally independent given $+D$.
+
+### iD and noD = -D
+
+On the no-disease side, 
+if conditional independent, then  $Pr(positive \space | \space -D) {^2} = (1-specificity)^2 = 0.1{^2} = 0.01$. But $Pr(\RR \space | \space -D) = 1.0^2 *0.09 + 0.0^2*0.90 = 0.09$ is a lot higher, WAY different, so NOT AT ALL conditionally independent given $-D$.
+
+
+### Two pictures
+
+
 
 ```{r}
 makePosteriorSequence(priorFor4 = c(0.9, 0.1, 9, 90)/100, pr_pos_given_group = c(1,0,1,0))
