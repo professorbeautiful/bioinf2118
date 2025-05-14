@@ -10,42 +10,6 @@ output: html_document
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-Today: a pet turtle in the clutches of a child, a prisoner's picnic gone bad, a flat earth theory, a political silo, & how to combine medical tests. How do we combine information from different sources, why does conditional independence matter, and what can go wrong? And of course, how does it all relate to machine learning. So, strike up the music for the Bayesian dance! 
-
-There's what you know. We'll call that data.   
-
-And there is something you want to know. 
-
-We'll call that the unknown truth, the true state... is the answer YES or NO?, is the statement TRUE or FALSE?, is the SICKNESS PRESENT or ABSENT?, will it be SUNNY or RAINY?.  
-
-In episode 1, we learned how you start with some belief about the true state. A belief expressed as probabilities. Or even better, as *odds*.
-
-Then you use new data to refine that initial belief.
-
-An alarming possibility, like visitors from outer space, or "yadayada Hillary clinton yadayada"....
-They tell me, "Do your own research.
-
-Suppose I start with a very LOW odds that the alarming possibility is true .
-
-I'm after all a reasonable human.
-
-Now I get deluged by a flurry of pieces of evidence supporting the doctrine. Each one pushes up my belief, my confidence in the alarming possibility, my personal probability.
-
-I'll just multiply the current odds, the "prior odds", by the ratio of the two different explanations of how you could have got the data. It's TRUE.  Or it's BS.
-That's called the likelihood ratio for the data:
-
-
-$$
-\frac{
-Probability \space that \space you'd \space get \space this \space data \space if \space the \space crazy \space idea \space is \space TRUE}
-{Probability \space that \space you'd \space get \space this \space data \space if \space the \space crazy \space idea \space is \space BS}
-$$
-
-
-where BS is short for... mmm,  NOT true.
-
-Here's a maybe more serious example. Switch to a medical decision setting.
-
 $$
 \newcommand{\alldata}{\space 
   \color{red}{\mathrm{{all{\space}data}} \space }}
@@ -53,92 +17,6 @@ $$
 \newcommand{\AND}{\space \mathrm{and}\space}
 \newcommand{\RR}{\color{red}{R1 \AND R2}}
 $$
-
-$$
-\begin{aligned}
-Odds(+D|\alldata) & =\frac{Pr(+D|\alldata )}{Pr(-D|\alldata )}\\
-& =\frac{Pr(\alldata \AND +D)/Pr(\alldata )}
-      {Pr(\alldata \AND -D)/Pr(\alldata )}\\
-& = \frac{Pr(\alldata |+D)}{Pr(\alldata |-D)}\ \frac{Pr(+D)}{Pr(-D)}\\
-& = LR(\alldata)\times Odds(+D)
-\end{aligned}
-$$
-
-$$
-\begin{aligned}
-Odds(+D|\RR) & =\frac{Pr(+D|\RR)}{Pr(-D|\RR)}\\
-& =\frac{Pr(\RR \AND +D)\quad/\space Pr(\RR)}
-      {Pr(\RR \AND -D)\quad/\space Pr(\RR)}\\
-& = \frac{Pr(\RR|+D)}{Pr(\RR|-D)}\ \frac{Pr(+D)}{Pr(-D)}\\
-& =LR(\RR)\times Odds(+D)
-\end{aligned}
-$$
-
-If we are lucky, R1 and R2 are CONDITIONALLY INDEPENDENT. Getting the right answer for $R1$ doesn't increase or decrease the chance of a right answer for $R2$. But that's good, it means R2 provides new information.
-$$
-\begin{aligned}
-LR(\RR) &= 
-\frac{Pr(\RR|+D)}{Pr(\RR|-D)}\\
-&= \frac{Pr(R1|+D) \quad Pr(R2|+D)}{Pr(R1|-D) \quad Pr(R2|-D)}\\
-&= LR(R1)  \quad  \quad \times  \quad  \quad LR(R2)
-\end{aligned}
-$$
-But, notice, that this only works if TWO conditional independence claims are true... one for the numerator ($+D$) and one for the denominator ($-D$).
-
-### Adding in "hidden" disease
-
-Now, suppose the "prior" says that some of the true $+D$'s are "hidden" ($hD$) from the test, instead of detectable ($dD$). Aw heck suppose it's a KNOWN proportion $Pr({hD}) \div Pr({+D})$ .
-
-
-Then the likelihood ratio is now
-$$
-\begin{aligned}
-LR(\RR)
-&= 
-\frac{Pr(\RR | dD \OR hD)} 
-  {Pr(\RR|-D)}
-\end{aligned}
-$$
-That numerator is
-
-$$
-Pr(\RR | dD \OR hD)
-= 
-\frac{Pr(\RR | dD)Pr(dD)+Pr(\RR | hD)Pr(hD)}
-{Pr(dD \OR  hD)
-}\\
-$$
-
-If the two reports are $R1=positive$ and $R2=positive$, then 
-
-$$
-\begin{aligned}
-Pr( \RR | dD \OR hD)
-= & \color{green}{Pr(positive | dD) ^{2}} Pr(dD)/ Pr(+D) \\
-& + \color{green}{Pr(positive | hD) ^{2}} Pr(hD)/ Pr(+D)
-\end{aligned}
-$$
-
-
-Note that $\color{green}{Pr(R1 | dD) ^{2}}$ is squared, because for the $dD$ person $R1$ and $R2$ are conditionally independent.
-$Pr(\RR | dD) = Pr(R1 | dD) \times Pr(R2 | R1, dD) = Pr(R1 | dD) \times Pr(R2 | dD)$ and we are supposing that $Pr(R1 | dD) \space \mathrm{ equals } \space Pr(R2 | dD)$
-For a $dD$ person, getting the right answer for $R1$ doesn't increase or decrease the chance of a right answer for $R2$.
-
-But $\color{green}{Pr(R1 | hD)}$ is not squared, because for $hD$, whatever $R1$ is, $R2$ will give the same answer. It doesn't add ANY new information.
-
-For the denominator of the likelihood ratio,
-$$
-\begin{aligned}
-  {Pr(\RR|-D)} 
-  &= {Pr(R1 |-D)} \times 
-  {Pr( R2|-D)}\\
-&= {Pr(R1 |-D)} ^{2}
-\end{aligned}
-$$
-
-because for $-D$, the two reports are conditionally independent. UNLESS there is a reason that a "false positive" might not be chance. Maybe there is a group of people who are not $+D$, but look like it in the test, consistently. The test might not be "specific" enough to pick out only $+D$ the disease we are looking for, not because of chance but because there is another condition that triggers the test.
-
-If we knew the proportions of $dD, hD, iD, noD$, then we can just get overall sensitivities and specificities as weighted averages. 
 
 ```{css}
 table {
@@ -169,8 +47,10 @@ makePosteriorSequence = function(
     pr_pos_given_group = pr_dist_given_group[1,],
     data = 1,  ### 1's and 2's
   dataSequence = c(1,1,1,1),
-  wordsForData = c("'Pos'\\quad", "'Neg'"),
-  dropZeroGroups = TRUE) {
+  wordsForData = c("'Pos'\\quad", "'Neg'\\quad"),
+  dropZeroGroups = TRUE,
+  makeHTML = TRUE, 
+  marginalize = FALSE) {
   
   pr_dist_given_group = rbind(pr_pos_given_group,  
                               1 - pr_pos_given_group)
@@ -178,7 +58,7 @@ makePosteriorSequence = function(
   names(priorFor4) = c('dD', 'hD',	'iD',	'noD')
   posteriorFor4 = posteriorSequence = priorFor4
   sapply(seq(along=dataSequence), function(ndata) {
-    data=- dataSequence[ndata]
+    data = dataSequence[ndata]
     posteriorFor4 <<- matrix(normalize(
       posteriorFor4 * pr_dist_given_group[data,]), nrow=1) 
     rownames(posteriorFor4) =  paste0('Report ', ndata, ':', wordsForData[data])
@@ -192,25 +72,135 @@ makePosteriorSequence = function(
   #rbind(priorFor4, (posteriorSequence))
     rownames(posteriorSequence)[1] = "prior for 4 groups"
   }
-  print(sys.call())
-  posteriorSequence
+  if(marginalize) {
+    Dplus = apply(posteriorSequence[ , 1:2], 1, sum)
+    Dminus = apply(posteriorSequence[ , 3:4], 1, sum)
+    posteriorSequence[, 1:2] = cbind(Dplus, Dminus)
+    posteriorSequence = posteriorSequence[ , 1:2]
+  }
+  if(ncol(posteriorSequence) == 2){
+    colnames(posteriorSequence) = c("+D", "-D")
+    rownames(posteriorSequence)[1] = "prior for 2 groups"
+  }
+  #if( makeHTML)
+    return(knitr::kable(format='html',
+                  posteriorSequence) )
 }
 ```
 
+
+Today: a pet turtle in the clutches of a child, a prisoner's picnic gone bad, a flat earth theory, a political silo, & how to combine medical tests. How do we combine information from different sources, why does conditional independence matter, and what can go wrong? And of course, how does it all relate to machine learning. So, strike up the music for the Bayesian dance! 
+
+There's what you know. We'll call that data.   
+
+And there is something you want to know. 
+
+We'll call that the unknown truth, the true state... is the answer YES or NO?, is the statement TRUE or FALSE?, is the SICKNESS PRESENT or ABSENT?, will it be SUNNY or RAINY?.  
+
+In episode 1, we learned how you start with some belief about the true state. A belief expressed as probabilities. Or even better, as *odds*.
+
+Then you use new data to refine that initial belief.
+
+An alarming possibility, like visitors from outer space, or "yadayada Hillary clinton yadayada"....
+They tell me, "Do your own research.
+
+Suppose I start with a very LOW odds that the alarming possibility is true .
+
+I'm after all a reasonable human.
+
+Now I get deluged by a flurry of pieces of evidence supporting the doctrine. Each one pushes up my belief, my confidence in the alarming possibility, my personal probability.
+
+I'll just multiply the current odds, the "prior odds", by the ratio of the two different explanations of how you could have got the data. It's TRUE.  Or it's BS.
+That's called the likelihood ratio for the data:
+
+
+$$
+\begin{aligned}
+LR & = Likelihood \space Ratio \\
+& =\frac{
+Probability \space that \space you'd \space get \space this \space data \space if \space the \space crazy \space idea \space is \space TRUE}
+{Probability \space that \space you'd \space get \space this \space data \space if \space the \space crazy \space idea \space is \space BS}
+\end{aligned}
+$$
+
+
+where "*BS*" is short for... mmm...  "*NOT true*".
+
+Here's a maybe more serious example. Switch to a medical diagnosis setting.
+
+![](/Users/Roger/Sites/Bioinf-2118-2018-website/N-files-for-handouts/CondProb video/app_Picture1.png)
+
+A link to this app is in the Dungeon, also to Episode 1, which walks you through how to use it.
+The prior odds is one percent, quite low. This diagnosis seems like a long shot going in the door.  The LR is high, it's 10, so getting a positive is far more likely if the person is Sick, but now multiply the odds by the LR and you've only boosted the odds up from 1% to 10%, the probability to only 9%.
+
+Ah, but here comes more information, more data!  What do we do with THAT?
+
+Repeat the test. Suppose you get the same answer every time.  
+
+$R1$ is Positive, $R2$ is positive, $R3$ is  positive, $R4$ is positive. 
+
+Just multiply by the new data's likelihood ratio. Right?  WRONG! Aw, man!
+
+
+Let's pretend it's ok for now. Multiplying by the same LR again and again.
+That's the same as adding the same *log LR* every time, because the logarithm turns multiplying into adding. These little up-arrows are the same length. So let's start with odds of 0.01. The first positive test R1 brings the chance up  only to 9%.  The second one, R2, jacks it up to a half. R3 brings it to 91%, and R4 to 99%.
+
+Just look at all that evidence mount up!
+
 ```{r, results='asis'}
-  print(knitr::kable(makePosteriorSequence(), format='html'))
-  print(knitr::kable(makePosteriorSequence(priorFor4 = c(.01,0,0,.99)), format='html'))
-  print(knitr::kable(makePosteriorSequence(pr_pos_given_group = c(1,0,1,0)), format='html'))
+### The nice case. Cond Indep, all good.
+  print(makePosteriorSequence(
+    pr_pos_given_group = c(0.9, 0, 0, 0.09),
+    priorFor4 = c(.01,0,0,.99)))
+```
+The general principle, the key idea is: always condition on ALL you know, all together. Like this:
+
+$$
+\begin{aligned}
+Odds(+D|\alldata) & =\frac{Pr(+D|\alldata )}{Pr(-D|\alldata )}\\
+& =\frac{Pr(\alldata \AND +D)/Pr(\alldata )}
+      {Pr(\alldata \AND -D)/Pr(\alldata )}\\
+& = \frac{Pr(\alldata |+D)}{Pr(\alldata |-D)}\ \frac{Pr(+D)}{Pr(-D)}\\
+& = LR(\alldata)\times Odds(+D)
+\end{aligned}
+$$
+
+In this case, just taking the first two reports, that becomes
+
+$$
+\begin{aligned}
+Odds(+D|\RR) & =\frac{Pr(+D|\RR)}{Pr(-D|\RR)}\\
+& =\frac{Pr(\RR \AND +D)\quad/\space Pr(\RR)}
+      {Pr(\RR \AND -D)\quad/\space Pr(\RR)}\\
+& = \frac{Pr(\RR|+D)}{Pr(\RR|-D)}\ \frac{Pr(+D)}{Pr(-D)}\\
+& =LR(\RR)\times Odds(+D)
+\end{aligned}
+$$
+
+If we are lucky, R1 and R2 are CONDITIONALLY INDEPENDENT. Getting the right answer for $R1$ doesn't increase or decrease the chance of a right answer for $R2$. And that's good, it means R2 provides new information.
+Just keep multiplying by the next *LR*.
+
+$$
+\begin{aligned}
+LR(\RR) &= 
+\frac{Pr(\RR|+D)}{Pr(\RR|-D)}\\
+&= \frac{Pr(R1|+D) \quad Pr(R2|+D)}{Pr(R1|-D) \quad Pr(R2|-D)}\\
+&= LR(R1)  \quad  \quad \times  \quad  \quad LR(R2)
+\end{aligned}
+$$
+But, careful,  this only works if TWO conditional independence claims are true... one for the numerator ($+D$) and one for the denominator ($-D$).
+
+Here is the same probability table, but a way different answer, because SOMETHING is lurking underneath:
+
+```{r, results='asis'}
+  # print(knitr::kable(makePosteriorSequence(), format='html'))
+  # print(knitr::kable(makePosteriorSequence(priorFor4 = c(.01,0,0,.99)), format='html'))
+  print(makePosteriorSequence(
+    priorFor4 = c(0.009, 0.001, 0.09, 0.90),
+    pr_pos_given_group = c(1,0,1,0) , marginalize=TRUE))
 
 ```
 
-
-Now repeat if the hD and iD do not exist.
-
-```{r}
-makePosteriorSequence(priorFor4 = c(1, 0, 0, 99)/100, )
-
-```
 
 Finally, what if the probabilities in the first table are correct, but we cannot distinguish between dD and hD, between iD and noD?
 
@@ -222,8 +212,10 @@ names(pr_positive_given_group) =
   c('dD', 'hD',	'iD',	'noD')
 
 ```
+### dD and hD = +D
 
-Let's just suppose the data are ${positive, positive}$
+Let's just suppose the data are ${positive, positive}$.
+
 $$
 \begin{aligned}
 Pr(\RR \space | \space +D) & = Pr(\RR \space | \space dD) {Pr(dD | +D)} \\
@@ -232,7 +224,11 @@ Pr(\RR \space | \space +D) & = Pr(\RR \space | \space dD) {Pr(dD | +D)} \\
         & + Pr(positive  \space | \space hD) {^2} {Pr(hD | +D)}
 \end{aligned}
 $$
-The two reports $\RR$ are conditionally independent... for $dD$ and for $hD$.  But maybe you don't even know that $+D$ contains two different types of patients.  Then you look at 
+
+
+The two reports $\RR$ are conditionally independent... for $dD$ and for $hD$.  But not if you condition only on $+D$.
+
+Maybe you don't even know that $+D$ contains two different types of patients.  Then you look at 
 
 $$
 \begin{aligned}
@@ -245,6 +241,7 @@ Nope.  In the example, $Pr(\RR \space | \space +D) = 0.9^2 *0.9 + 0.1^2*0.1 = 0.
 ```{r}
 makePosteriorSequence(priorFor4 = c(0.9, 0.1, 9, 90)/100, pr_pos_given_group = c(1,0,1,0))
 ```
+
 $Pr(\RR \space | \space +D) = 1.00^2 *0.9 + 0.00^2*0.1 = 0.9$, but $Pr(positive \space | \space +D) {^2} = sensitivity^2 = 0.9{^2} = 0.81$. So NOT conditionally independent given $+D$.
 Ideally you could carve up the population of patients into groups using explanations for why the groups differ. Then the only thing remaining would be pure chance mistakes, thus independence. 
 
