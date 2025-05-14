@@ -223,7 +223,7 @@ The probabilities in the first table are still correct, but we cannot distinguis
 
 The full story is this:
 
-
+![](table_for_dD_hD_iD_noD.png)
 
 ```{r, asis}
 priorFor4 = c(0.9,0.10, 9, 90)/100
