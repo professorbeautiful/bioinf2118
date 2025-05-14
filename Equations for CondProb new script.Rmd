@@ -224,6 +224,9 @@ The probabilities in the first table are still correct, but we cannot distinguis
 The full story is this:
 
 ![](table_for_dD_hD_iD_noD.png)
+You can see the same identical information, but now with explanations for false positives and false negatives, the hidden $hD$ and the imposters $iD$.
+
+False results often share the same cause.  If you only knew that, you wouldn't be fooled so easily.
 
 ```{r, asis}
 priorFor4 = c(0.9,0.10, 9, 90)/100
@@ -278,3 +281,14 @@ Ideally you could carve up the population of patients into groups using explanat
 That makes sense.  After the 1st report, the next bunch contribute no new information. $Pr(R2 = positive | R1 = positive) = 1$.
 Any data whose probability equals one no matter what the truth is, is useless!   
 And so we return to conspiracy theories and algorithms.
+
+
+### Causal diagrams and colliders
+
+### Machine learning
+
+### Media bubbles
+
+### Factoring joint distributions
+
+### Intro to Gibbs sampling
