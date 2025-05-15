@@ -208,51 +208,60 @@ $$
 The numerator splits, and the denominator splits. 
 But, careful,  this only works if TWO conditional independence claims are true... one for the numerator ($+D$) and one for the denominator ($-D$).
 
+## ## Oh no,
+
 Here is the same probability table,
 ![](table_for_+D_-D.png)
 
-but a way different response to multiple tests, because SOMETHING is lurking underneath:
+but a way different response to multiple tests.
+After the first test, none of the next 4 deliver any new information.
+Why?
 
 
 ```{r, results='asis'}
-  # print(knitr::kable(makePosteriorSequence(), format='html'))
-  # print(knitr::kable(makePosteriorSequence(priorFor4 = c(.01,0,0,.99)), format='html'))
   print(makePosteriorSequence(
     priorFor4 = c(0.009, 0.001, 0.09, 0.90),
     pr_pos_given_group = c(1,0,1,0) , marginalize=TRUE))
-
 ```
 
+ because SOMETHING is lurking underneath:
+ 
 ## ## What's lurking: 4 groups
 
 
 Here, the positive tests include  GENUINE false positives, because the patient has some OTHER condition, that the test is picking up when we don't want it to.  A misdiagnosis. An imposter. In the lingo, the test is not *specific* enough. "$iD$", means an imposter, when the real deal is "$dD$" for detectable disease.
 
 What's as bad, there can be GENUINE false negatives. Some patients WITH the target disease might have a variant of the disease that, in the lingo, the test is not sensitive enough. Hidden disease. "$hD$".
+
 Everybody with the disease we want to detect is $+D$, either $dD$ or $hD$.
+
 Everybody who we want to get a negative test for is $-D$, either $noD$ or $iD$.
 
-So $+D$ splits into two types of patients:  true positives $dD$ and false negatives $iD$.
-And $-D$ splits into two types of patients:  $iD$ and $noD$.
+So $+D$ splits into two types of patients:  true positives $dD$ and false negatives $hD$.
+And $-D$ splits into two types of patients: true negatives $noD$ and false positives $iD$.
 
-So, 4 categories instead of 2. Each category of patients has its own Probability of a Positive test.
+So, 4 categories instead of 2. 
 
 
 ## ## 4 groups distribution
 
-The full story is this:
+Each category of patients has its own Probability of a Positive test.
+This is the hidden full truth. 
 
 ![](table_for_dD_hD_iD_noD.png)
 
-This is the hidden full truth. We actually don't have prior information for the 4 groups. In fact, we might not know that the sneaky ones, hD and iD,  exist. 
+We actually don't have prior information for the 4 groups. In fact, we might not know that the sneaky ones, the hiddens and the imposters,  exist. 
 
 The probabilities in the first table showing probabilities for only +D and -D are still correct, but we cannot distinguish between dD and hD, between iD and noD.
 
-The hidden $hD$ and the imposters $iD$ are explanations for false positives and false negatives.  Too bad we don't know that.
+The hidden $hD$ and the imposters $iD$ are explanations for false positives and false negatives. Successive false results often share the same cause. In this case, two false positives occur because they share the patient, and the patient has an imposter condition that explains both false positive. If you only knew that, you wouldn't be fooled so easily.
 
-Maybe we can do biomedical research, learn that these groups exist, find biomarkers for them.
+Too bad we don't know that.
 
-Successive false results often share the same cause. In this case, two false positives occur because they share the patient, and the patient has an imposter condition that explains both false positive. If you only knew that, you wouldn't be fooled so easily.
+After time passes, following up on the patients, we may learn which of the test results had been false.
+And maybe we can do biomedical research, learn that these groups exist, find biomarkers for them.
+
+
 
 ```{r, asis}
 priorFor4 = c(0.9,0.10, 9, 90)/100
@@ -260,8 +269,9 @@ names(priorFor4) = c('dD', 'hD',	'iD',	'noD')
 pr_positive_given_group = c(90,10, 50, 10)/100
 names(pr_positive_given_group) = 
   c('dD', 'hD',	'iD',	'noD')
-###  unnecessary?
+###  unused?
 ```
+
 ## ## dD and hD = +D
 
 Let's  suppose we have just two test results, $R1 = positive, R2 = positive$. And, that conditional independence IS true for the 4 subgroups. 
@@ -285,8 +295,7 @@ Pr(\RR \space | \space +D) & = Pr(\RR \space | \space dD) \quad {Pr(dD | +D)} \\
         & = 0.9
 \end{aligned}
 $$
-But if the two tests were independent conditionall on $+D$, we'd get
-
+But if the two tests were independent conditionally on $+D$, we'd get
 
 
 $$
@@ -297,33 +306,38 @@ Pr(\RR \space | \space +D)
         & = 0.81
 \end{aligned}
 $$
-## ## Show no cond indep for +D.
 
-Nope.  
-In the example, if conditionally independent, then  $Pr(\RR \space | \space +D)$  would equal $Pr(positive \space | \space +D) {^2}$ = $sensitivity^2 =0.82{^2} = 0.67$. 
-But $Pr(\RR \space | \space +D) = 0.9^2 *0.9 + 0.1^2*0.1 = 0.73$, and that's  different, so NOT conditionally independent given $+D$.
+Nope.  Not the same.
 
+That makes sense.  After the first positive test result, only dD and iD are possible. And they both GUARANTEE that the next result will be positive... a true positive for dD and a false positive for iD.
 
+After the 1st report, the next bunch contribute no new information. $Pr(R2 = positive | R1 = positive) = 1$.
+Any data whose probability equals one no matter what the truth is, is useless!   
 
-## ## iD and noD = +D
+## ## 2 negatives
 
-On the no-disease side, 
-if conditional independent, then  $Pr(positive \space | \space -D) {^2} = (1-specificity)^2 = 0.1{^2} = 0.01$. But $Pr(\RR \space | \space -D) = 1.0^2 *0.09 + 0.0^2*0.90 = 0.09$ is a lot bigger, so NOT AT ALL conditionally independent given $-D$.
+What if you get all NEGATIVE tests. Maybe the doctor really really really doesn't want to miss it. 
 
+(Actually, it could be that as time passes a hidden disease becomes detectable. That's why every few years we repeat cancer screening tests.  That's an important case, but we'll set that aside for now.)
 
-## ## Two pictures
+```{r, results='asis'}
+  print(makePosteriorSequence(dataSequence = c(2,2,2,2),
+    priorFor4 = c(0.009, 0.001, 0.09, 0.90),
+    pr_pos_given_group = c(1,0,1,0) , marginalize=TRUE))
+```
+Sure enough, after the first test, the rest are guaranteed to provide no further information. Here is the full story.
 
-
-
-```{r}
-makePosteriorSequence(priorFor4 = c(0.9, 0.1, 9, 90)/100, pr_pos_given_group = c(1,0,1,0))
+```{r, results='asis'}
+  print(makePosteriorSequence(dataSequence = c(2,2,2,2),
+    priorFor4 = c(0.009, 0.001, 0.09, 0.90),
+    pr_pos_given_group = c(1,0,1,0) , marginalize=TRUE))
 ```
 
-$Pr(\RR \space | \space +D) = 1.00^2 *0.9 + 0.00^2*0.1 = 0.9$, but $Pr(positive \space | \space +D) {^2} = sensitivity^2 = 0.9{^2} = 0.81$. So NOT conditionally independent given $+D$.
-Ideally you could carve up the population of patients into groups using explanations for why the groups differ. Then the only thing remaining would be pure chance mistakes, not explained by something about the particular patient. And so,  independence. 
 
-That makes sense.  After the 1st report, the next bunch contribute no new information. $Pr(R2 = positive | R1 = positive) = 1$.
-Any data whose probability equals one no matter what the truth is, is useless!   
+Ideally you could carve up the population of patients into groups using explanations for why the groups differ. Then the only thing remaining would be pure chance mistakes, not explained by something about the particular patient. Conditional independence. 
+
+
+
 And so we return to conspiracy theories and algorithms.
 
 
