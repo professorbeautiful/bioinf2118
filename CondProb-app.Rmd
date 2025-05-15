@@ -32,9 +32,7 @@ source("makePosteriorSequence.R")
 ```{r}
 paramArgDefaults = c(pr_dD=0.01, pr_hD=0, pr_iD=0, pr_noD=0.99)
 
-output$posteriorSequence = renderUI(
-  div(makePosteriorSequence())
-)
+
 output$parameterUI = renderUI(
   {
     probParamUI = div(
@@ -64,7 +62,7 @@ output$parameterUI = renderUI(
       textInput(
         "dataInputID",
         value = "1 1 1 1",
-        label=HTML("Tests (1s and 2s, format like 1 2 1 2)"),
+        label=HTML("Test results (1s and 2s, format like 1 2 1 2)"),
       )
   }
 )
@@ -78,9 +76,8 @@ ui =
     useShinyjs(rmd=TRUE, debug=TRUE),  ## this is the place!!
     fluidRow(
       column(12,   uiOutput('parameterUI')), 
-      column(12,   uiOutput('posteriorSequence')), 
-      
-      
+      #https://stackoverflow.com/questions/51460955/how-to-make-kable-table-reactive-in-shiny-app-shiny-kable
+      column(12,   htmlOutput('makePosteriorSequence'))
     )
   )
 ```
@@ -90,20 +87,23 @@ ui =
 
 server = function(input, output) {
   
-  posteriorSequenceOutput = reactiveVal('posteriorSequenceOutput')
+  # posteriorSequenceOutput =
+  #   reactiveVal('posteriorSequenceOutput')
   
   run_makePosteriorSequence = function() {
-    
+    # TODO, maybe
   }
-
-  observeEvent(input$dataInputID, {
+  output$makePosteriorSequence = renderText({
     dataSequence = strsplit(split=' ', input$dataInputID)[[1]]
     dataSequence = sapply(dataSequence, as.numeric)
+    print(dataSequence)
     ## only 1's and 2's
-    dataSequence <<- rep(1,4)
+    #dataSequence <<- rep(1,4)
     if(all(dataSequence %in% 1:2)) { #proceed
       #run_makePosteriorSequence()
-      posteriorSequenceOutput ( makePosteriorSequence(
+      #posteriorSequenceOutput ( 
+        (
+          makePosteriorSequence(
         priorFor4 = c(0.9,0.10, 9, 90)/100,
         pr_pos_given_group = c(1, 0, 1, 0),
         dataSequence = dataSequence, ### 1's and 2's
@@ -111,9 +111,9 @@ server = function(input, output) {
         dropZeroGroups = TRUE,
         makeHTML = TRUE, 
         marginalize = FALSE # input$marginalize
-      ) )
+      ) ) 
     } ### end, call to makePosteriorSequence
-  })  ### end, input$dataInputID
+  })  ### end, renderText 
 }  ## end, server
 
 
