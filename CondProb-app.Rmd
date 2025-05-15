@@ -16,6 +16,10 @@ c('simplebayesdecision-fancy.Rmd', 'inclRmd.R',
 , "gerdPlot2.R"  )) 
 -->
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
 ```{r, echo=F}
 usingShinyApp = FALSE
 temp = suppressPackageStartupMessages(require('shinyjs', quietly=TRUE))
@@ -30,43 +34,59 @@ source("makePosteriorSequence.R")
 ```
 
 ```{r}
-paramArgDefaults = c(pr_dD=0.01, pr_hD=0, pr_iD=0, pr_noD=0.99)
+priorDefaults = 
+  c(pr_dD=0.009, pr_hD=0.001, pr_iD=0.09, pr_noD=0.9)
+
+
+rV= reactiveValues(
+  priors = priorDefaults
+)  
 
 
 output$parameterUI = renderUI(
   {
-    probParamUI = div(
+    div(
       h3(style='text-align:center', "Initial (prior) probabilities"),
       fluidRow(
         splitLayout(
           numericInput(
             'pr_dD',
             ('detectable D') ,
-            value = paramArgDefaults['pr_dD'],
+            value = priorDefaults['pr_dD'],
             min = 0, max=1, step = 0.01),
           numericInput('pr_hD',
                        ('hidden D'),
-                       value = paramArgDefaults['pr_hD'],
+                       value = priorDefaults['pr_hD'],
                        min = 0, max=1, step = 0.01),
           numericInput('pr_iD',
                        ('imposter D'),
-                       value = paramArgDefaults['pr_iD'],
+                       value = priorDefaults['pr_iD'],
                        min = 0, max=1, step = 0.01),
-          numericInput('pr_noD',  ### best to slave this one for now.
+          numericInput('pr_noD',  
+              ### best to slave this one for now.
                        ('no D'),
-                       value = paramArgDefaults['pr_noD'],
+                       value = priorDefaults['pr_noD'],
                        min = 0, max=1, step = 0.01)
         )))
     
-    ObservationUI = 
-      textInput(
-        "dataInputID",
-        value = "1 1 1 1",
-        label=HTML("Test results (1s and 2s, format like 1 2 1 2)"),
-      )
   }
 )
+output$whichFollows = renderUI(
+  radioButtons(inputId = 'whichFollows', 
+               choices = c('dD', 'hD', 'iD', 'noD'), label='which is dependent',
+   selected='noD', width='400px',
+  inline=T))
 
+
+output$ObservationUI = 
+  renderUI(
+    div(
+        textInput(
+          "dataInputID",
+          value = "1 1 1 1",
+          label=HTML("Test results (1s and 2s, format like 1 2 1 2)"),
+        ))
+  )
 ```
 
 ```{r}
@@ -76,17 +96,32 @@ ui =
     useShinyjs(rmd=TRUE, debug=TRUE),  ## this is the place!!
     fluidRow(
       column(12,   uiOutput('parameterUI')), 
+      column(12,   uiOutput('whichFollows')),
+      column(12,   uiOutput('ObservationUI')), 
       #https://stackoverflow.com/questions/51460955/how-to-make-kable-table-reactive-in-shiny-app-shiny-kable
-      column(12,   htmlOutput('makePosteriorSequence'))
+      column(12,   htmlOutput('makePosteriorSequence')),
+      column(12,   'all done!')
     )
   )
+
 ```
 
 ```{r}
 ####  server ####
 
 server = function(input, output) {
-  
+  observeEvent( input$pr_dD, {
+  updateNumericInput(inputId='pr_hD', 
+                     value = 1 - input$pr_dD - input$pr_iD - input$pr_noD  )
+}
+)
+#         {
+#           rV$priors =
+#           c(pr_dD=input$pr_dD, pr_hD=input$pr_hD,
+#             pr_iD=input$pr_iD, pr_noD=input$pr_noD)
+# })
+
+  #rV = reactiveValues(prior=c())
   # posteriorSequenceOutput =
   #   reactiveVal('posteriorSequenceOutput')
   
@@ -94,7 +129,11 @@ server = function(input, output) {
     # TODO, maybe
   }
   output$makePosteriorSequence = renderText({
-    dataSequence = strsplit(split=' ', input$dataInputID)[[1]]
+    req(input$dataInputID)
+    req(input$dD,input$hD,input$iD,input$noD)
+    pr_pos_given_group = c(input$dD,input$hD,input$iD,input$noD)
+    dataSequence = strsplit(split=' ',
+                            input$dataInputID)[[1]]
     dataSequence = sapply(dataSequence, as.numeric)
     print(dataSequence)
     ## only 1's and 2's
@@ -102,16 +141,16 @@ server = function(input, output) {
     if(all(dataSequence %in% 1:2)) { #proceed
       #run_makePosteriorSequence()
       #posteriorSequenceOutput ( 
-        (
-          makePosteriorSequence(
-        priorFor4 = c(0.9,0.10, 9, 90)/100,
-        pr_pos_given_group = c(1, 0, 1, 0),
-        dataSequence = dataSequence, ### 1's and 2's
-        wordsForData = c("'Pos'\\quad", "'Neg'\\quad"),
-        dropZeroGroups = TRUE,
-        makeHTML = TRUE, 
-        marginalize = FALSE # input$marginalize
-      ) ) 
+      (
+        makePosteriorSequence(
+          priorFor4 = rV$priors,
+          pr_pos_given_group = pr_pos_given_group,
+          dataSequence = dataSequence, ### 1's and 2's
+          wordsForData = c("'Pos'\\quad", "'Neg'\\quad"),
+          dropZeroGroups = FALSE,
+          makeHTML = TRUE, 
+          marginalize = FALSE # input$marginalize
+        ) ) 
     } ### end, call to makePosteriorSequence
   })  ### end, renderText 
 }  ## end, server
