@@ -12,8 +12,8 @@ rsconnect::deployApp(appFiles =
 c('simplebayesdecision-fancy.Rmd', 'inclRmd.R',
 'conditionalPanelWithCheckbox.R','addOpacity.R',
 'simplebayesdecision-info.Rmd', "simplebayesdecision.R" 
-           , "gerdPlot.R" 
-           , "gerdPlot2.R"  )) 
+, "gerdPlot.R" 
+, "gerdPlot2.R"  )) 
 -->
 
 ```{r, echo=F}
@@ -24,11 +24,17 @@ temp = suppressPackageStartupMessages(require('markdown', quietly=TRUE))
 source("inclRmd.R")
 source("conditionalPanelWithCheckbox.R")
 source("addOpacity.R")
+source("makePosteriorSequence.R")
 
 
 ```
 
+```{r}
+paramArgDefaults = c(pr_dD=0.01, pr_hD=0, pr_iD=0, pr_noD=0.99)
 
+output$posteriorSequence = renderUI(
+  div(makePosteriorSequence())
+)
 output$parameterUI = renderUI(
   {
     probParamUI = div(
@@ -38,28 +44,86 @@ output$parameterUI = renderUI(
           numericInput(
             'pr_dD',
             ('detectable D') ,
-            value = paramArgDefaults['prev'],
+            value = paramArgDefaults['pr_dD'],
             min = 0, max=1, step = 0.01),
           numericInput('pr_hD',
                        ('hidden D'),
-                       value = paramArgDefaults['sens'],
+                       value = paramArgDefaults['pr_hD'],
                        min = 0, max=1, step = 0.01),
           numericInput('pr_iD',
                        ('imposter D'),
-                       value = paramArgDefaults['spec'],
+                       value = paramArgDefaults['pr_iD'],
                        min = 0, max=1, step = 0.01),
           numericInput('pr_noD',  ### best to slave this one for now.
                        ('no D'),
-                       value = paramArgDefaults['spec'],
+                       value = paramArgDefaults['pr_noD'],
                        min = 0, max=1, step = 0.01)
-    )))
-
-  ObservationUI = 
-    textInput(
-      "dataInputID",
-      value = "1 1 1 1",
-      label=HTML("Tests (1s and 2s, format like 1 2 1 2)"),
+        )))
+    
+    ObservationUI = 
+      textInput(
+        "dataInputID",
+        value = "1 1 1 1",
+        label=HTML("Tests (1s and 2s, format like 1 2 1 2)"),
       )
-  
+  }
+)
 
+```
+
+```{r}
+
+ui = 
+  fillPage(  #fillPage and fluidPage the same.
+    useShinyjs(rmd=TRUE, debug=TRUE),  ## this is the place!!
+    fluidRow(
+      column(12,   uiOutput('parameterUI')), 
+      column(12,   uiOutput('posteriorSequence')), 
+      
+      
+    )
+  )
+```
+
+```{r}
+####  server ####
+
+server = function(input, output) {
+  
+  posteriorSequenceOutput = reactiveVal('posteriorSequenceOutput')
+  
+  run_makePosteriorSequence = function() {
+    
+  }
+
+  observeEvent(input$dataInputID, {
+    dataSequence = strsplit(split=' ', input$dataInputID)[[1]]
+    dataSequence = sapply(dataSequence, as.numeric)
+    ## only 1's and 2's
+    dataSequence <<- rep(1,4)
+    if(all(dataSequence %in% 1:2)) { #proceed
+      #run_makePosteriorSequence()
+      posteriorSequenceOutput ( makePosteriorSequence(
+        priorFor4 = c(0.9,0.10, 9, 90)/100,
+        pr_pos_given_group = c(1, 0, 1, 0),
+        dataSequence = dataSequence, ### 1's and 2's
+        wordsForData = c("'Pos'\\quad", "'Neg'\\quad"),
+        dropZeroGroups = TRUE,
+        makeHTML = TRUE, 
+        marginalize = FALSE # input$marginalize
+      ) )
+    } ### end, call to makePosteriorSequence
+  })  ### end, input$dataInputID
+}  ## end, server
+
+
+if(usingShinyApp) {
+  shinyApp(ui = ui, server = server)
+} else {
+  server(input, output)
+  ui
+}
+
+
+```
 
