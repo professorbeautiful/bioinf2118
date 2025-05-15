@@ -339,13 +339,44 @@ Ideally you could carve up the population of patients into groups using explanat
 
 And so we return to conspiracy theories and algorithms.
 
+## ## Media bubbles
+
+The algorithm recommends a video that shows that 
+![birds are not real!](https://www.youtube.com/shorts/aiy5SEGMGvI)
+They are all just Hillary Clinton wearing feathers.
+
+Naa, that's silly.  But kind of fun. You watch. The algorithm feeds you another one, another 'proof'. Your posterior probability goes up a bit. Then another, and another.  All these "independent" pieces of evidence.
+But are they independent? Really? 
+No they all just replicate a common origin.
+
+So friends, be kind to our neighbors in media bubbles.
+They don't know about conditional independence.
+
+
+## ## Factoring joint distributions
+
+Suppose you have a bunch of, say, ten random quantities $R1, ... , R10$.
+You can ALWAYS write their joint distribution, in a monstrous string.
+$$
+\color{blue}{Pr(R1)} \times Pr(R2 | R1) \times Pr(R3 | R1, R2)...  \times Pr(R10 | R1, R2, ... R9)
+$$
+The order is arbitrary.  But you need a starting point, in this case $\color{blue}{Pr(R1)}$ , that is unconditional on anything else.
 
 ## ## Causal diagrams and colliders
 
+Complicated! But with conditional independence, way simpler.
+
+$$
+Pr(R1) \times Pr(R2 | R1) \times Pr(R3 | R2)...  \times Pr(R10 | R9)
+$$
+What happens next depends only on the current state. Everything before is forgotten.  So $Pr(R10 | R9)$ instead of $Pr(R10 | R1,R2,...,R9)$
+
+This chain of influence is called a Markov chain.
+This pet turtle decides where to go next after its owner spins it around randomly without picking it up and moving it. It knows where it is, but where it was before is forgotten.
+
+
+Remember you need a starting point. If you don't know any unconditional distribution, do you give up? No! Techniques like Monte Carlo Markov Chain are wildly popular. Food for another video?
+
 ## ## Machine learning
-
-## ## Media bubbles
-
-## ## Factoring joint distributions
 
 ## ## Intro to Gibbs sampling
