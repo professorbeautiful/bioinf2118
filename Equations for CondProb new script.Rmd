@@ -1,9 +1,10 @@
-
 ---
 title: "CondProb new script"
 author: "Roger Day"
 date: "2025-05-13"
-output: html_document
+output:
+  html_document:
+    number_sections: true
 ---
 
 ```{r setup, include=FALSE}
@@ -27,6 +28,9 @@ table {
 table thead th { border-bottom: 1px solid #ddd; }
 th, td { padding: 10px; }
 ```
+
+
+##  ##Setup
 
 ```{r defaults}
 
@@ -90,7 +94,7 @@ makePosteriorSequence = function(
                   posteriorSequence) )
 }
 ```
-
+## ##Intro
 
 Today: a pet turtle in the clutches of a child, a prisoner's picnic gone bad, a flat earth theory, a political silo, & how to combine medical tests. How do we combine information from different sources, why does conditional independence matter, and what can go wrong? And of course, how does it all relate to machine learning. So, strike up the music for the Bayesian dance! 
 
@@ -113,6 +117,8 @@ I'm after all a reasonable human.
 
 Now I get deluged by a flurry of pieces of evidence supporting the doctrine. Each one pushes up my belief, my confidence in the alarming possibility, my personal probability.
 
+## ##Multiply
+
 I'll just multiply the current odds, the "prior odds", by the ratio of the two different explanations of how you could have got the data. It's TRUE.  Or it's BS.
 That's called the likelihood ratio for the data:
 
@@ -131,10 +137,14 @@ where "*BS*" is short for... mmm...  "*NOT true*".
 
 Here's a maybe more serious example. Switch to a medical diagnosis setting.
 
+## ##Medical table
+
+![](table_for_+D_-D.png)
+
 ![](/Users/Roger/Sites/Bioinf-2118-2018-website/N-files-for-handouts/CondProb video/app_Picture1.png)
 
 A link to this app is in the Dungeon, also to Episode 1, which walks you through how to use it.
-The prior odds is one percent, quite low. This diagnosis seems like a long shot going in the door.  The LR is high, it's 10, so getting a positive is far more likely if the person is Sick, but now multiply the odds by the LR and you've only boosted the odds up from 1% to 10%, the probability to only 9%.
+The prior odds is one percent, quite low. This diagnosis seems like a long shot going in the door.  The LR is high, it's 10, so getting a positive is far more likely if the person is Sick, but now multiply the odds by the LR and you've only boosted the odds up from 1 to a hundred to 1 to 10, the probability only increases 9%, which is 1 over 1 plus 10.
 
 Ah, but here comes more information, more data!  What do we do with THAT?
 
@@ -146,9 +156,9 @@ Just multiply by the new data's likelihood ratio. Right?  WRONG! Aw, man!
 
 
 Let's pretend it's ok for now. Multiplying by the same LR again and again.
-That's the same as adding the same *log LR* every time, because the logarithm turns multiplying into adding. These little up-arrows are the same length. So let's start with odds of 0.01. The first positive test R1 brings the chance up  only to 9%.  The second one, R2, jacks it up to a half. R3 brings it to 91%, and R4 to 99%.
+That's the same as adding the same *log LR* every time, because the logarithm turns multiplying into adding. These little up-arrows are the same length. So again let's start with odds of 1 to a hundred, probability 9%. The first positive test R1 brings the chance up only to 9%.  The second one, R2, jacks it up to a half. R3 brings it to 91%, and R4 to 99%.
 
-Just look at all that evidence mount up!
+Just look at all that evidence mount up! It seems that $+D$, the disease is present, is nearly certain now.
 
 ```{r, results='asis'}
 ### The nice case. Cond Indep, all good.
@@ -156,6 +166,10 @@ Just look at all that evidence mount up!
     pr_pos_given_group = c(0.9, 0, 0, 0.09),
     priorFor4 = c(.01,0,0,.99)))
 ```
+
+## ## Careful
+
+We gotta be careful, though.
 The general principle, the key idea is: always condition on ALL you know, all together. Like this:
 
 $$
@@ -191,9 +205,14 @@ LR(\RR) &=
 &= LR(R1)  \quad  \quad \times  \quad  \quad LR(R2)
 \end{aligned}
 $$
+The numerator splits, and the denominator splits. 
 But, careful,  this only works if TWO conditional independence claims are true... one for the numerator ($+D$) and one for the denominator ($-D$).
 
-Here is the same probability table, but a way different answer, because SOMETHING is lurking underneath:
+Here is the same probability table,
+![](table_for_+D_-D.png)
+
+but a way different response to multiple tests, because SOMETHING is lurking underneath:
+
 
 ```{r, results='asis'}
   # print(knitr::kable(makePosteriorSequence(), format='html'))
@@ -204,29 +223,36 @@ Here is the same probability table, but a way different answer, because SOMETHIN
 
 ```
 
-### What's lurking:
+## ## What's lurking: 4 groups
+
 
 Here, the positive tests include  GENUINE false positives, because the patient has some OTHER condition, that the test is picking up when we don't want it to.  A misdiagnosis. An imposter. In the lingo, the test is not *specific* enough. "$iD$", means an imposter, when the real deal is "$dD$" for detectable disease.
 
-
-What's as bad, some patients WITH the target disease might have a variant of the disease that, in the lingo, the test is not sensitive enough. Hidden disease. "$hD$".
+What's as bad, there can be GENUINE false negatives. Some patients WITH the target disease might have a variant of the disease that, in the lingo, the test is not sensitive enough. Hidden disease. "$hD$".
 Everybody with the disease we want to detect is $+D$, either $dD$ or $hD$.
 Everybody who we want to get a negative test for is $-D$, either $noD$ or $iD$.
+
+So $+D$ splits into two types of patients:  true positives $dD$ and false negatives $iD$.
+And $-D$ splits into two types of patients:  $iD$ and $noD$.
 
 So, 4 categories instead of 2. Each category of patients has its own Probability of a Positive test.
 
 
-But we didn't know about hD and iD. 
-The probabilities for dD and hD? We only see their sum.  Likewise for iD and noD.
-
-The probabilities in the first table are still correct, but we cannot distinguish between dD and hD, between iD and noD?
+## ## 4 groups distribution
 
 The full story is this:
 
 ![](table_for_dD_hD_iD_noD.png)
-You can see the same identical information, but now with explanations for false positives and false negatives, the hidden $hD$ and the imposters $iD$.
 
-False results often share the same cause.  If you only knew that, you wouldn't be fooled so easily.
+This is the hidden full truth. We actually don't have prior information for the 4 groups. In fact, we might not know that the sneaky ones, hD and iD,  exist. 
+
+The probabilities in the first table showing probabilities for only +D and -D are still correct, but we cannot distinguish between dD and hD, between iD and noD.
+
+The hidden $hD$ and the imposters $iD$ are explanations for false positives and false negatives.  Too bad we don't know that.
+
+Maybe we can do biomedical research, learn that these groups exist, find biomarkers for them.
+
+Successive false results often share the same cause. In this case, two false positives occur because they share the patient, and the patient has an imposter condition that explains both false positive. If you only knew that, you wouldn't be fooled so easily.
 
 ```{r, asis}
 priorFor4 = c(0.9,0.10, 9, 90)/100
@@ -234,40 +260,58 @@ names(priorFor4) = c('dD', 'hD',	'iD',	'noD')
 pr_positive_given_group = c(90,10, 50, 10)/100
 names(pr_positive_given_group) = 
   c('dD', 'hD',	'iD',	'noD')
+###  unnecessary?
 ```
-### dD and hD = +D
+## ## dD and hD = +D
 
-Let's just suppose the data are ${positive, positive}$. And, that conditional independence IS true for the 4 subgroups. Then
+Let's  suppose we have just two test results, $R1 = positive, R2 = positive$. And, that conditional independence IS true for the 4 subgroups. 
+For each of the FOUR subgroups of patients, 
+$$
+\begin{aligned}
+Pr(positive, positive \space | \space group \space G) 
+        & = Pr(positive \space | \space \space group \space G) {^2} \quad 
+\end{aligned}
+$$
+In particular, for G equals dD and hD. 
+Then
 
 $$
 \begin{aligned}
-Pr(\RR \space | \space +D) & = Pr(\RR \space | \space dD) {Pr(dD | +D)} \\
-        & + Pr(\RR \space | \space hD) {Pr(hD | +D)} \\  
-        & = Pr(positive \space | \space dD) {^2} {Pr(dD | +D)} \\
-        & + Pr(positive  \space | \space hD) {^2} {Pr(hD | +D)}
+Pr(\RR \space | \space +D) & = Pr(\RR \space | \space dD) \quad {Pr(dD | +D)} \\
+        & + Pr(\RR \space | \space hD) \quad  {Pr(hD | +D)} \\  
+        & = Pr(positive \space | \space dD) {^2} \quad  {0.009/0.01} \\
+        & + Pr(positive  \space | \space hD) {^2} \quad  {0.001/0.01} \\
+        & = 1.0^2 * 0.009/0.01 + 0.0^2 * 0.001/0.01  \\
+        & = 0.9
 \end{aligned}
 $$
+But if the two tests were independent conditionall on $+D$, we'd get
 
 
-The two reports $\RR$ are conditionally independent... for $dD$ and for $hD$.  But not if you condition only on $+D$.
-
-Maybe you don't even know that $+D$ contains two different types of patients.  Then you wonder: 
 
 $$
 \begin{aligned}
 Pr(\RR \space | \space +D) 
-        & = Pr(positive \space | \space +D) {^2} \quad ?
+        & = Pr(positive \space | \space +D) {^2} \\
+        & = 0.9^2 \\
+        & = 0.81
 \end{aligned}
 $$
-Nope.  In the example, if conditional independent, then  $Pr(positive \space | \space +D) {^2} = sensitivity^2 =0.82{^2} = 0.67$. But $Pr(\RR \space | \space +D) = 0.9^2 *0.9 + 0.1^2*0.1 = 0.73$ is different, so NOT conditionally independent given $+D$.
+## ## Show no cond indep for +D.
 
-### iD and noD = -D
+Nope.  
+In the example, if conditionally independent, then  $Pr(\RR \space | \space +D)$  would equal $Pr(positive \space | \space +D) {^2}$ = $sensitivity^2 =0.82{^2} = 0.67$. 
+But $Pr(\RR \space | \space +D) = 0.9^2 *0.9 + 0.1^2*0.1 = 0.73$, and that's  different, so NOT conditionally independent given $+D$.
+
+
+
+## ## iD and noD = +D
 
 On the no-disease side, 
-if conditional independent, then  $Pr(positive \space | \space -D) {^2} = (1-specificity)^2 = 0.1{^2} = 0.01$. But $Pr(\RR \space | \space -D) = 1.0^2 *0.09 + 0.0^2*0.90 = 0.09$ is a lot higher, WAY different, so NOT AT ALL conditionally independent given $-D$.
+if conditional independent, then  $Pr(positive \space | \space -D) {^2} = (1-specificity)^2 = 0.1{^2} = 0.01$. But $Pr(\RR \space | \space -D) = 1.0^2 *0.09 + 0.0^2*0.90 = 0.09$ is a lot bigger, so NOT AT ALL conditionally independent given $-D$.
 
 
-### Two pictures
+## ## Two pictures
 
 
 
@@ -276,19 +320,19 @@ makePosteriorSequence(priorFor4 = c(0.9, 0.1, 9, 90)/100, pr_pos_given_group = c
 ```
 
 $Pr(\RR \space | \space +D) = 1.00^2 *0.9 + 0.00^2*0.1 = 0.9$, but $Pr(positive \space | \space +D) {^2} = sensitivity^2 = 0.9{^2} = 0.81$. So NOT conditionally independent given $+D$.
-Ideally you could carve up the population of patients into groups using explanations for why the groups differ. Then the only thing remaining would be pure chance mistakes, thus independence. 
+Ideally you could carve up the population of patients into groups using explanations for why the groups differ. Then the only thing remaining would be pure chance mistakes, not explained by something about the particular patient. And so,  independence. 
 
 That makes sense.  After the 1st report, the next bunch contribute no new information. $Pr(R2 = positive | R1 = positive) = 1$.
 Any data whose probability equals one no matter what the truth is, is useless!   
 And so we return to conspiracy theories and algorithms.
 
 
-### Causal diagrams and colliders
+## ## Causal diagrams and colliders
 
-### Machine learning
+## ## Machine learning
 
-### Media bubbles
+## ## Media bubbles
 
-### Factoring joint distributions
+## ## Factoring joint distributions
 
-### Intro to Gibbs sampling
+## ## Intro to Gibbs sampling
