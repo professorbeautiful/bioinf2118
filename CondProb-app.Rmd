@@ -55,10 +55,6 @@ priorDefaults =
 prob_pos_Defaults = 
   c(prob_pos_dD=0.9, prob_pos_hD=0.1, prob_pos_iD=0.9, prob_pos_noD=0.1)
 
-rV= reactiveValues(
-  priors = priorDefaults
-)  
-
 
 output$priorUI = renderUI(
   {
@@ -212,24 +208,15 @@ server = function(input, output) {
       )
     }
   )
-#         {
-#           rV$priors =
-#           c(prior_dD=input$prior_dD, prior_hD=input$prior_hD,
-#             prior_iD=input$prior_iD, prior_noD=input$prior_noD)
-# })
-
-  #rV = reactiveValues(prior=c())
-  # posteriorSequenceOutput =
-  #   reactiveVal('posteriorSequenceOutput')
   
-  run_makePosteriorSequence = function() {
-    # TODO, maybe
-  }
+
+
   output$makePosteriorSequence = renderText({
     req(input$dataInputID)
     # req(input$prior_dD, input$prior_hD, input$prior_iD, input$prior_noD) ### causes it to break
     req(abs(input$prior_dD+input$prior_hD+input$prior_iD
             + input$prior_noD -  1.00)  < 1e-7)
+      # this doesn't prevent the "cat" below, but ok.
     req(c(input$prob_pos_dD, input$prob_pos_hD, 
           input$prob_pos_iD, input$prob_pos_noD))
     this_priorFor4 = 
