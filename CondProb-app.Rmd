@@ -227,14 +227,19 @@ server = function(input, output) {
   }
   output$makePosteriorSequence = renderText({
     req(input$dataInputID)
-    req(c(input$prior_dD, input$prior_hD, input$prior_iD, input$prior_noD))
-    req(c(input$prob_pos_dD, input$prob_pos_hD, input$prob_pos_iD, input$prob_pos_noD))
+    # req(input$prior_dD, input$prior_hD, input$prior_iD, input$prior_noD) ### causes it to break
+    req(abs(input$prior_dD+input$prior_hD+input$prior_iD
+            + input$prior_noD -  1.00)  < 1e-7)
+    req(c(input$prob_pos_dD, input$prob_pos_hD, 
+          input$prob_pos_iD, input$prob_pos_noD))
     this_priorFor4 = 
-      c(input$prior_dD, input$prior_hD, input$prior_iD, input$prior_noD)
+      c(input$prior_dD, input$prior_hD, 
+        input$prior_iD, input$prior_noD)
     this_prob_pos_given_group = c(
       input$prob_pos_dD, input$prob_pos_hD, 
       input$prob_pos_iD, input$prob_pos_noD)
-    cat('this_prob_pos_given_group', this_prob_pos_given_group)
+    cat('this_priorFor4', this_priorFor4, '\n')
+    cat('this_prob_pos_given_group', this_prob_pos_given_group, '\n')
     dataSequence = strsplit(split=' ',
                             input$dataInputID)[[1]]
     dataSequence = sapply(dataSequence, as.numeric)
@@ -246,7 +251,7 @@ server = function(input, output) {
       #posteriorSequenceOutput ( 
       (
         makePosteriorSequence(
-          priorFor4 = rV$priors,
+          priorFor4 = this_priorFor4,
           prob_pos_given_group = this_prob_pos_given_group,
           dataSequence = dataSequence, ### 1's and 2's
           #wordsForData = c("'Pos'\\quad", "'Neg'\\quad"),
