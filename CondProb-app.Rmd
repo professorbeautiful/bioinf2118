@@ -24,6 +24,16 @@ knitr::opts_chunk$set(echo = FALSE)
   .myTable th {
     padding: 30px;
   }
+  
+  .shiny-input-radiogroup label {
+  display: inline-block;
+  text-align: center;
+  }
+  .shiny-input-radiogroup label input[type='radio'] {
+  display: block;
+  margin: 2em auto;
+  }
+  
 ```
   
 ```{r, echo=F}
@@ -70,7 +80,6 @@ output$priorUI = renderUI(
                        value = priorDefaults['prior_iD'],
                        min = 0, max=1, step = 0.01),
           numericInput('prior_noD',  
-              ### best to slave this one for now.
                        ('no D'),
                        value = priorDefaults['prior_noD'],
                        min = 0, max=1, step = 0.01)
@@ -78,19 +87,31 @@ output$priorUI = renderUI(
     
   }
 )
-library(shinyWidgets)
+# library(shinyWidgets)
+WIDE = function(x) x
+WIDE = function(x) (paste0('', x, 
+                           paste(collapse='', rep('.', 30))))
 output$whichFollows = renderUI(
-  radioButtons(inputId = 'whichFollows', 
-               choices = c('dD', 'hD', 'iD', 'noD'), 
-               label='which is dependent',
-   selected='noD', width='100%',
-  inline=T))
+  div(
+          h4(style='text-align:center', 
+             "Probabilities must add to one. Pick which is dependent on the other three."),
+  fluidRow(column(12, offset=0,
+                  radioButtons(inputId = 'whichFollows', 
+                      choiceNames = 
+#            c(WIDE('dD'), WIDE('hD'), WIDE('iD'), WIDE('noD')), 
+  c(WIDE('detectable D'), WIDE('hidden D'), WIDE('imposter D'), WIDE('no Disease')),
+                      choiceValues = 
+              c('dD', 'hD', 'iD', 'noD'),
+            label='',
+                               selected='noD', width='100%', #class='btn-block',
+               inline=T))
+)))
 
 
 output$prob_pos_UI = renderUI(
   {
     div(
-      h3(style='text-align:center', "Probabilities of a positive"),
+      h4(style='text-align:center', "Probabilities of a positive"),
       fluidRow(
         splitLayout(
           numericInput(
@@ -116,13 +137,15 @@ output$prob_pos_UI = renderUI(
 )
 output$ObservationUI = 
   renderUI(
-    div(
-        textInput(
-          "dataInputID",
-          value = "1 1 1 1",
-          label=HTML("Test results (1s and 2s, format like 1 2 1 2)"),
-        ))
-  )
+    div(style='text-align:center',
+        h4(style='text-align:center', "Data reports"),
+        fluidRow(style='text-align:center',
+            column(12, offset=4, textInput(
+                      "dataInputID",
+                      value = "1 1 1 1",
+                      label=HTML("Test results (1s and 2s, format like 1 2 1 2)"),
+            )))
+  ))
 ```
 
 ```{r}
@@ -130,15 +153,37 @@ output$ObservationUI =
 ui = 
   fillPage(  #fillPage and fluidPage the same.
     useShinyjs(rmd=TRUE, debug=TRUE),  ## this is the place!!
-    fluidRow(
-      column(12,   uiOutput('priorUI')), 
-      column(12,   uiOutput('whichFollows')),
-      column(12,   uiOutput('ObservationUI')), 
-      column(12,   uiOutput('prob_pos_UI')), 
+    tags$head(
+        tags$style(HTML("
+            .shiny-input-radiogroup label {
+                display: inline-block;
+                text-align: center;
+            }
+            .shiny-input-radiogroup label input[type='radio'] {
+                display: block;
+                margin: 2em auto;
+            }
+
+        "))
+    ),
+     uiOutput('priorUI'), 
+     uiOutput('whichFollows'),
+      hr(),
+     uiOutput('ObservationUI'), 
+     uiOutput('prob_pos_UI'), 
 
       #https://stackoverflow.com/questions/51460955/how-to-make-kable-table-reactive-in-shiny-app-shiny-kable
-      column(12,   htmlOutput('makePosteriorSequence')),
-    )
+      htmlOutput('makePosteriorSequence'),
+#    fluidRow(
+      # column(12,   uiOutput('priorUI')), 
+      # column(12,   uiOutput('whichFollows')),
+      # hr(),br(),br(),
+      # column(12,   uiOutput('ObservationUI')), 
+      # column(12,   uiOutput('prob_pos_UI')), 
+      # 
+      # #https://stackoverflow.com/questions/51460955/how-to-make-kable-table-reactive-in-shiny-app-shiny-kable
+      # column(12,   htmlOutput('makePosteriorSequence')),
+    #)
   )
 
 ```
@@ -151,7 +196,7 @@ server = function(input, output) {
     c(input$prior_dD, input$prior_dD, input$prior_iD, input$prior_noD ),
     {
   #radio
-      switch(input$whichFollows,
+      switch(gsub('_', '', input$whichFollows),
              hD= updateNumericInput(
                inputId='prior_hD', value = 1 - 
                  input$prior_dD-input$prior_iD-input$prior_noD),
