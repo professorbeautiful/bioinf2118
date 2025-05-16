@@ -1,5 +1,4 @@
 ---
-title: "Conditional dependence in medical diagnosis"
 output: html_document
 runtime: shiny
 ---
@@ -24,7 +23,12 @@ knitr::opts_chunk$set(echo = FALSE)
   .myTable th {
     padding: 30px;
   }
-  
+  h3 {
+   color: #00a400;;
+  }
+  h4 {
+   color: #a40;;
+  }
   .shiny-input-radiogroup label {
   display: inline-block;
   text-align: center;
@@ -58,8 +62,8 @@ prob_pos_Defaults =
 
 output$priorUI = renderUI(
   {
-    div(
-      h3(style='text-align:center', "Initial (prior) probabilities"),
+    wellPanel(
+      h4(style='text-align:center', "Initial (prior) probabilities"),
       fluidRow(
         splitLayout(
           numericInput(
@@ -88,7 +92,7 @@ WIDE = function(x) x
 WIDE = function(x) (paste0('', x, 
                            paste(collapse='', rep('.', 30))))
 output$whichFollows = renderUI(
-  div(
+  wellPanel(
           h4(style='text-align:center', 
              "Probabilities must add to one. Pick which is dependent on the other three."),
   fluidRow(column(12, offset=0,
@@ -106,7 +110,7 @@ output$whichFollows = renderUI(
 
 output$prob_pos_UI = renderUI(
   {
-    div(
+    wellPanel(
       h4(style='text-align:center', "Probabilities of a positive"),
       fluidRow(
         splitLayout(
@@ -133,7 +137,7 @@ output$prob_pos_UI = renderUI(
 )
 output$ObservationUI = 
   renderUI(
-    div(style='text-align:center',
+    wellPanel(style='text-align:center',
         h4(style='text-align:center', "Data reports"),
         fluidRow(style='text-align:center',
             column(12, offset=4, textInput(
@@ -162,6 +166,7 @@ ui =
 
         "))
     ),
+    h3("Conditional dependence in medical diagnosis"),
      uiOutput('priorUI'), 
      uiOutput('whichFollows'),
       hr(),
