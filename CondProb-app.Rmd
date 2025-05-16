@@ -78,10 +78,12 @@ output$priorUI = renderUI(
     
   }
 )
+library(shinyWidgets)
 output$whichFollows = renderUI(
   radioButtons(inputId = 'whichFollows', 
-               choices = c('dD', 'hD', 'iD', 'noD'), label='which is dependent',
-   selected='noD', width='400px',
+               choices = c('dD', 'hD', 'iD', 'noD'), 
+               label='which is dependent',
+   selected='noD', width='100%',
   inline=T))
 
 
@@ -202,7 +204,7 @@ server = function(input, output) {
           priorFor4 = rV$priors,
           prob_pos_given_group = this_prob_pos_given_group,
           dataSequence = dataSequence, ### 1's and 2's
-          wordsForData = c("'Pos'\\quad", "'Neg'\\quad"),
+          #wordsForData = c("'Pos'\\quad", "'Neg'\\quad"),
           dropZeroGroups = FALSE,
           makeHTML = TRUE, 
           marginalize = FALSE # input$marginalize
