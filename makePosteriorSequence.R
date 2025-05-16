@@ -55,5 +55,6 @@ makePosteriorSequence = function(
   #if( makeHTML)
   require(xtable)
     return( knitr::kable(format='html',
-               posteriorSequence))
+               posteriorSequence, padding=10, digits=3,
+               table.attr='class="myTable"'))
 }

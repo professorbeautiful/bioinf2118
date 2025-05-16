@@ -20,6 +20,12 @@ c('simplebayesdecision-fancy.Rmd', 'inclRmd.R',
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+```{css}
+  .myTable th {
+    padding: 30px;
+  }
+```
+  
 ```{r, echo=F}
 usingShinyApp = FALSE
 temp = suppressPackageStartupMessages(require('shinyjs', quietly=TRUE))
@@ -130,7 +136,6 @@ ui =
 
       #https://stackoverflow.com/questions/51460955/how-to-make-kable-table-reactive-in-shiny-app-shiny-kable
       column(12,   htmlOutput('makePosteriorSequence')),
-      column(12,   'all done!')
     )
   )
 
