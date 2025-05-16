@@ -35,37 +35,38 @@ source("makePosteriorSequence.R")
 
 ```{r}
 priorDefaults = 
-  c(pr_dD=0.009, pr_hD=0.001, pr_iD=0.09, pr_noD=0.9)
-
+  c(prior_dD=0.009, prior_hD=0.001, prior_iD=0.09, prior_noD=0.9)
+prob_pos_Defaults = 
+  c(prob_pos_dD=0.009, prob_pos_hD=0.001, prob_pos_iD=0.09, prob_pos_noD=0.9)
 
 rV= reactiveValues(
   priors = priorDefaults
 )  
 
 
-output$parameterUI = renderUI(
+output$priorUI = renderUI(
   {
     div(
       h3(style='text-align:center', "Initial (prior) probabilities"),
       fluidRow(
         splitLayout(
           numericInput(
-            'pr_dD',
+            'prior_dD',
             ('detectable D') ,
-            value = priorDefaults['pr_dD'],
+            value = priorDefaults['prior_dD'],
             min = 0, max=1, step = 0.01),
-          numericInput('pr_hD',
+          numericInput('prior_hD',
                        ('hidden D'),
-                       value = priorDefaults['pr_hD'],
+                       value = priorDefaults['prior_hD'],
                        min = 0, max=1, step = 0.01),
-          numericInput('pr_iD',
+          numericInput('prior_iD',
                        ('imposter D'),
-                       value = priorDefaults['pr_iD'],
+                       value = priorDefaults['prior_iD'],
                        min = 0, max=1, step = 0.01),
-          numericInput('pr_noD',  
+          numericInput('prior_noD',  
               ### best to slave this one for now.
                        ('no D'),
-                       value = priorDefaults['pr_noD'],
+                       value = priorDefaults['prior_noD'],
                        min = 0, max=1, step = 0.01)
         )))
     
@@ -78,6 +79,34 @@ output$whichFollows = renderUI(
   inline=T))
 
 
+output$prob_pos_UI = renderUI(
+  {
+    div(
+      h3(style='text-align:center', "Initial (prior) probabilities"),
+      fluidRow(
+        splitLayout(
+          numericInput(
+            'prob_pos_dD',
+            ('detectable D') ,
+            value = prob_pos_Defaults['prob_pos_dD'],
+            min = 0, max=1, step = 0.01),
+          numericInput('prob_pos_hD',
+                       ('hidden D'),
+                       value = prob_pos_Defaults['prob_pos_hD'],
+                       min = 0, max=1, step = 0.01),
+          numericInput('prob_pos_iD',
+                       ('imposter D'),
+                       value = prob_pos_Defaults['prob_pos_iD'],
+                       min = 0, max=1, step = 0.01),
+          numericInput('prob_pos_noD',  
+              ### best to slave this one for now.
+                       ('no D'),
+                       value = prob_pos_Defaults['prob_pos_noD'],
+                       min = 0, max=1, step = 0.01)
+        )))
+    
+  }
+)
 output$ObservationUI = 
   renderUI(
     div(
@@ -95,7 +124,7 @@ ui =
   fillPage(  #fillPage and fluidPage the same.
     useShinyjs(rmd=TRUE, debug=TRUE),  ## this is the place!!
     fluidRow(
-      column(12,   uiOutput('parameterUI')), 
+      column(12,   uiOutput('priorUI')), 
       column(12,   uiOutput('whichFollows')),
       column(12,   uiOutput('ObservationUI')), 
       #https://stackoverflow.com/questions/51460955/how-to-make-kable-table-reactive-in-shiny-app-shiny-kable
@@ -110,15 +139,30 @@ ui =
 ####  server ####
 
 server = function(input, output) {
-  observeEvent( input$pr_dD, {
-  updateNumericInput(inputId='pr_hD', 
-                     value = 1 - input$pr_dD - input$pr_iD - input$pr_noD  )
-}
-)
+  observeEvent( 
+    c(input$prior_dD, input$prior_dD, input$prior_iD, input$prior_noD ),
+    {
+  #radio
+      switch(input$whichFollows,
+             hD= updateNumericInput(
+               inputId='prior_hD', value = 1 - 
+                 input$prior_dD-input$prior_iD-input$prior_noD),
+             dD=updateNumericInput(
+               inputId='prior_dD', value = 1 - 
+                 input$prior_hD - input$prior_iD - input$prior_noD),
+             iD=updateNumericInput(
+               inputId='prior_iD', value = 1 - 
+                 input$prior_dD - input$prior_hD - input$prior_noD),
+             noD=updateNumericInput(
+               inputId='prior_noD', value = 1 - 
+                 input$prior_dD - input$prior_iD - input$prior_hD)
+      )
+    }
+  )
 #         {
 #           rV$priors =
-#           c(pr_dD=input$pr_dD, pr_hD=input$pr_hD,
-#             pr_iD=input$pr_iD, pr_noD=input$pr_noD)
+#           c(prior_dD=input$prior_dD, prior_hD=input$prior_hD,
+#             prior_iD=input$prior_iD, prior_noD=input$prior_noD)
 # })
 
   #rV = reactiveValues(prior=c())
@@ -130,8 +174,10 @@ server = function(input, output) {
   }
   output$makePosteriorSequence = renderText({
     req(input$dataInputID)
-    req(input$dD,input$hD,input$iD,input$noD)
-    pr_pos_given_group = c(input$dD,input$hD,input$iD,input$noD)
+    req(c(input$prior_dD, input$prior_hD, input$prior_iD, input$prior_noD))
+    this_priorFor4 = 
+      c(input$prior_dD, input$prior_hD, input$prior_iD, input$prior_noD)
+    this_prob_pos_given_group = c(input$prob_pos_dD,input$prob_pos_hD, input$prob_pos_iD,input$prob_pos_noD)
     dataSequence = strsplit(split=' ',
                             input$dataInputID)[[1]]
     dataSequence = sapply(dataSequence, as.numeric)
@@ -144,7 +190,7 @@ server = function(input, output) {
       (
         makePosteriorSequence(
           priorFor4 = rV$priors,
-          pr_pos_given_group = pr_pos_given_group,
+          prob_pos_given_group = this_prob_pos_given_group,
           dataSequence = dataSequence, ### 1's and 2's
           wordsForData = c("'Pos'\\quad", "'Neg'\\quad"),
           dropZeroGroups = FALSE,
