@@ -42,18 +42,6 @@ rV= reactiveValues(
   priors = priorDefaults
 )  
 
-observeEvent( input$pr_dD, {
-  # priors = isolate(rV$priors)
-  # priors$pr_dD = input$pr_dD
-  # rV$priors = priors
-  print(rV$priors)
-}
-)
-#         {
-#           rV$priors =
-#           c(pr_dD=input$pr_dD, pr_hD=input$pr_hD,
-#             pr_iD=input$pr_iD, pr_noD=input$pr_noD)
-# })
 
 output$parameterUI = renderUI(
   {
@@ -75,7 +63,7 @@ output$parameterUI = renderUI(
                        value = priorDefaults['pr_iD'],
                        min = 0, max=1, step = 0.01),
           numericInput('pr_noD',  
-                       ### best to slave this one for now.
+              ### best to slave this one for now.
                        ('no D'),
                        value = priorDefaults['pr_noD'],
                        min = 0, max=1, step = 0.01)
@@ -102,6 +90,7 @@ ui =
     useShinyjs(rmd=TRUE, debug=TRUE),  ## this is the place!!
     fluidRow(
       column(12,   uiOutput('parameterUI')), 
+      column(12,   uiOutput('whichFollows')),
       column(12,   uiOutput('ObservationUI')), 
       #https://stackoverflow.com/questions/51460955/how-to-make-kable-table-reactive-in-shiny-app-shiny-kable
       column(12,   htmlOutput('makePosteriorSequence')),
@@ -115,7 +104,17 @@ ui =
 ####  server ####
 
 server = function(input, output) {
-  
+  observeEvent( input$pr_dD, {
+  updateNumericInput(inputId='pr_hD', 
+                     value = 1 - input$pr_dD - input$pr_iD - input$pr_noD  )
+}
+)
+#         {
+#           rV$priors =
+#           c(pr_dD=input$pr_dD, pr_hD=input$pr_hD,
+#             pr_iD=input$pr_iD, pr_noD=input$pr_noD)
+# })
+
   #rV = reactiveValues(prior=c())
   # posteriorSequenceOutput =
   #   reactiveVal('posteriorSequenceOutput')
@@ -124,8 +123,17 @@ server = function(input, output) {
     # TODO, maybe
   }
   output$makePosteriorSequence = renderText({
-    req(input$dataInputID)
-    req(rV$priors)
+    print(c(input$dataInputID,
+            input$dD, input$hD, input$iD, input$noD))
+    req(!is.null(input$dataInputID))
+  
+    req(input$dD, input$hD, input$iD, input$noD)
+    this_priorFor4 = 
+      c(input$dD, input$hD, input$iD, input$noD)
+ 
+    this_pr_pos_given_group = 
+      c(.9, .1, .9, .1)
+    print(paste('dataInput ', input$dataInputID))
     dataSequence = strsplit(split=' ',
                             input$dataInputID)[[1]]
     dataSequence = sapply(dataSequence, as.numeric)
@@ -137,8 +145,8 @@ server = function(input, output) {
       #posteriorSequenceOutput ( 
       (
         makePosteriorSequence(
-          priorFor4 = rV$priors,
-          pr_pos_given_group = c(1, 0, 1, 0),
+          priorFor4 = this_priorFor4,
+          pr_pos_given_group = this_pr_pos_given_group,
           dataSequence = dataSequence, ### 1's and 2's
           wordsForData = c("'Pos'\\quad", "'Neg'\\quad"),
           dropZeroGroups = FALSE,
