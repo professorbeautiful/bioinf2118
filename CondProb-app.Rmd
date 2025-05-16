@@ -37,7 +37,7 @@ source("makePosteriorSequence.R")
 priorDefaults = 
   c(prior_dD=0.009, prior_hD=0.001, prior_iD=0.09, prior_noD=0.9)
 prob_pos_Defaults = 
-  c(prob_pos_dD=0.009, prob_pos_hD=0.001, prob_pos_iD=0.09, prob_pos_noD=0.9)
+  c(prob_pos_dD=0.9, prob_pos_hD=0.1, prob_pos_iD=0.9, prob_pos_noD=0.1)
 
 rV= reactiveValues(
   priors = priorDefaults
@@ -82,7 +82,7 @@ output$whichFollows = renderUI(
 output$prob_pos_UI = renderUI(
   {
     div(
-      h3(style='text-align:center', "Initial (prior) probabilities"),
+      h3(style='text-align:center', "Probabilities of a positive"),
       fluidRow(
         splitLayout(
           numericInput(
@@ -99,7 +99,6 @@ output$prob_pos_UI = renderUI(
                        value = prob_pos_Defaults['prob_pos_iD'],
                        min = 0, max=1, step = 0.01),
           numericInput('prob_pos_noD',  
-              ### best to slave this one for now.
                        ('no D'),
                        value = prob_pos_Defaults['prob_pos_noD'],
                        min = 0, max=1, step = 0.01)
@@ -127,6 +126,8 @@ ui =
       column(12,   uiOutput('priorUI')), 
       column(12,   uiOutput('whichFollows')),
       column(12,   uiOutput('ObservationUI')), 
+      column(12,   uiOutput('prob_pos_UI')), 
+
       #https://stackoverflow.com/questions/51460955/how-to-make-kable-table-reactive-in-shiny-app-shiny-kable
       column(12,   htmlOutput('makePosteriorSequence')),
       column(12,   'all done!')
@@ -175,9 +176,13 @@ server = function(input, output) {
   output$makePosteriorSequence = renderText({
     req(input$dataInputID)
     req(c(input$prior_dD, input$prior_hD, input$prior_iD, input$prior_noD))
+    req(c(input$prob_pos_dD, input$prob_pos_hD, input$prob_pos_iD, input$prob_pos_noD))
     this_priorFor4 = 
       c(input$prior_dD, input$prior_hD, input$prior_iD, input$prior_noD)
-    this_prob_pos_given_group = c(input$prob_pos_dD,input$prob_pos_hD, input$prob_pos_iD,input$prob_pos_noD)
+    this_prob_pos_given_group = c(
+      input$prob_pos_dD, input$prob_pos_hD, 
+      input$prob_pos_iD, input$prob_pos_noD)
+    cat('this_prob_pos_given_group', this_prob_pos_given_group)
     dataSequence = strsplit(split=' ',
                             input$dataInputID)[[1]]
     dataSequence = sapply(dataSequence, as.numeric)
