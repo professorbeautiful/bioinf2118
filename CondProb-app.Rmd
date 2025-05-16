@@ -29,6 +29,8 @@ knitr::opts_chunk$set(echo = FALSE)
   h4 {
    color: #a40;;
   }
+  wellPanel {padding: 1px !important;}
+  
   .shiny-input-radiogroup label {
   display: inline-block;
   text-align: center;
