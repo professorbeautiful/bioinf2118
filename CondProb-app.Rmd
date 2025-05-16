@@ -140,7 +140,7 @@ output$ObservationUI =
     wellPanel(style='text-align:center',
         h4(style='text-align:center', "Data reports"),
         fluidRow(style='text-align:center',
-            column(12, offset=4, textInput(
+            column(12, offset=4, textInput(width = '200px',
                       "dataInputID",
                       value = "1 1 1 1",
                       label=HTML("Test results (1s and 2s, format like 1 2 1 2)"),
