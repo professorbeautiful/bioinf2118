@@ -201,6 +201,7 @@ Why?
 Here, the positive tests include  GENUINE false positives, because the patient has some OTHER condition, that the test is picking up when we don't want it to.  A misdiagnosis. An imposter. In the lingo, the test is not *specific* enough. "$iD$", means an imposter, when the real deal is "$dD$" for detectable disease.
 
 What's as bad, there can be GENUINE false negatives. Some patients WITH the target disease might have a variant of the disease that, in the lingo, the test is not sensitive enough. *Hidden disease*. "$hD$".
+Sometimes called "occult disease", but that sounds too much like being possessed by demons!
 
 Everybody with the disease we want to detect is $+D$, either $dD$ or $hD$.
 
@@ -301,7 +302,7 @@ Any data whose probability equals one no matter what the truth is, is useless fo
 
 What if you get all NEGATIVE tests. Maybe the doctor really really really doesn't want to miss it. 
 
-(Actually, it could be that as time passes a hidden disease becomes detectable. That's why every few years we repeat cancer screening tests.  That's an important case, but we'll set that aside for now.)
+(Actually, it could be that as time passes a hidden disease becomes detectable. That's why every few years we repeat some cancer screening tests.  That's an important case, but we'll set that aside for now.)
 
 ```{r, results='asis'}
   print(makePosteriorSequence(dataSequence = c(2,2,2,2),
@@ -313,8 +314,10 @@ Sure enough, after the first test, the rest are guaranteed to provide no further
 ```{r, results='asis'}
   print(makePosteriorSequence(dataSequence = c(2,2,2,2),
     priorFor4 = c(0.009, 0.001, 0.09, 0.90),
-    prob_pos_given_group = c(1,0,1,0) , marginalize=TRUE))
+    prob_pos_given_group = c(1,0,1,0) , marginalize=FALSE))
 ```
+
+The negatives wipe out the detectable dD's. But not the hidden ones, hD.
 
 Now, suppose there are no imposters.
 
@@ -329,18 +332,20 @@ And so we return to conspiracy theories and algorithms.
 ## ## Media bubbles
 
 The algorithm recommends a video that shows that 
-![birds are not real!](https://www.youtube.com/shorts/aiy5SEGMGvI)
+![birds are not real!](/Users/Roger/Sites/Bioinf-2118-2018-website/N-files-for-handouts/CondProb video/birds-are-not-real-1.png)
 They are all just Hillary Clinton wearing feathers.
 
-Naa, that's silly.  But kind of fun. You watch. The algorithm feeds you another one, another 'proof'. Your posterior probability goes up a bit. Then another, and another.  All these "independent" pieces of evidence.
+Naa, that's silly.  But kind of fun. So you watch the video. The algorithm feeds you another one, another 'proof'. Your posterior probability goes up a bit. Then another, and another.  All these "independent" pieces of evidence.
 But are they independent? Really? 
-No they all just replicate a common origin.
+No, they all just replicate a common origin.
 
 So friends, be kind to our neighbors in media bubbles.
 They don't know about conditional independence.
 
 
 ## ## Factoring joint distributions
+
+Let's dive in deeper.  (Or, 'delve' in, as ChatGPT would say.)
 
 Suppose you have a bunch of, say, ten random quantities $R1, ... , R10$.
 You can ALWAYS write their joint distribution, in a monstrous string.
@@ -356,13 +361,20 @@ Complicated! But with conditional independence, way simpler.
 $$
 Pr(R1) \times Pr(R2 | R1) \times Pr(R3 | R2)...  \times Pr(R10 | R9)
 $$
-What happens next depends only on the current state. Everything before is forgotten.  So $Pr(R10 | R9)$ instead of $Pr(R10 | R1,R2,...,R9)$
+What happens as you go get the next report depends only on the current report Everything before is forgotten.  So $Pr(R10 | R9)$ instead of $Pr(R10 | R1,R2,...,R9)$
 
 This chain of influence is called a Markov chain.
 This *pet turtle* decides where to go next after its owner spins it around randomly without picking it up and moving it. It knows where it is, but where it was before is forgotten.
 
-Remember you need a starting point. If you don't know any unconditional distribution, do you give up? No! Techniques like Monte Carlo Markov Chain are wildly popular. Food for another video?
 
-## ## Machine learning
+## ## Monte Carlo Markov Chain 
 
-## ## Intro to Gibbs sampling
+Getting back to the general case,
+$$
+\color{blue}{Pr(R1)} \times Pr(R2 | R1) \times Pr(R3 | R1, R2)...  \times Pr(R10 | R1, R2, ... R9)
+$$
+
+Remember you need a starting point. One of the 10 random reports, you have to know its *marginal* probabilities ignoring all the others, *unconditional* all the others. If you don't know ANY unconditional distribution, do you give up? No! Techniques like Monte Carlo Markov Chain are wildly popular. They contribute to heavy duty data methods like Machine Learning. Food for another video?
+
+
+
