@@ -147,7 +147,7 @@ output$ObservationUI =
             column(12, textInput(width = '400px',
                       "dataInputID",
                       value = "1 1 1 1",
-                      label=HTML("Test results (1s and 2s, format like 1 2 1 2)"),
+                      label=HTML("1=positive, 2=negative. Format them like 1 2 1 2 1 1 ..."),
             )))
   ))
 ```
