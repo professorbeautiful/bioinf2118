@@ -31,7 +31,8 @@ makePosteriorSequence = function(
     data = dataSequence[ndata]
     posteriorFor4 <<- matrix(normalize(
       posteriorFor4 * pr_dist_given_group[data,]), nrow=1) 
-    rownames(posteriorFor4) =  paste0('Report ', ndata, ':', wordsForData[data])
+    rownames(posteriorFor4) =  paste0(#'Report ', 
+                                      ndata, ':', wordsForData[data])
     posteriorSequence <<- rbind(posteriorSequence, posteriorFor4)
   })
   if(dropZeroGroups){
