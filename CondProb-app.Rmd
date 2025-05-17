@@ -146,7 +146,7 @@ output$ObservationUI =
         fluidRow(style='text-align:center',
             column(12, textInput(width = '400px',
                       "dataInputID",
-                      value = "1 1 1 1",
+                      value = "1 1 1 1 1 1",
                       label=HTML("1=positive, 2=negative. Format them like 1 2 1 2 1 1 ..."),
             )))
   ))
