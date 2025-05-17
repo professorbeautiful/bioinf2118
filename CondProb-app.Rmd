@@ -242,7 +242,6 @@ server = function(input, output) {
     if(all(dataSequence %in% 1:2)) { #proceed
       #run_makePosteriorSequence()
       #posteriorSequenceOutput ( 
-      (
         makePosteriorSequence(
           priorFor4 = this_priorFor4,
           prob_pos_given_group = this_prob_pos_given_group,
@@ -251,7 +250,7 @@ server = function(input, output) {
           dropZeroGroups = FALSE,
           makeHTML = TRUE, 
           marginalize = FALSE # input$marginalize
-        ) ) 
+        )  
     } ### end, call to makePosteriorSequence
   })  ### end, renderText 
 }  ## end, server

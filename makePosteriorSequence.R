@@ -26,6 +26,7 @@ makePosteriorSequence = function(
                               1 - prob_pos_given_group)
   
   names(priorFor4) = c('dD', 'hD',	'iD',	'noD')
+  names(priorFor4) = c('dD\ndetectable', 'hD\nhidden',	'iD\nimposter',	'noD\nno_disease')
   posteriorFor4 = posteriorSequence = priorFor4
   sapply(seq(along=dataSequence), function(ndata) {
     data = dataSequence[ndata]
