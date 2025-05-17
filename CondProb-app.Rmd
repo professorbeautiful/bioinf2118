@@ -31,7 +31,11 @@ knitr::opts_chunk$set(echo = FALSE)
   color: #a40;
   text-align:center;
   }
-  wellPanel {padding: 30px !important;}
+  
+  hr {
+  border-width:10px; color: #a40;
+  }
+  wellPanel {padding: 300px !important;}
   
   .shiny-input-radiogroup label {
   display: inline-block;
@@ -89,14 +93,19 @@ output$priorUI = renderUI(
                        ('no D'),
                        value = priorDefaults['prior_noD'],
                        min = 0, max=1, step = 0.01)
-        )))
+        ))
+      , hr())
     
   }
 )
+
+```
+
+```{r whichFollows}
 # library(shinyWidgets)
 WIDE = function(x) x
-WIDE = function(x) (paste0('', x, 
-                           paste(collapse='', rep('.', 0))))
+# WIDE = function(x) (paste0('', x, 
+#                            paste(collapse='', rep('.', 0))))
 output$whichFollows = renderUI(
   div(
           h4( 
@@ -111,7 +120,8 @@ output$whichFollows = renderUI(
             label='',
                                selected='noD', width='100%', #class='btn-block',
                inline=T))
-)))
+  ), hr()
+  ))
 ```
 
 ```{r prob_pos_UI}
@@ -139,7 +149,8 @@ output$prob_pos_UI = renderUI(
                        ('no D'),
                        value = prob_pos_Defaults['prob_pos_noD'],
                        min = 0, max=1, step = 0.01)
-        )))
+        )), hr()
+      )
     
   }
 )
@@ -156,6 +167,7 @@ output$ObservationUI =
                       value = "1 1 1 1 1 1",
                       label=HTML("1=positive, 2=negative. Format them like 1 2 1 2 1 1 ..."),
             )))
+  , hr()
   ))
 ```
 
@@ -182,7 +194,6 @@ ui =
       column(7, #wellPanel
              uiOutput('priorUI'), 
              uiOutput('whichFollows'),
-             hr(),
              uiOutput('ObservationUI'), 
              uiOutput('prob_pos_UI'), 
       ),
