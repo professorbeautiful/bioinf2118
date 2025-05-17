@@ -17,7 +17,7 @@ makePosteriorSequence = function(
     priorFor4 = c(0.9,0.10, 9, 90)/100,
     prob_pos_given_group = pr_dist_given_group[1,],
   dataSequence = c(1,1,1,1), ### 1's and 2's
-  wordsForData = c("'Pos'", "'Neg'"), # \\quad not working here.
+  wordsForData = c("Positive", "Negative"), # \\quad not working here.
   dropZeroGroups = FALSE,
   makeHTML = TRUE, 
   marginalize = FALSE) {
@@ -41,7 +41,7 @@ makePosteriorSequence = function(
     rownames(posteriorSequence)[1] = "prior for 2 groups"
   } else {
   #rbind(priorFor4, (posteriorSequence))
-    rownames(posteriorSequence)[1] = "prior for 4 groups"
+    rownames(posteriorSequence)[1] = "4 group probs"
   }
   if(marginalize) {
     Dplus = apply(posteriorSequence[ , 1:2], 1, sum)
@@ -59,5 +59,8 @@ makePosteriorSequence = function(
     return( knitr::kable(format='html',
                posteriorSequence, padding=10, digits=3,
                table.attr='class="myTable"')
-            %>% row_spec(1, bold=TRUE, italic=TRUE))
+            %>% row_spec(1, bold=TRUE, italic=TRUE)
+            %>% pack_rows(
+              index=c(`Prior`=1, Reports=length(dataSequence)) )
+            )
 }
