@@ -64,7 +64,7 @@ prob_pos_Defaults =
 
 output$priorUI = renderUI(
   {
-    wellPanel(
+    div(
       h4(style='text-align:center', "Initial (prior) probabilities"),
       fluidRow(
         splitLayout(
@@ -92,11 +92,11 @@ output$priorUI = renderUI(
 # library(shinyWidgets)
 WIDE = function(x) x
 WIDE = function(x) (paste0('', x, 
-                           paste(collapse='', rep('.', 30))))
+                           paste(collapse='', rep('.', 0))))
 output$whichFollows = renderUI(
-  wellPanel(
+  div(
           h4(style='text-align:center', 
-             "Probabilities must add to one. Pick which is dependent on the other three."),
+             "Probabilities add to one. This one adjusts to the other 3."),
   fluidRow(column(12, offset=0,
                   radioButtons(inputId = 'whichFollows', 
                       choiceNames = 
@@ -112,7 +112,7 @@ output$whichFollows = renderUI(
 
 output$prob_pos_UI = renderUI(
   {
-    wellPanel(
+    div(
       h4(style='text-align:center', "Probabilities of a positive"),
       fluidRow(
         splitLayout(
@@ -139,7 +139,7 @@ output$prob_pos_UI = renderUI(
 )
 output$ObservationUI = 
   renderUI(
-    wellPanel(style='text-align:center',
+    div(style='text-align:center',
         h4(style='text-align:center', "Data reports"),
         fluidRow(style='text-align:center',
             column(12, offset=4, textInput(width = '200px',
@@ -169,24 +169,19 @@ ui =
         "))
     ),
     h3("Conditional dependence in medical diagnosis"),
-     uiOutput('priorUI'), 
-     uiOutput('whichFollows'),
-      hr(),
-     uiOutput('ObservationUI'), 
-     uiOutput('prob_pos_UI'), 
-
-      #https://stackoverflow.com/questions/51460955/how-to-make-kable-table-reactive-in-shiny-app-shiny-kable
-      htmlOutput('makePosteriorSequence'),
-#    fluidRow(
-      # column(12,   uiOutput('priorUI')), 
-      # column(12,   uiOutput('whichFollows')),
-      # hr(),br(),br(),
-      # column(12,   uiOutput('ObservationUI')), 
-      # column(12,   uiOutput('prob_pos_UI')), 
-      # 
-      # #https://stackoverflow.com/questions/51460955/how-to-make-kable-table-reactive-in-shiny-app-shiny-kable
-      # column(12,   htmlOutput('makePosteriorSequence')),
-    #)
+    fluidRow(
+      column(7, #wellPanel
+             uiOutput('priorUI'), 
+             uiOutput('whichFollows'),
+             hr(),
+             uiOutput('ObservationUI'), 
+             uiOutput('prob_pos_UI'), 
+      ),
+      column(5,
+             #https://stackoverflow.com/questions/51460955/how-to-make-kable-table-reactive-in-shiny-app-shiny-kable
+             htmlOutput('makePosteriorSequence')
+      )
+    )
   )
 
 ```
