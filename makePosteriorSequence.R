@@ -55,7 +55,9 @@ makePosteriorSequence = function(
   }
   #if( makeHTML)
   require(xtable)
+  library(kableExtra)
     return( knitr::kable(format='html',
                posteriorSequence, padding=10, digits=3,
-               table.attr='class="myTable"'))
+               table.attr='class="myTable"')
+            %>% row_spec(1, bold=TRUE, italic=TRUE))
 }
