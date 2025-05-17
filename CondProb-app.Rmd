@@ -195,7 +195,7 @@ ui =
 
 server = function(input, output) {
   observeEvent( 
-    c(input$prior_dD, input$prior_dD, input$prior_iD, input$prior_noD ),
+    c(input$prior_dD, input$prior_hD, input$prior_iD, input$prior_noD ),
     {
   #radio
       switch(gsub('_', '', input$whichFollows),
