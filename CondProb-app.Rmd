@@ -19,7 +19,7 @@ c('simplebayesdecision-fancy.Rmd', 'inclRmd.R',
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-```{css}
+```{css CSS}
   .myTable th {
     padding: 30px;
   }
@@ -44,7 +44,7 @@ knitr::opts_chunk$set(echo = FALSE)
   
 ```
   
-```{r, echo=F}
+```{r sources, echo=F}
 usingShinyApp = FALSE
 temp = suppressPackageStartupMessages(require('shinyjs', quietly=TRUE))
 temp = suppressPackageStartupMessages(require('markdown', quietly=TRUE))
@@ -57,12 +57,14 @@ source("makePosteriorSequence.R")
 
 ```
 
-```{r}
+```{r defaults}
 priorDefaults = 
   c(prior_dD=0.009, prior_hD=0.001, prior_iD=0.09, prior_noD=0.9)
 prob_pos_Defaults = 
   c(prob_pos_dD=0.9, prob_pos_hD=0.1, prob_pos_iD=0.9, prob_pos_noD=0.1)
+```
 
+```{r priorUI}
 
 output$priorUI = renderUI(
   {
@@ -110,7 +112,9 @@ output$whichFollows = renderUI(
                                selected='noD', width='100%', #class='btn-block',
                inline=T))
 )))
+```
 
+```{r prob_pos_UI}
 
 output$prob_pos_UI = renderUI(
   {
@@ -139,6 +143,9 @@ output$prob_pos_UI = renderUI(
     
   }
 )
+```
+
+```{r ObservationUI}
 output$ObservationUI = 
   renderUI(
     div(
@@ -152,7 +159,7 @@ output$ObservationUI =
   ))
 ```
 
-```{r}
+```{r ui}
 
 ui = 
   fillPage(  #fillPage and fluidPage the same.
@@ -190,7 +197,7 @@ ui =
 
 ```
 
-```{r}
+```{r server}
 ####  server ####
 
 server = function(input, output) {
@@ -254,7 +261,9 @@ server = function(input, output) {
     } ### end, call to makePosteriorSequence
   })  ### end, renderText 
 }  ## end, server
+```
 
+```{r run the app}
 
 if(usingShinyApp) {
   shinyApp(ui = ui, server = server)
