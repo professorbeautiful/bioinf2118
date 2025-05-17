@@ -29,7 +29,7 @@ knitr::opts_chunk$set(echo = FALSE)
   h4 {
    color: #a40;;
   }
-  wellPanel {padding: 1px !important;}
+  wellPanel {padding: 30px !important;}
   
   .shiny-input-radiogroup label {
   display: inline-block;
@@ -142,7 +142,7 @@ output$ObservationUI =
     div(style='text-align:center',
         h4(style='text-align:center', "Data reports"),
         fluidRow(style='text-align:center',
-            column(12, offset=4, textInput(width = '200px',
+            column(12, textInput(width = '400px',
                       "dataInputID",
                       value = "1 1 1 1",
                       label=HTML("Test results (1s and 2s, format like 1 2 1 2)"),
@@ -179,10 +179,12 @@ ui =
       ),
       column(5,
              #https://stackoverflow.com/questions/51460955/how-to-make-kable-table-reactive-in-shiny-app-shiny-kable
-             htmlOutput('makePosteriorSequence')
-      )
+             br(),br(),br(),br(),br(),
+             h4("Results: posterior probabilities"),
+             htmlOutput('makePosteriorSequence'))
     )
   )
+
 
 ```
 
