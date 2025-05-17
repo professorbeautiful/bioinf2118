@@ -49,49 +49,7 @@ pr_dist_given_group = rbind(pr_positive_given_group, 1 - pr_positive_given_group
 rownames(pr_dist_given_group) = c('pos', 'neg')
 normalize= function(x)  x/sum(x)
 
-makePosteriorSequence = function(
-    priorFor4 = c(0.9,0.10, 9, 90)/100,
-    pr_pos_given_group = pr_dist_given_group[1,],
-  dataSequence = c(1,1,1,1), ### 1's and 2's
-  wordsForData = c("'Pos'\\quad", "'Neg'\\quad"),
-  dropZeroGroups = TRUE,
-  makeHTML = TRUE, 
-  marginalize = FALSE) {
-  
-  pr_dist_given_group = rbind(pr_pos_given_group,  
-                              1 - pr_pos_given_group)
-  
-  names(priorFor4) = c('dD', 'hD',	'iD',	'noD')
-  posteriorFor4 = posteriorSequence = priorFor4
-  sapply(seq(along=dataSequence), function(ndata) {
-    data = dataSequence[ndata]
-    posteriorFor4 <<- matrix(normalize(
-      posteriorFor4 * pr_dist_given_group[data,]), nrow=1) 
-    rownames(posteriorFor4) =  paste0('Report ', ndata, ':', wordsForData[data])
-    posteriorSequence <<- rbind(posteriorSequence, posteriorFor4)
-  })
-  if(dropZeroGroups){
-    posteriorSequence = posteriorSequence[ 
-      , which (priorFor4>0)]
-    rownames(posteriorSequence)[1] = "prior for 2 groups"
-  } else {
-  #rbind(priorFor4, (posteriorSequence))
-    rownames(posteriorSequence)[1] = "prior for 4 groups"
-  }
-  if(marginalize) {
-    Dplus = apply(posteriorSequence[ , 1:2], 1, sum)
-    Dminus = apply(posteriorSequence[ , 3:4], 1, sum)
-    posteriorSequence[, 1:2] = cbind(Dplus, Dminus)
-    posteriorSequence = posteriorSequence[ , 1:2]
-  }
-  if(ncol(posteriorSequence) == 2){
-    colnames(posteriorSequence) = c("+D", "-D")
-    rownames(posteriorSequence)[1] = "prior for 2 groups"
-  }
-  #if( makeHTML)
-    return(knitr::kable(format='html',
-                  posteriorSequence) )
-}
+source('makePosteriorSequence.R')
 ```
 ## ##Intro
 
@@ -107,7 +65,12 @@ In episode 1, we learned how you start with some belief about the true state. A 
 
 Then you use new data to refine that initial belief.
 
-An alarming possibility, like visitors from outer space, or "yadayada Hillary clinton yadayada"....
+Well odds is just a different way of describing a probability P. Instead of P, think about P over one minus P. Same information, in fact P equals odds over one plus odds. A probability is between zero and one, and an odds is between zero and infinity.
+Refresh yourself at this link here if you want. Nine to one odds means zero point 9 divided by zero point 1, nine tenth to one tenth, and nine over 1 plus nine is, sure enough, 9 tenths. 
+
+An alarming possibility, like visitors from outer space, or "yadayada Hillary clinton yadayada"...., 
+or "birds aren't real".
+
 They tell me, "Do your own research.
 
 Suppose I start with a very LOW odds that the alarming possibility is true .
@@ -162,8 +125,9 @@ Just look at all that evidence mount up! It seems that $+D$, the disease is pres
 ```{r, results='asis'}
 ### The nice case. Cond Indep, all good.
   print(makePosteriorSequence(
-    pr_pos_given_group = c(0.9, 0, 0, 0.09),
-    priorFor4 = c(.01,0,0,.99)))
+    prob_pos_given_group = c(0.9, 0, 0, 0.09),
+    priorFor4 = c(.01,0,0,.99) 
+    ))
 ```
 
 ## ## Careful
@@ -193,6 +157,12 @@ Odds(+D|\RR) & =\frac{Pr(+D|\RR)}{Pr(-D|\RR)}\\
 \end{aligned}
 $$
 
+The celebrated 3Blue1Brown hinted that this at the end of an excellent video on Bayesian method.
+![](/Users/Roger/Sites/Bioinf-2118-2018-website/N-files-for-handouts/CondProb video/3b1b-bayes-factors.png)
+(He has E for event, we have R for report. And pretty colors.) 
+The 2nd Bayes factor (what we're calling likelihood ratio) conditions not just on the new data E2 but on the previous data E1 also. 
+
+
 If we are lucky, R1 and R2 are CONDITIONALLY INDEPENDENT. Getting the right answer for $R1$ doesn't increase or decrease the chance of a right answer for $R2$. And that's good, it means R2 provides new information.
 Just keep multiplying by the next *LR*.
 
@@ -212,25 +182,25 @@ But, careful,  this only works if TWO conditional independence claims are true..
 Here is the same probability table,
 ![](table_for_+D_-D.png)
 
-but a way different response to multiple tests.
+but something sneaky lurks underneath
+A sequence of repeated  tests don't keep jacking up the probability.
 After the first test, none of the next 4 deliver any new information.
 Why?
+
+
+ 
+## ## What's lurking: 4 groups
 
 
 ```{r, results='asis'}
   print(makePosteriorSequence(
     priorFor4 = c(0.009, 0.001, 0.09, 0.90),
-    pr_pos_given_group = c(1,0,1,0) , marginalize=TRUE))
+    prob_pos_given_group = c(1,0,1,0) , marginalize=TRUE))
 ```
-
- because SOMETHING is lurking underneath:
- 
-## ## What's lurking: 4 groups
-
 
 Here, the positive tests include  GENUINE false positives, because the patient has some OTHER condition, that the test is picking up when we don't want it to.  A misdiagnosis. An imposter. In the lingo, the test is not *specific* enough. "$iD$", means an imposter, when the real deal is "$dD$" for detectable disease.
 
-What's as bad, there can be GENUINE false negatives. Some patients WITH the target disease might have a variant of the disease that, in the lingo, the test is not sensitive enough. Hidden disease. "$hD$".
+What's as bad, there can be GENUINE false negatives. Some patients WITH the target disease might have a variant of the disease that, in the lingo, the test is not sensitive enough. *Hidden disease*. "$hD$".
 
 Everybody with the disease we want to detect is $+D$, either $dD$ or $hD$.
 
@@ -241,11 +211,23 @@ And $-D$ splits into two types of patients: true negatives $noD$ and false posit
 
 So, 4 categories instead of 2. 
 
+```{r group names}
+print(
+  kable(data.frame(short_name=c('dD', 'hD', 'iD', 'noD'),
+           long_name = as.vector(c(dD='detectable', hD='hidden',	
+                   iD='imposter',	noD='no disease')), 
+           test_result=c('true positive', 'false negative',
+                         'false positive', 'true negative')
+))
+)
+
+```
 
 ## ## 4 groups distribution
 
-Each category of patients has its own Probability of a Positive test.
-This is the hidden full truth. 
+Each category of patients has its own 
+*Probability of a Positive Test*.
+This is the behind-the-veil full truth. 
 
 ![](table_for_dD_hD_iD_noD.png)
 
@@ -253,12 +235,12 @@ We actually don't have prior information for the 4 groups. In fact, we might not
 
 The probabilities in the first table showing probabilities for only +D and -D are still correct, but we cannot distinguish between dD and hD, between iD and noD.
 
-The hidden $hD$ and the imposters $iD$ are explanations for false positives and false negatives. Successive false results often share the same cause. In this case, two false positives occur because they share the patient, and the patient has an imposter condition that explains both false positive. If you only knew that, you wouldn't be fooled so easily.
+The hidden $hD$ and the imposters $iD$ are explanations for false positives and false negatives. Successive false results often share the same cause. Sometimes, two false positives in a row occur because they share the patient, and the patient has an imposter condition that explains both false positives. If you only knew that, you wouldn't be fooled so easily.
 
 Too bad we don't know that.
 
-After time passes, following up on the patients, we may learn which of the test results had been false.
-And maybe we can do biomedical research, learn that these groups exist, find biomarkers for them.
+After time passes, following up on the patients, we may learn which patients really had the disease, so we learn which of the test results had been false.
+Sometimes we can do biomedical research, learn that these subgroups exist, and find biomarkers for them.
 
 
 
@@ -306,14 +288,16 @@ Pr(\RR \space | \space +D)
 \end{aligned}
 $$
 
-Nope.  Not the same.
+Nope.  That's wrong.
 
-That makes sense.  After the first positive test result, only dD and iD are possible. And they both GUARANTEE that the next result will be positive... a true positive for dD and a false positive for iD.
+That the true probability is larger makes sense.  After the first positive test result, only dD and iD are possible. And they both GUARANTEE that the next result will be positive... a true positive for dD and a false positive for iD.
 
-After the 1st report, the next bunch contribute no new information. $Pr(R2 = positive | R1 = positive) = 1$.
-Any data whose probability equals one no matter what the truth is, is useless!   
+After the 1st report, the next bunch contribute no new information. $Pr(R2 = positive | R1 = positive) = 1$ whether the patient is a true detectable dD or an imposter iD.
 
-## ## 2 negatives
+Any data whose probability equals one no matter what the truth is, is useless for discovering the truth!   
+
+
+## ## 2 or more negatives
 
 What if you get all NEGATIVE tests. Maybe the doctor really really really doesn't want to miss it. 
 
@@ -322,15 +306,18 @@ What if you get all NEGATIVE tests. Maybe the doctor really really really doesn'
 ```{r, results='asis'}
   print(makePosteriorSequence(dataSequence = c(2,2,2,2),
     priorFor4 = c(0.009, 0.001, 0.09, 0.90),
-    pr_pos_given_group = c(1,0,1,0) , marginalize=TRUE))
+    prob_pos_given_group = c(1,0,1,0) , marginalize=TRUE))
 ```
 Sure enough, after the first test, the rest are guaranteed to provide no further information. Here is the full story.
 
 ```{r, results='asis'}
   print(makePosteriorSequence(dataSequence = c(2,2,2,2),
     priorFor4 = c(0.009, 0.001, 0.09, 0.90),
-    pr_pos_given_group = c(1,0,1,0) , marginalize=TRUE))
+    prob_pos_given_group = c(1,0,1,0) , marginalize=TRUE))
 ```
+
+Now, suppose there are no imposters.
+
 
 
 Ideally you could carve up the population of patients into groups using explanations for why the groups differ. Then the only thing remaining would be pure chance mistakes, not explained by something about the particular patient. Conditional independence. 
@@ -372,8 +359,7 @@ $$
 What happens next depends only on the current state. Everything before is forgotten.  So $Pr(R10 | R9)$ instead of $Pr(R10 | R1,R2,...,R9)$
 
 This chain of influence is called a Markov chain.
-This pet turtle decides where to go next after its owner spins it around randomly without picking it up and moving it. It knows where it is, but where it was before is forgotten.
-
+This *pet turtle* decides where to go next after its owner spins it around randomly without picking it up and moving it. It knows where it is, but where it was before is forgotten.
 
 Remember you need a starting point. If you don't know any unconditional distribution, do you give up? No! Techniques like Monte Carlo Markov Chain are wildly popular. Food for another video?
 
