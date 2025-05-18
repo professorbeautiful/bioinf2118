@@ -53,7 +53,11 @@ source('makePosteriorSequence.R')
 ```
 ## ##Intro
 
-Today: a pet turtle in the clutches of a child, a prisoner's picnic gone bad, a flat earth theory, a political silo, & how to combine medical tests. How do we combine information from different sources, why does conditional independence matter, and what can go wrong? And of course, how does it all relate to machine learning. So, strike up the music for the Bayesian dance! 
+Welcome to Statistics Beautiful.
+Today: a pet turtle in the clutches of a child, a prisoner's picnic gone bad, alarming claims like there's visitors from outer space, or "yadayada Hillary Clinton yadayada"....or, birds aren't real!
+& how to combine repeated medical tests. All to understand better-- How do we combine information from different sources, why does conditional independence matter, and what can go wrong? And did I mention machine learning? So, strike up the band for the Bayesian dance! 
+
+
 
 There's what you know. We'll call that data.   
 
@@ -374,7 +378,9 @@ $$
 \color{blue}{Pr(R1)} \times Pr(R2 | R1) \times Pr(R3 | R1, R2)...  \times Pr(R10 | R1, R2, ... R9)
 $$
 
-Remember you need a starting point. One of the 10 random reports, you have to know its *marginal* probabilities ignoring all the others, *unconditional* all the others. If you don't know ANY unconditional distribution, do you give up? No! Techniques like Monte Carlo Markov Chain are wildly popular. They contribute to heavy duty data methods like Machine Learning. Food for another video?
+Remember you need a starting point. One of the 10 random reports, you have to know its *marginal* probabilities ignoring all the others, *unconditional* all the others. If you don't know ANY unconditional distribution, do you give up? No! Techniques like Monte Carlo Markov Chain are wildly popular. They contribute to heavy duty data methods like Machine Learning. 
+
+Food for another video.
 
 
 
