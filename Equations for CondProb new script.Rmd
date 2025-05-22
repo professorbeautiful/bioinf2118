@@ -233,16 +233,15 @@ And $-D$ splits into two types of patients: true negatives $noD$ and false posit
 
 So, 4 categories instead of 2. 
 
-```{r group names, asis}
+```{r group names, results='asis'}
 print(
-  kable(data.frame(short_name=c('dD', 'hD', 'iD', 'noD'),
+  knitr::kable(format='html', data.frame(short_name=c('dD', 'hD', 'iD', 'noD'),
            long_name = as.vector(c(dD='detectable', hD='hidden',	
                    iD='imposter',	noD='no disease')), 
            test_result=c('true positive', 'false negative',
                          'false positive', 'true negative')
 ))
 )
-
 ```
 
 ## ## 4 groups distribution
@@ -251,7 +250,16 @@ Here is the behind-the-veil full truth.
 Each category of patients has its own 
 *Probability of a Positive Test*.
 
-![](table_for_dD_hD_iD_noD.png)
+```{r image test,echo=FALSE }
+##  Dead end.  This 
+# does work in a chunk but not in an inline context.
+#require(imager,quietly = TRUE)
+images = "../N-files-for-handouts/CondProb video/"
+#plot(load.image(paste0(images, "table_for_dD_hD_iD_noD.png"))) 
+```
+
+![](../N-files-for-handouts/CondProb video/table_for_dD_hD_iD_noD.png)
+
 
 We actually don't have prior information for the 4 groups. In fact, we probably don't even know that the sneaky ones, the hiddens and the imposters,  exist. 
 
