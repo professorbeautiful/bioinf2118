@@ -244,6 +244,25 @@ print(
 )
 ```
 
+## what we want, what we get
+
+
+```{r what we want what we get, results='asis'}
+print(
+  knitr::kable(format='html', 
+               data.frame(
+                 short_name=c('dD', 'hD', 'iD', 'noD'),
+           long_name = as.vector(c(dD='detectable', hD='hidden',	
+                   iD='imposter',	noD='no disease')), 
+           test_result=c('true positive', 'false negative',
+                         'false positive', 'true negative'),
+           `what_we_want`=c('positive', 'positive', 'negative', 'negative'),
+           `what_we_get`=c('CORRECT!', 'WRONG', 'WRONG', 'CORRECT!')
+))
+)
+```
+
+
 ## ## 4 groups distribution
 
 Here is the behind-the-veil full truth. 
@@ -257,6 +276,7 @@ Each category of patients has its own
 images = "../N-files-for-handouts/CondProb video/"
 #plot(load.image(paste0(images, "table_for_dD_hD_iD_noD.png"))) 
 ```
+## ## 4 categories probability table
 
 ![](../N-files-for-handouts/CondProb video/table_for_dD_hD_iD_noD.png)
 
@@ -271,6 +291,8 @@ Too bad we don't know that.
 
 After time passes, following up on the patients, we may learn the truth, which patients really had the disease, so we learn which of the test results had been false.
 Sometimes we can do biomedical research, learn that these subgroups exist, and find biomarkers for them.
+
+![](../N-files-for-handouts/CondProb video/table_for_dD_hD_iD_noD-switcheroos.png)
 
 
 
@@ -287,6 +309,7 @@ names(pr_positive_given_group) =
 
 Let's  suppose we have just two test results, $R1 = positive, R2 = positive$. If we pretended that the two tests were independent conditionally on $+D$, we'd get
 
+##  Assuming conditional independence for +D
 
 $$
 \begin{aligned}
@@ -297,6 +320,7 @@ Pr(\RR \space | \space +D)
 \end{aligned}
 $$
 
+##  Assuming conditional independence for all 4 subgroups
 But if conditional independence IS true for each of the FOUR subgroups of patients, 
 $$
 \begin{aligned}
@@ -334,32 +358,27 @@ What if you get all NEGATIVE tests. Maybe the doctor really really really doesn'
 
 (Actually, it could be that as time passes a hidden disease becomes detectable. That's why every few years we repeat some cancer screening tests.  That's an important case, but we'll set that aside for now.)
 
-```{r, results='asis'}
-  print(makePosteriorSequence(dataSequence = c(2,2,2,2),
-    priorFor4 = c(0.009, 0.001, 0.09, 0.90),
-    prob_pos_given_group = c(1,0,1,0) , marginalize=TRUE))
-```
-Sure enough, after the first test, the rest are guaranteed to provide no further information. Here is the full story.
-
-```{r, results='asis'}
+```{r table for repeated negative tests, results='asis'}
   print(makePosteriorSequence(dataSequence = c(2,2,2,2),
     priorFor4 = c(0.009, 0.001, 0.09, 0.90),
     prob_pos_given_group = c(1,0,1,0) , marginalize=FALSE))
 ```
+Sure enough, after the first test, the rest are guaranteed to provide no further information. Here is the full story.
 
 The negatives wipe out the detectable dD's. But not the hidden ones, hD.
 
 Now, suppose there are no imposters.
 
+Ideally you could carve up the population of patients into groups using explanations for why the groups differ. Then the only thing remaining would be pure chance mistakes, not explained by something about the particular patient. 
+
+Conditional independence. 
 
 
-Ideally you could carve up the population of patients into groups using explanations for why the groups differ. Then the only thing remaining would be pure chance mistakes, not explained by something about the particular patient. Conditional independence. 
 
-
-
-And so we return to conspiracy theories and algorithms.
 
 ## ## Media bubbles
+
+And so we return to conspiracy theories and algorithms.
 
 The algorithm recommends a video that shows that 
 
@@ -396,11 +415,15 @@ Everything is connected to everything. The order is arbitrary.  But you need a s
 
 ## ## Causal diagrams and colliders
 
+## Markov chain
 Complicated! But with conditional independence, way simpler.
+
 
 $$
 Pr(R1) \times Pr(R2 | R1) \times Pr(R3 | R2)...  \times Pr(R10 | R9)
 $$
+
+
 What happens as you go get the next report depends only on the current report Everything before is forgotten.  So at the end, $Pr(R10 | R9)$ instead of $Pr(R10 | R1,R2,...,R9)$
 
 This chain of influence is called a Markov chain.
