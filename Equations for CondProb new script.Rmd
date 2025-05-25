@@ -177,6 +177,16 @@ $$
 
 The celebrated 3Blue1Brown hinted that this at the end of an excellent video on Bayesian method.
 ![](/Users/Roger/Sites/Bioinf-2118-2018-website/N-files-for-handouts/CondProb video/3b1b-bayes-factors.png)
+$$
+\newcommand{\RR}{\color{red}{R1 \AND R2}}
+\newcommand{\yellowD}{\color{blue}{D}}
+\newcommand{\greenR1}{\color{green}{R}}
+\newcommand{\blueR2}{\color{blue}{R{2}}}
+TEST \RR
+$$
+$$
+O(\yellowD | \greenR1 , \blueR2 )= O(\yellowD )\box{\frac{{(\greenE1 | \yellowD)} {(\greenE1 | \notD)}}} 
+$$
 
 (He has E for event, we have R for report. Nice colors, Mr. Sanderson.) 
 The 2nd Bayes factor (what we're calling likelihood ratio) conditions not just on the new data E2 but on the previous data E1 also. 
