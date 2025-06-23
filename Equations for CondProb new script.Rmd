@@ -302,7 +302,7 @@ Too bad we don't know that.
 After time passes, following up on the patients, we may learn the truth, which patients really had the disease, so we learn which of the test results had been false.
 Sometimes we can do biomedical research, learn that these subgroups exist, and find biomarkers for them.
 
-![](../N-files-for-handouts/CondProb video/table_for_dD_hD_iD_noD-switcheroos.png)
+
 
 
 
@@ -317,7 +317,7 @@ names(pr_positive_given_group) =
 
 ## ## dD and hD = +D
 
-Let's  suppose we have just two test results, $R1 = positive, R2 = positive$. If we pretended that the two tests were independent conditionally on $+D$, we'd get
+Meanwhile, Let's  suppose we have just two test results, $R1 = positive, R2 = positive$. If we pretended that the two tests were independent conditionally on $+D$, we'd get
 
 ##  Assuming conditional independence for +D
 
@@ -361,6 +361,24 @@ After the 1st report, the next bunch contribute no new information. $Pr(R2 = pos
 
 Any data whose probability equals one no matter what the truth is, is useless for discovering the truth!   
 
+For the bottom part of LR,
+$$
+\begin{aligned}
+Pr(\RR \space | \space -D) & = Pr(\RR \space | \space dD) \quad {Pr(noD | -D)} \\
+        & + Pr(\RR \space | \space hD) \quad  {Pr(iD | -D)} \\  
+        & = Pr(positive \space | \space noD) {^2} \quad  {0.09/0.99} \\
+        & + Pr(positive  \space | \space -D) {^2} \quad  {0.90/0.99} \\
+        & = 1.0^2 * 0.09/0.99 + 0.0^2 * 0.90/0.99  \\
+        & \approx 0.09
+\end{aligned}
+$$
+
+So the true likelihood ratio is 0.9/0.09 = 10 instead of 0.81/(0.1^2)=81.
+Far weaker evidence.
+
+The LR for R1 alone is sensitivity/(1-specificity) = 10. 
+So sure enough, the second report added no new information.
+
 
 ## ## 2 or more negatives
 
@@ -373,7 +391,7 @@ What if you get all NEGATIVE tests. Maybe the doctor really really really doesn'
     priorFor4 = c(0.009, 0.001, 0.09, 0.90),
     prob_pos_given_group = c(1,0,1,0) , marginalize=FALSE))
 ```
-Sure enough, after the first test, the rest are guaranteed to provide no further information. Here is the full story.
+Once again, after the first test, the rest are guaranteed to provide no further information. Here is the full story.
 
 The negatives wipe out the detectable dD's. But not the hidden ones, hD.
 
@@ -381,9 +399,9 @@ Now, suppose there are no imposters.
 
 Ideally you could carve up the population of patients into groups using explanations for why the groups differ. Then the only thing remaining would be pure chance mistakes, not explained by something about the particular patient. 
 
-Conditional independence. 
 
 
+![](../N-files-for-handouts/CondProb video/table_for_dD_hD_iD_noD-switcheroos.png)
 
 
 ## ## Media bubbles
