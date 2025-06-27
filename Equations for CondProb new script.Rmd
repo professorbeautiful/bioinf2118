@@ -15,9 +15,16 @@ $$
 \newcommand{\alldata}{\space 
   \color{red}{\mathrm{{all{\space}data}} \space }}
 \newcommand{\OR}{\space \mathrm{or}\space}
+\newcommand{\GIVEN}{\space \color{blue}{\large\mathrm{if \space }}}
+\newcommand\boolean[1]{\space \color{red}{\large\mathrm{#1}\space}}
 \newcommand{\AND}{\space \mathrm{and}\space}
 \newcommand{\RR}{\color{red}{R1 \AND R2}}
+\newcommand{\yellowD}{\color{blue}{D}}
+\newcommand{\greenRone}{\color{green}{R{1}}}
+\newcommand{\blueRtwo}{\color{blue}{R{2}}}
+\newcommand{\redR}{\color{red}{R}}
 $$
+
 
 ```{css}
 table {
@@ -96,11 +103,32 @@ $$
 \begin{aligned}
 LR & = Likelihood \space Ratio \\
 & =\frac{
-Probability \space that \space you'd \space get \space this \space data \space if \space the \space crazy \space idea \space is \space TRUE}
-{Probability \space that \space you'd \space get \space this \space data \space if \space the \space crazy \space idea \space is \space BS}
+Probability \space that \space you'd \space get \space this \space data \space \GIVEN \space the \space ALARMING \space possibility \space \boolean{is \space TRUE}}
+{Probability \space that \space you'd \space get \space this \space data \space \GIVEN \space the \space ALARMING \space possibility \space \boolean{is \space FALSE}}
+\end{aligned}
+$$
+$$
+\begin{aligned}
+LR & = Likelihood \space Ratio \\
+& =\frac{
+Pr( \space data \space report \GIVEN  \boolean{it's \space TRUE} )}
+{
+Pr( \space data \space report \GIVEN  \boolean{it's \space FALSE} )}
 \end{aligned}
 $$
 
+$$
+\frac{
+Pr( \space data \space report \GIVEN  \boolean{it's \space TRUE} )}
+{
+Pr( \space data \space report \GIVEN  \boolean{it's \space FALSE} )}
+=
+\frac{sensitivity}{1-specificity}
+=
+90/9
+=
+\LARGE\color{green}{10}
+$$
 
 where "*BS*" is short for... mmm...  "*NOT true*".
 
@@ -118,7 +146,28 @@ The patient has a positive test result.
 If the patient is a +D, yes it's the disease, then the probability is the sensitivity, 90%. 
 If the patient is a -D, no it's not the disease, then the probability is the 1 minus the specificity, just 9%.  The LR is 90/9.
 
-It is high, it's 10, so getting a positive is far more likely if the person is Sick, but now multiply the odds by the LR and you've only boosted the odds up from 1 to a hundred to 1 to 10, the probability only increases to 9%, which is 1 divided by (odds plus 1).
+It is high, it's 10, so getting a positive is far more likely if the person is Sick, 
+
+but now multiply the odds by the LR and you've only boosted the odds up from 1 to a hundred to 1 to 10, the probability only increases to 9%, which is 1 divided by (odds plus 1).
+
+$$
+\begin{aligned}
+
+&Odds(  \boolean{it's \space TRUE} \GIVEN  \space test\space is\space positive )\\
+=
+&\quad Odds(  \boolean{it's \space TRUE} )
+\times
+\mathrm{\color{green}{Likelihood \space Ratio}}\\
+= 
+&\quad \quad \large{\color{red}{{1}:{99}}}\quad\quad \quad \quad \quad   \times \quad \quad \LARGE\color{green}{10}\\
+= &\quad \quad \quad \quad \quad \quad \quad 
+\LARGE{\color{red}{10 :99}}
+\end{aligned}
+
+$$
+$$
+P = \frac{10}{10+99},\quad \quad \mathrm{about \quad 9\%}
+$$
 
 Ah, but here comes more information, more data!  What do we do with THAT?
 
@@ -177,16 +226,7 @@ $$
 
 The celebrated 3Blue1Brown hinted that this at the end of an excellent video on Bayesian method.
 ![](/Users/Roger/Sites/Bioinf-2118-2018-website/N-files-for-handouts/CondProb video/3b1b-bayes-factors.png)
-$$
-\newcommand{\RR}{\color{red}{R1 \AND R2}}
-\newcommand{\yellowD}{\color{blue}{D}}
-\newcommand{\greenR1}{\color{green}{R}}
-\newcommand{\blueR2}{\color{blue}{R{2}}}
-TEST \RR
-$$
-$$
-O(\yellowD | \greenR1 , \blueR2 )= O(\yellowD )\box{\frac{{(\greenE1 | \yellowD)} {(\greenE1 | \notD)}}} 
-$$
+
 
 (He has E for event, we have R for report. Nice colors, Mr. Sanderson.) 
 The 2nd Bayes factor (what we're calling likelihood ratio) conditions not just on the new data E2 but on the previous data E1 also. 
@@ -199,8 +239,8 @@ $$
 \begin{aligned}
 LR(\RR) &= 
 \frac{Pr(\RR|+D)}{Pr(\RR|-D)}\\
-&= \frac{Pr(R1|+D) \quad Pr(R2|+D)}{Pr(R1|-D) \quad Pr(R2|-D)}\\
-&= LR(R1)  \quad  \quad \times  \quad  \quad LR(R2)
+&= \frac{Pr(\greenRone |+D) \quad Pr(\blueRtwo |+D)}{Pr(\greenRone |-D) \quad Pr(\blueRtwo |-D)}\\
+&= LR(\greenRone )  \quad  \quad \times  \quad  \quad LR(\blueRtwo )
 \end{aligned}
 $$
 The numerator splits, and the denominator splits. 
