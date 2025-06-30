@@ -39,7 +39,7 @@ makePosteriorSequence = function(
   if(dropZeroGroups){
     posteriorSequence = posteriorSequence[ 
       , which (priorFor4>0)]
-    rownames(posteriorSequence)[1] = "prior for 2 groups"
+    rownames(posteriorSequence)[1] = " "
   } else {
   #rbind(priorFor4, (posteriorSequence))
     rownames(posteriorSequence)[1] = "4 group probs"
@@ -52,16 +52,18 @@ makePosteriorSequence = function(
   }
   if(ncol(posteriorSequence) == 2){
     colnames(posteriorSequence) = c("+D", "-D")
-    rownames(posteriorSequence)[1] = "prior for 2 groups"
+    rownames(posteriorSequence)[1] = " "
   }
   #if( makeHTML)
   require(xtable)
   library(kableExtra)
-    return( knitr::kable(format='html',
+  return( knitr::kable(format='html',
                posteriorSequence, padding=10, digits=3,
                table.attr='class="myTable"')
             %>% row_spec(1, bold=TRUE, italic=TRUE)
             %>% pack_rows(
-              index=c(`Prior`=1, Reports=length(dataSequence)) )
+              index=c(`________________________________Prior Probs`=1, 
+                      `Reports_________________________Posterior Probs`=length(dataSequence)) )
+           # %>% pack_rows(2, )
             )
 }
