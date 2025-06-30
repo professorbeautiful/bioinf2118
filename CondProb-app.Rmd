@@ -62,10 +62,27 @@ source("makePosteriorSequence.R")
 ```
 
 ```{r defaults}
-priorDefaults = 
+
+nGroups = 2
+showHiddenImpostors = TRUE
+marginalize = TRUE
+#  4 groups
+priorDefaults_4 = 
   c(prior_dD=0.009, prior_hD=0.001, prior_iD=0.09, prior_noD=0.9)
-prob_pos_Defaults = 
+prob_pos_Defaults_4 = 
   c(prob_pos_dD=0.9, prob_pos_hD=0.1, prob_pos_iD=0.9, prob_pos_noD=0.1)
+# 2 groups
+priorDefaults_2 = 
+  c(prior_dD=0.01, prior_hD=0.00, prior_iD=0.0, prior_noD=0.99)
+prob_pos_Defaults_2 = 
+  c(prob_pos_dD=0.9, prob_pos_hD=0.0, prob_pos_iD=0.0, prob_pos_noD=0.09)
+if (nGroups == 2) {
+  priorDefaults = priorDefaults_2
+  prob_pos_Defaults = prob_pos_Defaults_2
+} else if (nGroups == 4) {
+  priorDefaults = priorDefaults_4
+  prob_pos_Defaults = prob_pos_Defaults_4
+}
 ```
 
 ```{r priorUI}
@@ -81,14 +98,14 @@ output$priorUI = renderUI(
             ('detectable D') ,
             value = priorDefaults['prior_dD'],
             min = 0, max=1, step = 0.01),
-          numericInput('prior_hD',
+          if (nGroups==4 | showHiddenImpostors) numericInput('prior_hD',
                        ('hidden D'),
                        value = priorDefaults['prior_hD'],
-                       min = 0, max=1, step = 0.01),
-          numericInput('prior_iD',
+                       min = 0, max=1, step = 0.01) else '',
+          if (nGroups==4 | showHiddenImpostors) numericInput('prior_iD',
                        ('imposter D'),
                        value = priorDefaults['prior_iD'],
-                       min = 0, max=1, step = 0.01),
+                       min = 0, max=1, step = 0.01) else '',
           numericInput('prior_noD',  
                        ('no D'),
                        value = priorDefaults['prior_noD'],
@@ -137,14 +154,16 @@ output$prob_pos_UI = renderUI(
             ('detectable D') ,
             value = prob_pos_Defaults['prob_pos_dD'],
             min = 0, max=1, step = 0.01),
-          numericInput('prob_pos_hD',
+          if (nGroups==4 | showHiddenImpostors) numericInput('prob_pos_hD',
                        ('hidden D'),
                        value = prob_pos_Defaults['prob_pos_hD'],
-                       min = 0, max=1, step = 0.01),
-          numericInput('prob_pos_iD',
+                       min = 0, max=1, step = 0.01)
+          else '',
+          if (nGroups==4 | showHiddenImpostors) numericInput('prob_pos_iD',
                        ('imposter D'),
                        value = prob_pos_Defaults['prob_pos_iD'],
-                       min = 0, max=1, step = 0.01),
+                       min = 0, max=1, step = 0.01)
+          else '',
           numericInput('prob_pos_noD',  
                        ('no D'),
                        value = prob_pos_Defaults['prob_pos_noD'],
@@ -267,7 +286,7 @@ server = function(input, output) {
           #wordsForData = c("'Pos'\\quad", "'Neg'\\quad"),
           dropZeroGroups = FALSE,
           makeHTML = TRUE, 
-          marginalize = FALSE # input$marginalize
+          marginalize = marginalize # input$marginalize
         )  
     } ### end, call to makePosteriorSequence
   })  ### end, renderText 
