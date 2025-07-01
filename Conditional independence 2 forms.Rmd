@@ -31,6 +31,12 @@ Pr(\greenRone \AND \blueRtwo|+D) =&
         Pr(\greenRone |+D) \quad Pr(\blueRtwo |+D)\\
         \\
 &Divide ~ by ~ Pr(\greenRone |+D), ~~ \\&and~swap~sides\\
+Pr(\blueRtwo |+D) =& 
+         \frac{Pr(\greenRone \AND \blueRtwo|+D)}{ Pr(\greenRone |+D)}\\\\
+         &Use~the~definition~\\
+         &of~conditional~probability.\\
+Pr(\blueRtwo |+D) =& Pr(\blueRtwo | \greenRone \AND +D)\\
+&(Just~pretend~the~ +D~isn't~there;~then~it's~obvious.)
 \end{aligned}
 $$
 
@@ -44,7 +50,8 @@ Pr(\blueRtwo |+D) =&
          \frac{Pr(\greenRone \AND \blueRtwo|+D)}{ Pr(\greenRone |+D)}\\\\
 &{Use~the~definition~\\&of~conditional~probability.}\\
 Pr(\blueRtwo |+D) =& Pr(\blueRtwo | \greenRone \AND +D)\\
-&(Just~pretend~the~ +D~isn't~there;~then~it's~obvious.)
+&(Just~pretend~the~ +D~isn't~there;\\
+&then~it's~obvious.)
 \end{aligned}
 $$
 
