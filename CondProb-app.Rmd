@@ -111,9 +111,12 @@ output$priorUI = renderUI(
                        value = priorDefaults['prior_noD'],
                        min = 0, max=1, step = 0.01)
         ))
-      , hr())
+      , hr(),
+      checkboxInput('marg', label = 'marginalize?', value = 0)
+      )
     
   }
+  
 )
 
 ```
@@ -286,7 +289,7 @@ server = function(input, output) {
           #wordsForData = c("'Pos'\\quad", "'Neg'\\quad"),
           dropZeroGroups = FALSE,
           makeHTML = TRUE, 
-          marginalize = marginalize # input$marginalize
+          marginalize = input$marg # input$marginalize
         )  
     } ### end, call to makePosteriorSequence
   })  ### end, renderText 
